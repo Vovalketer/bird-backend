@@ -1,0 +1,45 @@
+#Database
+POSTGRESQL_USERNAME: user
+POSTGRESQL_PASSWORD: letmein
+POSTGRESQL_HOST: localhost
+POSTGRESQL_PORT: 5432
+POSTGRESQL_DATABASE: bird-db
+
+#Server
+CONTAINER_PORT: 8080
+ACTIVE_PROFILE: dev
+
+#Email Config
+# smtp.live.com
+# smtp.office365.com
+
+#Devmail Email
+#EMAIL_HOST: smtp.devmail.email
+#EMAIL_PORT: 587
+#EMAIL_ID: main
+#EMAIL_PASSWORD: x4qidmd32IVRQ2dDrepg
+
+#Gmail
+EMAIL_HOST: smtp.gmail.com
+EMAIL_PORT: 587
+EMAIL_ID: blank.devmail@gmail.com
+#EMAIL_PASSWORD: Restlessmaildev551
+EMAIL_PASSWORD: nncfjkoqpxkbegma
+#EMAIL_PASSWORD: nncf jkoq pxkb egma
+
+# MAILERSEND
+#EMAIL_HOST: smtp.mailersend.net
+#EMAIL_PORT: 587
+#EMAIL_ID: MS_XTXcGV@trial-ynrw7gyzv2o42k8e.mlsender.net
+#EMAIL_ID: trial-ynrw7gyzv2o42k8e.mlsender.net
+#EMAIL_PASSWORD: 0uVJ35A8hi3Ewa3S
+#EMAIL_TOKEN: mlsn.55cd0e6abdaff5f402065b774367576261d8573d2ebe39949189fec7aac7d4fa
+VERIFY_EMAIL_HOST: http://localhost:8080
+
+# 5 days
+#JWT_EXPIRATION: 432_000_000
+JWT_ISSUER: BirdApp
+JWT_ACCESS_TOKEN_EXPIRATION: 300000
+JWT_REFRESH_TOKEN_EXPIRATION: 900000
+#SECRETKEY, B64
+JWT_SECRET: 4Gi+M641foaMpV4PsJ1f4XCjpGC4XPW26j01R/Uyn/CLEPz8wlwean+43JlcB58TPKKcEBaRgUxhRxxslZlUvQ==
