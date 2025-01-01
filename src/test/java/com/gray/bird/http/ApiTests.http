@@ -1,0 +1,9 @@
+# @write-body-temporary-file
+POST http://localhost:8080/auth/login
+#Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "fake1@account.com",
+  "password": "testpassword"
+}
