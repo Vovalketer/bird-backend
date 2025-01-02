@@ -1,5 +1,6 @@
 package com.gray.bird.postAggregate;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -9,7 +10,7 @@ import com.gray.bird.media.MediaMapper;
 import com.gray.bird.post.PostEntity;
 import com.gray.bird.post.PostMapper;
 
-@Mapper(uses = {PostMapper.class, MediaMapper.class})
+@Mapper(uses = {PostMapper.class, MediaMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface PostAggregateMapper {
 	@Mapping(target = "interactions", expression = "java(mapInteractions(post))")
 	@Mapping(target = "post", source = "post")
@@ -22,8 +23,7 @@ public interface PostAggregateMapper {
 		long likesCount = post.getLikes() != null ? post.getLikes().size() : 0;
 		long repostsCount = post.getReposts() != null ? post.getReposts().size() : 0;
 		long repliesCount = post.getReplies() != null ? post.getReplies().size() : 0;
-		return Optional.of(
-			new InteractionsAggregate(post.getId(), repliesCount, likesCount, repostsCount));
+		return Optional.of(new InteractionsAggregate(post.getId(), repliesCount, likesCount, repostsCount));
 	}
 
 	default<T> Optional<T> wrapOptional(T t) {
