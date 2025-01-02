@@ -1,5 +1,6 @@
 package com.gray.bird.media;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -11,7 +12,7 @@ import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.media.dto.MediaRequest;
 import com.gray.bird.media.dto.MediaRequestContent;
 
-@Mapper
+@Mapper(injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface MediaMapper {
 	@Mapping(target = "postId", source = "media.post.id")
 	MediaDto toMediaDto(MediaEntity media);

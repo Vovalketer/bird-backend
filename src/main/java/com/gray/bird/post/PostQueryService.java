@@ -30,7 +30,10 @@ public class PostQueryService {
 	}
 
 	public Long getRepliesCountByPostId(Long id) {
-		return postRepository.countRepliesByPostId(id).orElseThrow(
-			() -> new ResourceNotFoundException());
+		return postRepository.countRepliesByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
+	}
+
+	public Page<Long> getPostIdsByUsername(String username, Pageable pageable) {
+		return postRepository.findPostIdsByUsername(username, pageable);
 	}
 }

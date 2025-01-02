@@ -16,4 +16,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
 	@Query("SELECT COUNT(*) FROM PostEntity p WHERE p.parentPostId = :id")
 	Optional<Long> countRepliesByPostId(@Param("id") Long id);
+
+	@Query("SELECT p.id FROM PostEntity p WHERE p.username = :username")
+	Page<Long> findPostIdsByUsername(String username, Pageable pageable);
 }

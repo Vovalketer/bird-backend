@@ -1,5 +1,8 @@
 package com.gray.bird.user;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,11 +18,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import java.net.URI;
+import java.util.List;
 
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.common.ResourcePaths;
+import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
+import com.gray.bird.post.PostQueryService;
+import com.gray.bird.postAggregate.PostAggregate;
 import com.gray.bird.postAggregate.PostAggregateQueryService;
+import com.gray.bird.postAggregate.PostResourceConverter;
 import com.gray.bird.user.dto.RegisterRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.follow.FollowService;
@@ -29,10 +37,12 @@ import com.gray.bird.user.follow.FollowService;
 @RequiredArgsConstructor
 public class UserController {
 	private final UserService userService;
-	private final PostAggregateQueryService postAggregatorService;
+	private final PostAggregateQueryService postAggregateQueryService;
+	private final PostQueryService postQueryService;
 	private final FollowService followService;
 	private final AuthService authService;
 	private final UserResourceConverter userResourceConverter;
+	private final PostResourceConverter postResourceConverter;
 
 	@PostMapping("/register")
 	public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest data, HttpServletRequest request) {
@@ -53,8 +63,12 @@ public class UserController {
 	public ResponseEntity<?> getUserPosts(@PathVariable String username,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		// just the user posts and its replies, no reposts
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Page<Long> postIds = postQueryService.getPostIdsByUsername(username, pageable);
+		List<PostAggregate> posts = postAggregateQueryService.getPosts(postIds);
+		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(posts);
 
-		return ResponseEntity.ok(null);
+		return ResponseEntity.ok(aggregate);
 	}
 
 	@GetMapping("/{username}/timelines/following")
