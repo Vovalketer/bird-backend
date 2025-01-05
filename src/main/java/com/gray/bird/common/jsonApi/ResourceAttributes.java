@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public interface ResourceAttributes {
 	Map<String, Object> getAttributes();
 
-	Object getAttribute(String name);
+	Object getAttribute(String key);
 
-	<T> T getAttribute(String name, Class<T> type);
+	<T> T getAttribute(String key, Class<T> type);
 }

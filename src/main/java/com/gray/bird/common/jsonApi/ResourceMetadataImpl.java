@@ -2,6 +2,7 @@ package com.gray.bird.common.jsonApi;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ResourceMetadataImpl implements ResourceMetadata {
 	private Map<String, Object> meta;
@@ -20,18 +21,18 @@ public class ResourceMetadataImpl implements ResourceMetadata {
 	}
 
 	@Override
-	public Object getMetadata(String name) {
-		return meta.get(name);
+	public Optional<Object> getMetadata(String key) {
+		return Optional.ofNullable(meta.get(key));
 	}
 
 	@Override
-	public void addMetadata(String name, Object value) {
-		meta.put(name, value);
+	public void addMetadata(String key, Object value) {
+		meta.put(key, value);
 	}
 
 	@Override
-	public void removeMetadata(String name) {
-		meta.remove(name);
+	public void removeMetadata(String key) {
+		meta.remove(key);
 	}
 
 	@Override
@@ -40,8 +41,16 @@ public class ResourceMetadataImpl implements ResourceMetadata {
 	}
 
 	@Override
-	public <T> T getMetadata(String key, Class<T> type) {
+	public <T> Optional<T> getMetadata(String key, Class<T> type) {
 		Object object = meta.get(key);
-		return type.cast(object);
+		if (object != null) {
+			return Optional.ofNullable(type.cast(object));
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
 	}
 }

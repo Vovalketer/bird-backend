@@ -1,16 +1,17 @@
 package com.gray.bird.common.jsonApi;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public interface ResourceLinks {
-	void addLink(String name, String url);
+	void addLink(String key, String url);
 
-	String getLink(String name);
+	Optional<String> getLink(String key);
 
-	void removeLink(String name);
+	void removeLink(String key);
 
 	Map<String, String> getLinks();
 }

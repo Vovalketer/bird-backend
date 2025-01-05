@@ -46,4 +46,24 @@ public class ResourcePaginationMetadataImpl implements ResourcePaginationMetadat
 		return "ResourcePaginationMetadataImpl [totalElements=" + totalElements + ", numberOfElements="
 			+ numberOfElements + ", first=" + first + ", last=" + last + ", empty=" + empty + "]";
 	}
+
+	public void setTotalElements(long totalElements) {
+		this.totalElements = totalElements;
+	}
+
+	public void setNumberOfElements(int numberOfElements) {
+		this.numberOfElements = numberOfElements;
+	}
+
+	public void setFirst(boolean first) {
+		this.first = first;
+	}
+
+	public void setLast(boolean last) {
+		this.last = last;
+	}
+
+	public void setEmpty(boolean empty) {
+		this.empty = empty;
+	}
 }
