@@ -1,17 +1,21 @@
 package com.gray.bird.common.jsonApi;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public interface ResourceRelationships {
-	List<Relationship> getRelationshipsForType(String type);
+	Optional<RelationshipToOne> getRelationshipToOne(String key);
 
-	Map<String, List<Relationship>> getRelationships();
+	Optional<RelationshipToMany> getRelationshipToMany(String key);
 
-	void addRelationship(String name, Relationship relationship);
+	Map<String, Object> getRelationships();
 
-	void removeRelationship(String name);
+	void addRelationshipToOne(String key, RelationshipToOne relationship);
+
+	void addRelationshipToMany(String key, RelationshipToMany relationship);
+
+	void removeRelationship(String key);
 }

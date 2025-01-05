@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gray.bird.common.jsonApi.Relationship;
-import com.gray.bird.common.jsonApi.RelationshipImpl;
+import com.gray.bird.common.jsonApi.RelationshipToMany;
+import com.gray.bird.common.jsonApi.RelationshipToManyImpl;
+import com.gray.bird.common.jsonApi.RelationshipToOne;
+import com.gray.bird.common.jsonApi.RelationshipToOneImpl;
 import com.gray.bird.common.jsonApi.ResourceAttributes;
 import com.gray.bird.common.jsonApi.ResourceAttributesImpl;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
@@ -112,24 +114,21 @@ public class ResourceFactory {
 		return new ResourceRelationshipsImpl();
 	}
 
-	public ResourceRelationships createRelationships(Map<String, List<Relationship>> relationships) {
-		return new ResourceRelationshipsImpl(relationships);
+	public RelationshipToOne createRelationshipToOne(ResourceIdentifier data) {
+		return new RelationshipToOneImpl(data);
 	}
 
-	public Relationship createRelationship(ResourceIdentifier data) {
-		return new RelationshipImpl(data);
+	public RelationshipToOne createRelationshipToOne(
+		ResourceIdentifier data, Map<String, String> links, Map<String, Object> metadata) {
+		return new RelationshipToOneImpl(data, links, metadata);
 	}
 
-	public Relationship createRelationship(List<ResourceIdentifier> data) {
-		return new RelationshipImpl(data);
+	public RelationshipToMany createRelationshipToMany() {
+		return new RelationshipToManyImpl();
 	}
 
-	public Relationship createRelationship(ResourceIdentifier data, Map<String, String> links) {
-		return new RelationshipImpl(data, links);
-	}
-
-	public Relationship createRelationship(List<ResourceIdentifier> data, Map<String, String> links) {
-		return new RelationshipImpl(data, links);
+	public RelationshipToMany createRelationshipToMany(List<ResourceIdentifier> data) {
+		return new RelationshipToManyImpl(data);
 	}
 
 	public ResourceAttributes createAttributes(Object attributes) {
@@ -144,5 +143,11 @@ public class ResourceFactory {
 
 	public ResourceMetadata createMetadata() {
 		return new ResourceMetadataImpl();
+	}
+
+	public List<ResourceIdentifier> getIdentifiers(List<ResourceData> data) {
+		List<ResourceIdentifier> ids = new ArrayList<>();
+		data.forEach(d -> ids.add(d));
+		return ids;
 	}
 }

@@ -5,8 +5,9 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import com.gray.bird.common.jsonApi.Relationship;
+import com.gray.bird.common.jsonApi.RelationshipToOne;
 import com.gray.bird.common.jsonApi.ResourceAttributes;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceData;
@@ -33,14 +34,14 @@ public class PostResourceConverter {
 		ResourceAttributes attributes = resourceFactory.createAttributes(postAttributes);
 		ResourceIdentifier resourceId = resourceFactory.createIdentifier(POST_TYPE, post.id().toString());
 		ResourceData content = resourceFactory.createContent(resourceId, attributes);
-		Relationship authorRelationship = resourceFactory.createRelationship(
+		RelationshipToOne authorRelationship = resourceFactory.createRelationshipToOne(
 			resourceFactory.createIdentifier(USER_TYPE, post.userReferenceId()));
-		content.addRelationship(USER_TYPE, authorRelationship);
+		content.addRelationshipToOne(USER_TYPE, authorRelationship);
 		if (post.parentPostId() != null) {
 			ResourceIdentifier parentId =
 				resourceFactory.createIdentifier(POST_TYPE, post.parentPostId().toString());
-			Relationship rel = resourceFactory.createRelationship(parentId);
-			content.addRelationship("parent", rel);
+			RelationshipToOne rel = resourceFactory.createRelationshipToOne(parentId);
+			content.addRelationshipToOne("parent", rel);
 		}
 		return content;
 	}
@@ -59,22 +60,19 @@ public class PostResourceConverter {
 		return resourceFactory.createContent(id, attributes);
 	}
 
-	public ResourceSingleAggregate toAggregate(PostAggregate post) {
-		ResourceData resourceContent = toResourceContent(post.post());
-		ResourceSingleAggregate aggregate = resourceFactory.createSingleAggregate(resourceContent);
+	private List<ResourceData> toResourceContent(List<MediaProjection> media) {
+		return media.stream().map(m -> toResourceContent(m)).collect(Collectors.toList());
+	}
 
-		for (var m : post.media()) {
-			ResourceIdentifier id = resourceFactory.createIdentifier(MEDIA_TYPE, m.postId().toString());
-			aggregate.getData().addRelationship(MEDIA_TYPE, resourceFactory.createRelationship(id));
-			ResourceData mediaResourceContent = toResourceContent(m);
-			aggregate.includeResource(mediaResourceContent);
-		}
+	public ResourceSingleAggregate toAggregate(PostAggregate post) {
+		ResourceData resourceData = toResourceContent(post.post());
+		ResourceSingleAggregate aggregate = resourceFactory.createSingleAggregate(resourceData);
+		List<ResourceData> media = toResourceContent(post.media());
+		aggregate.includeAllResources(media);
 
 		if (post.interactions().isPresent()) {
-			PostInteractions postInteractions = new PostInteractions(post.interactions().get().repliesCount(),
-				post.interactions().get().likesCount(),
-				post.interactions().get().repostsCount());
-			resourceContent.addMetadata(INTERACTIONS_TYPE, postInteractions);
+			PostInteractions interactions = toInteractions(post.interactions().get());
+			resourceData.addMetadata(INTERACTIONS_TYPE, interactions);
 		}
 		return aggregate;
 	}
@@ -82,22 +80,22 @@ public class PostResourceConverter {
 	public ResourceCollectionAggregate toAggregate(List<PostAggregate> posts) {
 		ResourceCollectionAggregate aggregate = resourceFactory.createCollectionAggregate();
 		for (var p : posts) {
-			ResourceData resourceContent = toResourceContent(p.post());
-			for (var m : p.media()) {
-				ResourceIdentifier id = resourceFactory.createIdentifier(MEDIA_TYPE, m.postId().toString());
-				resourceContent.addRelationship(MEDIA_TYPE, resourceFactory.createRelationship(id));
-				ResourceData mediaResourceContent = toResourceContent(m);
-				aggregate.includeResource(mediaResourceContent);
-			}
+			ResourceData data = toResourceContent(p.post());
+			List<ResourceData> media = toResourceContent(p.media());
+			data.addRelationshipToMany(
+				MEDIA_TYPE, resourceFactory.createRelationshipToMany(resourceFactory.getIdentifiers(media)));
+			aggregate.includeAllResources(media);
 			if (p.interactions().isPresent()) {
-				PostInteractions postInteractions =
-					new PostInteractions(p.interactions().get().repliesCount(),
-						p.interactions().get().likesCount(),
-						p.interactions().get().repostsCount());
-				resourceContent.addMetadata(INTERACTIONS_TYPE, postInteractions);
+				PostInteractions interactions = toInteractions(p.interactions().get());
+				data.addMetadata(INTERACTIONS_TYPE, interactions);
 			}
-			aggregate.addData(resourceContent);
+			aggregate.addData(data);
 		}
 		return aggregate;
+	}
+
+	private PostInteractions toInteractions(InteractionsAggregate interactions) {
+		return new PostInteractions(
+			interactions.repliesCount(), interactions.likesCount(), interactions.repostsCount());
 	}
 }
