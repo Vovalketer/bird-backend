@@ -69,4 +69,12 @@ public class ResourceAggregateBaseImpl implements ResourceAggregateBase {
 	public String toString() {
 		return "ResourceAggregateBaseImpl [included=" + included + ", meta=" + meta + "]";
 	}
+
+	public void setIncluded(List<ResourceData> included) {
+		this.included = included;
+	}
+
+	public void setMeta(ResourceMetadata meta) {
+		this.meta = meta;
+	}
 }

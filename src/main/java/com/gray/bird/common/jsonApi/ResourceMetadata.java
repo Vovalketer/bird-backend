@@ -1,6 +1,7 @@
 package com.gray.bird.common.jsonApi;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -8,11 +9,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public interface ResourceMetadata {
 	Map<String, Object> getMetadata();
 
-	Object getMetadata(String key);
+	Optional<Object> getMetadata(String key);
 
-	<T> T getMetadata(String key, Class<T> type);
+	<T> Optional<T> getMetadata(String key, Class<T> type);
 
-	void addMetadata(String name, Object value);
+	void addMetadata(String key, Object value);
 
 	void removeMetadata(String key);
 }

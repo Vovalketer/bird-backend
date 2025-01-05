@@ -21,4 +21,12 @@ public class ResourceIdentifierImpl implements ResourceIdentifier {
 	public String toString() {
 		return "ResourceIdentifierImpl [type=" + type + ", id=" + id + "]";
 	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 }

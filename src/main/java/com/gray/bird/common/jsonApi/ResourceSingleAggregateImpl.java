@@ -38,4 +38,8 @@ public class ResourceSingleAggregateImpl
 	public String toString() {
 		return "ResourceSingleAggregateImpl [data=" + data + "]";
 	}
+
+	public void setData(ResourceData data) {
+		this.data = data;
+	}
 }

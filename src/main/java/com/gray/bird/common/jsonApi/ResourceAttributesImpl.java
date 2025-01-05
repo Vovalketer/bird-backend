@@ -15,17 +15,21 @@ public class ResourceAttributesImpl implements ResourceAttributes {
 	}
 
 	@Override
-	public Object getAttribute(String name) {
-		return attributes.get(name);
+	public Object getAttribute(String key) {
+		return attributes.get((key));
 	}
 
 	@Override
-	public <T> T getAttribute(String name, Class<T> type) {
-		return type.cast(attributes.get(name));
+	public <T> T getAttribute(String key, Class<T> type) {
+		return type.cast(attributes.get((key)));
 	}
 
 	@Override
 	public String toString() {
 		return "ResourceAttributesImpl [attributes=" + attributes + "]";
+	}
+
+	public void setAttributes(Map<String, Object> attributes) {
+		this.attributes = attributes;
 	}
 }

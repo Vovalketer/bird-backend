@@ -57,4 +57,8 @@ public class ResourceCollectionAggregateImpl
 	public String toString() {
 		return "ResourceCollectionAggregateImpl [data=" + data + "]";
 	}
+
+	public void setData(List<ResourceData> data) {
+		this.data = data;
+	}
 }
