@@ -1,7 +1,7 @@
 package com.gray.bird.common.jsonApi;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -38,48 +38,58 @@ public class ResourceDataImpl implements ResourceData {
 	}
 
 	@Override
-	public Map<String, List<Relationship>> getRelationships() {
+	public void addRelationshipToMany(String key, RelationshipToMany relationship) {
+		relationships.addRelationshipToMany(key, relationship);
+	}
+
+	@Override
+	public void addRelationshipToOne(String key, RelationshipToOne relationship) {
+		relationships.addRelationshipToOne(key, relationship);
+	}
+
+	@Override
+	public Optional<RelationshipToMany> getRelationshipToMany(String key) {
+		return relationships.getRelationshipToMany(key);
+	}
+
+	@Override
+	public Optional<RelationshipToOne> getRelationshipToOne(String key) {
+		return relationships.getRelationshipToOne(key);
+	}
+
+	@Override
+	public Map<String, Object> getRelationships() {
 		return relationships.getRelationships();
 	}
 
 	@Override
-	public List<Relationship> getRelationshipsForType(String type) {
-		return relationships.getRelationshipsForType(type);
+	public void removeRelationship(String key) {
+		relationships.removeRelationship(key);
 	}
 
 	@Override
-	public void addRelationship(String name, Relationship relationship) {
-		relationships.addRelationship(name, relationship);
+	public void addLink(String key, String url) {
+		links.addLink(key, url);
 	}
 
 	@Override
-	public void removeRelationship(String name) {
-		relationships.removeRelationship(name);
+	public Optional<String> getLink(String key) {
+		return links.getLink(key);
 	}
 
 	@Override
-	public void addLink(String name, String url) {
-		links.addLink(name, url);
+	public void removeLink(String key) {
+		links.removeLink(key);
 	}
 
 	@Override
-	public String getLink(String name) {
-		return links.getLink(name);
+	public Object getAttribute(String key) {
+		return attributes.getAttribute(key);
 	}
 
 	@Override
-	public void removeLink(String name) {
-		links.removeLink(name);
-	}
-
-	@Override
-	public Object getAttribute(String name) {
-		return attributes.getAttribute(name);
-	}
-
-	@Override
-	public <T> T getAttribute(String name, Class<T> type) {
-		return getAttribute(name, type);
+	public <T> T getAttribute(String key, Class<T> type) {
+		return getAttribute(key, type);
 	}
 
 	@Override
@@ -98,14 +108,18 @@ public class ResourceDataImpl implements ResourceData {
 	}
 
 	@Override
-	public Object getMetadata(String key) {
-		return meta.getMetadata(key);
+	public Optional<Object> getMetadata(String type) {
+		return meta.getMetadata(type);
 	}
 
 	@Override
-	public <T> T getMetadata(String key, Class<T> type) {
-		Object metadata = meta.getMetadata(key);
-		return type.cast(metadata);
+	public <T> Optional<T> getMetadata(String type, Class<T> classType) {
+		Object metadata = meta.getMetadata(type);
+		if (metadata != null) {
+			return Optional.ofNullable(classType.cast(metadata));
+		} else {
+			return Optional.empty();
+		}
 	}
 
 	@Override
@@ -114,8 +128,8 @@ public class ResourceDataImpl implements ResourceData {
 	}
 
 	@Override
-	public void addMetadata(String name, Object value) {
-		meta.addMetadata(name, value);
+	public void addMetadata(String key, Object value) {
+		meta.addMetadata(key, value);
 	}
 
 	@Override
