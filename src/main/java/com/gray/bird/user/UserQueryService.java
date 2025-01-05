@@ -20,6 +20,12 @@ public class UserQueryService {
 		return userRepository.findById(id, UserProjection.class)
 			.orElseThrow(() -> new ResourceNotFoundException());
 	}
+
+	public UserProjection getUserByUsername(String username) {
+		return userRepository.findByUsernameIgnoreCase(username, UserProjection.class)
+			.orElseThrow(() -> new ResourceNotFoundException());
+	}
+
 	public List<UserProjection> getAllUsersById(Iterable<Long> userIds) {
 		return userRepository.findAllByIdIn(userIds, UserProjection.class);
 	}
@@ -28,10 +34,12 @@ public class UserQueryService {
 		return userRepository.findUserIdByUsername(username).orElseThrow(
 			() -> new ResourceNotFoundException());
 	}
+
 	public List<UserProjection> getUsersFromPosts(List<PostAggregate> posts) {
 		List<Long> ids = getUserIdsFromPosts(posts);
 		return getAllUsersById(ids);
 	}
+
 	private List<Long> getUserIdsFromPosts(List<PostAggregate> posts) {
 		return posts.stream().map(p -> p.post().userId()).collect(Collectors.toList());
 	}
