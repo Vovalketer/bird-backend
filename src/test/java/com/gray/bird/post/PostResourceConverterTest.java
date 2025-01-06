@@ -16,21 +16,19 @@ import java.util.Optional;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceData;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
-import com.gray.bird.config.PostTestConfig;
 import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.postAggregate.InteractionsAggregate;
 import com.gray.bird.postAggregate.PostAggregate;
 import com.gray.bird.postAggregate.PostResourceConverter;
 import com.gray.bird.utils.TestUtils;
+import com.gray.bird.utils.TestUtilsFactory;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = PostTestConfig.class)
 public class PostResourceConverterTest {
 	@Autowired
 	private PostResourceConverter postResourceConverter;
-	@Autowired
-	private TestUtils testUtils;
+	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 
 	@Test
 	void convertSinglePostToResource() {

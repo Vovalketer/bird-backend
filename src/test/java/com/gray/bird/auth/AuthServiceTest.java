@@ -42,6 +42,7 @@ import com.gray.bird.user.UserMapper;
 import com.gray.bird.user.dto.CredentialsDto;
 import com.gray.bird.user.dto.UserDataDto;
 import com.gray.bird.utils.TestUtils;
+import com.gray.bird.utils.TestUtilsFactory;
 
 @Import(GlobalExceptionHandler.class)
 @ExtendWith(MockitoExtension.class)
@@ -62,8 +63,7 @@ public class AuthServiceTest {
 	@Autowired
 	private UserMapper userMapper;
 
-	@Autowired
-	private TestUtils testUtils;
+	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 
 	@Test
 	void testValidLogin() {
