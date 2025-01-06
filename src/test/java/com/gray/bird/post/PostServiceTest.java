@@ -19,6 +19,7 @@ import com.gray.bird.post.PostCommandService;
 import com.gray.bird.post.PostEntity;
 import com.gray.bird.post.PostRepository;
 import com.gray.bird.utils.TestUtils;
+import com.gray.bird.utils.TestUtilsFactory;
 
 @Import(GlobalExceptionHandler.class)
 @ExtendWith(MockitoExtension.class)
@@ -28,8 +29,7 @@ public class PostServiceTest {
 	private PostRepository repository;
 	@InjectMocks
 	private PostCommandService service;
-	@Autowired
-	private TestUtils testUtils;
+	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 
 	@Test
 	void getPostByPostId() {

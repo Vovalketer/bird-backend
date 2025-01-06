@@ -20,6 +20,7 @@ import com.gray.bird.user.UserEntity;
 import com.gray.bird.user.UserService;
 import com.gray.bird.user.view.UserViewService;
 import com.gray.bird.utils.TestUtils;
+import com.gray.bird.utils.TestUtilsFactory;
 
 @Import(GlobalExceptionHandler.class)
 @ExtendWith(MockitoExtension.class)
@@ -45,8 +46,7 @@ public class PostAggregatorServiceTest {
 	@InjectMocks
 	private PostAggregateQueryService postAggregateService;
 
-	@Autowired
-	private TestUtils testUtils;
+	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 
 	private final UserEntity user = testUtils.createUser();
 	private final PostEntity post = testUtils.createPost();

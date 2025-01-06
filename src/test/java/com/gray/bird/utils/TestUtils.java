@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
+import org.mapstruct.factory.Mappers;
+
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,31 +17,37 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.gray.bird.auth.UserPrincipal;
+import com.gray.bird.media.MediaMapper;
+import com.gray.bird.media.MediaMapperImpl;
 import com.gray.bird.media.view.MediaView;
 import com.gray.bird.post.PostEntity;
 import com.gray.bird.post.PostMapper;
+import com.gray.bird.post.PostMapperImpl;
 import com.gray.bird.post.ReplyType;
 import com.gray.bird.post.view.InteractionsView;
 import com.gray.bird.post.view.PostView;
 import com.gray.bird.postAggregate.PostAggregate;
 import com.gray.bird.postAggregate.PostAggregateMapper;
+import com.gray.bird.postAggregate.PostAggregateMapperImpl;
 import com.gray.bird.role.RoleEntity;
 import com.gray.bird.role.RoleType;
 import com.gray.bird.security.SecurityConstants;
 import com.gray.bird.user.CredentialsEntity;
 import com.gray.bird.user.UserEntity;
 import com.gray.bird.user.UserMapper;
+import com.gray.bird.user.UserMapperImpl;
 import com.gray.bird.user.dto.CredentialsDto;
 import com.gray.bird.user.dto.UserDataDto;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.view.UserView;
 
-@RequiredArgsConstructor
 @Component
 public class TestUtils {
-	private final UserMapper userMapper;
-	private final PostMapper postMapper;
-	private final PostAggregateMapper postAggregateMapper;
+	private final UserMapper userMapper = new UserMapperImpl();
+	private final MediaMapper mediaMapper = new MediaMapperImpl();
+	private final PostMapper postMapper = new PostMapperImpl(mediaMapper);
+	private final PostAggregateMapper postAggregateMapper =
+		new PostAggregateMapperImpl(postMapper, mediaMapper);
 
 	public UserEntity createUser(String username, String handle, String email) {
 		RoleEntity role = createRole(RoleType.USER);
@@ -96,8 +104,7 @@ public class TestUtils {
 		return new RoleEntity(Long.valueOf(role.ordinal()), role);
 	}
 
-	public CredentialsEntity createCredentialsWithEncryptedPassword(
-		UserEntity user, String password) {
+	public CredentialsEntity createCredentialsWithEncryptedPassword(UserEntity user, String password) {
 		BCryptPasswordEncoder encoder =
 			new BCryptPasswordEncoder(SecurityConstants.PASSWORD_ENCODER_STRENGTH);
 		return new CredentialsEntity(user, encoder.encode(password));
@@ -136,7 +143,7 @@ public class TestUtils {
 		return PostEntity.builder()
 			.id(randomId())
 			.user(user)
-			.text("test_text")
+			.text(UUID.randomUUID().toString())
 			.replyType(replyType)
 			.deleted(deleted)
 			.parentPost(parentPost)
@@ -173,8 +180,7 @@ public class TestUtils {
 	public List<MediaView> createMediaViews(Iterable<Long> postIds) {
 		List<MediaView> list = new LinkedList<>();
 		for (Long id : postIds) {
-			list.add(
-				MediaView.builder().id(randomId()).url("example.com/image.jpg").postId(id).build());
+			list.add(MediaView.builder().id(randomId()).url("example.com/image.jpg").postId(id).build());
 		}
 		return list;
 	}

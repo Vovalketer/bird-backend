@@ -12,6 +12,7 @@ import com.gray.bird.post.PostRepository;
 import com.gray.bird.user.UserEntity;
 import com.gray.bird.user.UserRepository;
 import com.gray.bird.utils.TestUtils;
+import com.gray.bird.utils.TestUtilsFactory;
 
 @SpringBootTest
 public class posts {
@@ -20,8 +21,7 @@ public class posts {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Autowired
-	private TestUtils testUtils;
+	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 
 	@Test
 	void addPosts() {
