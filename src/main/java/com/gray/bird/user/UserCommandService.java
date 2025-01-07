@@ -37,6 +37,12 @@ public class UserCommandService {
 			savedUser.getId(), savedUser.getReferenceId(), savedUser.getHandle(), savedUser.getEmail());
 	}
 
+	public void enableAccount(EnableAccountCommand command) {
+		UserEntity user = getUserEntity(command.userId());
+		user.setEnabled(true);
+		userRepository.save(user);
+	}
+
 	private UserEntity createUserEntity(RegisterUserCommand command) {
 		RoleEntity role =
 			roleRepository.findByType(RoleType.USER).orElseThrow(() -> new RoleNotFoundException());
@@ -60,10 +66,8 @@ public class UserCommandService {
 			.build();
 	}
 
-	public void enableAccount(EnableAccountCommand command) {
-		UserEntity user =
-			userRepository.findById(command.userId()).orElseThrow(() -> new ResourceNotFoundException());
-		user.setEnabled(true);
-		userRepository.save(user);
+	private UserEntity getUserEntity(Long userId) {
+		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException());
+		return user;
 	}
 }
