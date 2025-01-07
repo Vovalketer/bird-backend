@@ -33,7 +33,7 @@ public class PostQueryService {
 		return postRepository.countRepliesByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
 	}
 
-	public Page<Long> getPostIdsByUsername(String username, Pageable pageable) {
-		return postRepository.findPostIdsByUsername(username, pageable);
+	public Page<Long> getPostIdsByUserId(Long userId, Pageable pageable) {
+		return postRepository.findPostIdsByUserId(userId, pageable);
 	}
 }
