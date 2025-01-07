@@ -22,8 +22,8 @@ import com.gray.bird.user.dto.RegisterRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.event.EventType;
 import com.gray.bird.user.event.UserEvent;
-import com.gray.bird.user.registration.Confirmation;
-import com.gray.bird.user.registration.ConfirmationRepository;
+import com.gray.bird.user.registration.AccountVerificationTokenEntity;
+import com.gray.bird.user.registration.AccountVerificationTokenRepository;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -33,7 +33,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
 	private final CredentialsRepository credentialsRepository;
-	private final ConfirmationRepository confirmationRepository;
+	private final AccountVerificationTokenRepository verificationRepository;
 	private final BCryptPasswordEncoder encoder;
 	private final ApplicationEventPublisher publisher;
 	private final UserMapper userMapper;
@@ -50,9 +50,9 @@ public class UserService {
 
 		CredentialsEntity credential = new CredentialsEntity(user, encoder.encode(data.password()));
 		credentialsRepository.save(credential);
-		Confirmation confirmation =
-			new Confirmation(user, LocalDateTime.now().plusSeconds(ACCOUNT_CONFIRMATION_EXPIRATION));
-		confirmationRepository.save(confirmation);
+		AccountVerificationTokenEntity confirmation = new AccountVerificationTokenEntity(
+			user.getId(), LocalDateTime.now().plusSeconds(ACCOUNT_CONFIRMATION_EXPIRATION));
+		verificationRepository.save(confirmation);
 		publisher.publishEvent(
 			new UserEvent(user, EventType.REGISTRATION, Map.of("token", confirmation.getToken())));
 		return userMapper.toUserProjection(user);
@@ -64,18 +64,18 @@ public class UserService {
 	}
 
 	public void validateAccount(String token) {
-		Confirmation confirmation = getUserConfirmation(token);
-		if (confirmation.getExpiresAt().isBefore(LocalDateTime.now())) {
+		AccountVerificationTokenEntity verificationToken = getUserConfirmation(token);
+		if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
 			throw new InvalidConfirmationTokenException();
 		}
-		UserEntity user = getUserEntityByEmail(confirmation.getUser().getEmail());
+		UserEntity user = getUserEntityById(verificationToken.getUserId());
 		user.setEnabled(true);
 		userRepository.save(user);
-		confirmationRepository.delete(confirmation);
+		verificationRepository.delete(verificationToken);
 	}
 
-	private Confirmation getUserConfirmation(String token) {
-		return confirmationRepository.findByToken(token).orElseThrow(
+	private AccountVerificationTokenEntity getUserConfirmation(String token) {
+		return verificationRepository.findByToken(token).orElseThrow(
 			() -> new ApiException("Token not valid"));
 	}
 
