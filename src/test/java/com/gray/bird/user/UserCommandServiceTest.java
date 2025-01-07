@@ -3,6 +3,7 @@ package com.gray.bird.user;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import com.gray.bird.role.RoleEntity;
 import com.gray.bird.role.RoleRepository;
 import com.gray.bird.role.RoleType;
+import com.gray.bird.user.command.EnableAccountCommand;
 import com.gray.bird.user.command.RegisterUserCommand;
 import com.gray.bird.user.event.UserEventPublisher;
 import com.gray.bird.utils.TestUtils;
@@ -59,5 +61,19 @@ public class UserCommandServiceTest {
 		Mockito.verify(encoder, Mockito.times(1)).encode(command.password());
 		Mockito.verify(publisher, Mockito.times(1))
 			.publishUserCreatedEvent(user.getId(), user.getReferenceId(), user.getHandle(), user.getEmail());
+	}
+
+	@Test
+	void testEnableAccount() {
+		UserEntity user = testUtils.createUser();
+		user.setEnabled(false);
+		Mockito.when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+		Mockito.when(userRepository.save(Mockito.any(UserEntity.class))).thenReturn(user);
+
+		userCommandService.enableAccount(new EnableAccountCommand(user.getId()));
+
+		Assertions.assertThat(user.isEnabled()).isTrue();
+		Mockito.verify(userRepository, Mockito.times(1)).findById(user.getId());
+		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(UserEntity.class));
 	}
 }
