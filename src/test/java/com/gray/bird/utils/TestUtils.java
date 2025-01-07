@@ -6,10 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
-
-import org.mapstruct.factory.Mappers;
-
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,6 +104,10 @@ public class TestUtils {
 		BCryptPasswordEncoder encoder =
 			new BCryptPasswordEncoder(SecurityConstants.PASSWORD_ENCODER_STRENGTH);
 		return new CredentialsEntity(user, encoder.encode(password));
+	}
+
+	public CredentialsEntity createCredentials(UserEntity user, String password) {
+		return new CredentialsEntity(user, password);
 	}
 
 	public CredentialsDto createCredentialsDto(String password) {
