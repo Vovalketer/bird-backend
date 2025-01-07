@@ -8,10 +8,12 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.exception.RoleNotFoundException;
 import com.gray.bird.role.RoleEntity;
 import com.gray.bird.role.RoleRepository;
 import com.gray.bird.role.RoleType;
+import com.gray.bird.user.command.EnableAccountCommand;
 import com.gray.bird.user.command.RegisterUserCommand;
 import com.gray.bird.user.event.UserEventPublisher;
 
@@ -56,5 +58,12 @@ public class UserCommandService {
 			.location(null)
 			.profileImage(null) // TODO: set the default pic here
 			.build();
+	}
+
+	public void enableAccount(EnableAccountCommand command) {
+		UserEntity user =
+			userRepository.findById(command.userId()).orElseThrow(() -> new ResourceNotFoundException());
+		user.setEnabled(true);
+		userRepository.save(user);
 	}
 }
