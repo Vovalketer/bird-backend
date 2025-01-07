@@ -26,16 +26,15 @@ public class SecurityConfig {
 		http.cors(Customizer.withDefaults())
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(req
-				-> req.requestMatchers("api/auth/**", "api/users/register")
+				-> req.requestMatchers("/api/auth/**", "/api/users/register")
 					.permitAll()
-					.requestMatchers(HttpMethod.GET, "api/posts/**")
+					.requestMatchers(HttpMethod.GET, "/api/posts/**")
 					.permitAll()
-					.requestMatchers(HttpMethod.GET, "api/users/**")
+					.requestMatchers(HttpMethod.GET, "/api/users/**")
 					.permitAll()
 					.anyRequest()
 					.authenticated())
-			.sessionManagement(
-				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.exceptionHandling(
 				exceptionHandling -> exceptionHandling.authenticationEntryPoint(userAuthEntryPoint))
 			// .authenticationProvider(userAuthenticationProvider)
