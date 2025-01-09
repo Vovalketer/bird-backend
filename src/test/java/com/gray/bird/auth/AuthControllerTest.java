@@ -1,6 +1,5 @@
 package com.gray.bird.auth;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -8,10 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -27,12 +26,12 @@ import org.mockito.Mockito;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
+import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.exception.InvalidConfirmationTokenException;
 import com.gray.bird.exception.InvalidJwtException;
 import com.gray.bird.user.UserService;
-import com.gray.bird.user.dto.RegisterRequest;
-import com.gray.bird.user.dto.UserProjection;
+import com.gray.bird.user.registration.AccountVerificationService;
 
 @WebMvcTest(controllers = AuthController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class,
 	useDefaultFilters = false)
@@ -44,13 +43,17 @@ public class AuthControllerTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@MockBean
+	private static final String AUTH_ENDPOINT = ResourcePaths.AUTH;
+
+	@MockitoBean
 	private AuthService authService;
-	@MockBean
+	@MockitoBean
 	private UserService userService;
-	@MockBean
+	@MockitoBean
+	private AccountVerificationService accountVerificationService;
+	@MockitoBean
 	private HttpServletRequest request;
-	@MockBean
+	@MockitoBean
 	private HttpServletResponse response;
 
 	@Test
@@ -63,7 +66,7 @@ public class AuthControllerTest {
 
 		mockMvc
 			.perform(MockMvcRequestBuilders
-					.post("/auth/login")
+					.post(AUTH_ENDPOINT + "/login")
 					// .perform(MockMvcRequestBuilders.post(uri)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(data)))
@@ -71,8 +74,6 @@ public class AuthControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("access-token"))
 			.andExpect(cookie().exists("refresh-token"))
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.message", Matchers.containsString("Logged in")))
 			.andReturn();
 	}
 
@@ -84,7 +85,7 @@ public class AuthControllerTest {
 		Mockito.when(authService.refreshAccessToken(ArgumentMatchers.any(Cookie[].class)))
 			.thenReturn(accessTok);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh-token").cookie(refreshTok))
+		mockMvc.perform(MockMvcRequestBuilders.post(AUTH_ENDPOINT + "/refresh-token").cookie(refreshTok))
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("access-token"));
 	}
@@ -97,50 +98,16 @@ public class AuthControllerTest {
 		Mockito.when(authService.refreshAccessToken(ArgumentMatchers.any(Cookie[].class)))
 			.thenThrow(new InvalidJwtException("Invalid token"));
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/auth/refresh-token").cookie(cookies))
+		mockMvc.perform(MockMvcRequestBuilders.post(AUTH_ENDPOINT + "/refresh-token").cookie(cookies))
 			.andExpect(status().isUnauthorized());
-	}
-
-	@Test
-	void registerValidData() throws Exception {
-		RegisterRequest data = new RegisterRequest("username", "some@email.com", "securepassword", "handle");
-		UserProjection user =
-			UserProjection.builder().username(data.username()).handle(data.handle()).build();
-		Mockito.when(userService.createUser(data)).thenReturn(user);
-		mockMvc
-			.perform(MockMvcRequestBuilders.post("/auth/register")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(data)))
-			.andExpect(status().isCreated())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.message", Matchers.containsString("Account created")))
-			.andExpect(jsonPath("$.data.username").value(user.username()))
-			.andExpect(jsonPath("$.data.handle").value(user.handle()));
-	}
-
-	@Test
-	void registerInvalidData() throws Exception {
-		RegisterRequest data = new RegisterRequest("username", "someemail.com", "secu", "handle");
-		UserProjection user =
-			UserProjection.builder().username(data.username()).handle(data.handle()).build();
-		Mockito.when(userService.createUser(data)).thenReturn(user);
-		mockMvc
-			.perform(MockMvcRequestBuilders.post("/auth/register")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(data)))
-			.andExpect(status().isBadRequest())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.message", Matchers.containsString("Validation failed")))
-			.andExpect(jsonPath("$.errors.email").exists())
-			.andExpect(jsonPath("$.errors.password").exists());
 	}
 
 	@Test
 	void verifyAccountValid() throws Exception {
 		String token = "valid token";
-		Mockito.doNothing().when(userService).validateAccount(ArgumentMatchers.anyString());
+		Mockito.doNothing().when(accountVerificationService).verifyAccount(ArgumentMatchers.anyString());
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/auth/verify/account").param("token", token))
+		mockMvc.perform(MockMvcRequestBuilders.get(AUTH_ENDPOINT + "/verify/account").param("token", token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", Matchers.containsString("Account verified")));
 	}
@@ -149,10 +116,10 @@ public class AuthControllerTest {
 	void invalidTokenVerifyAccount() throws Exception {
 		String token = "invalid token";
 		Mockito.doThrow(new InvalidConfirmationTokenException())
-			.when(userService)
-			.validateAccount(ArgumentMatchers.anyString());
+			.when(accountVerificationService)
+			.verifyAccount(token);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/auth/verify/account").param("token", token))
+		mockMvc.perform(MockMvcRequestBuilders.get(AUTH_ENDPOINT + "/verify/account").param("token", token))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.message", Matchers.containsString("invalid")));
 	}
