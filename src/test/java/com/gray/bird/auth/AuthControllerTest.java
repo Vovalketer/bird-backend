@@ -38,12 +38,13 @@ import com.gray.bird.user.registration.AccountVerificationService;
 @ContextConfiguration(classes = AuthController.class)
 @Import(GlobalExceptionHandler.class)
 public class AuthControllerTest {
+	private static final String ACCESS_TOKEN = "access-token";
+	private static final String REFRESH_TOKEN = "refresh-token";
+	private static final String AUTH_ENDPOINT = ResourcePaths.AUTH;
 	@Autowired
 	private MockMvc mockMvc;
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	private static final String AUTH_ENDPOINT = ResourcePaths.AUTH;
 
 	@MockitoBean
 	private AuthService authService;
@@ -59,8 +60,8 @@ public class AuthControllerTest {
 	@Test
 	void login() throws Exception {
 		LoginRequest data = new LoginRequest("fake1@email.com", "testpassword");
-		LoginResponse cookies = new LoginResponse(
-			new Cookie("access-token", "mockvalue"), new Cookie("refresh-token", "mockvalue"));
+		LoginResponse cookies =
+			new LoginResponse(new Cookie(ACCESS_TOKEN, "mockvalue"), new Cookie(REFRESH_TOKEN, "mockvalue"));
 
 		Mockito.when(authService.login(ArgumentMatchers.any(LoginRequest.class))).thenReturn(cookies);
 
@@ -72,27 +73,27 @@ public class AuthControllerTest {
 					.content(objectMapper.writeValueAsString(data)))
 			// .with(SecurityMockMvcRequestPostProcessors.csrf()))
 			.andExpect(status().isOk())
-			.andExpect(cookie().exists("access-token"))
-			.andExpect(cookie().exists("refresh-token"))
+			.andExpect(cookie().exists(ACCESS_TOKEN))
+			.andExpect(cookie().exists(REFRESH_TOKEN))
 			.andReturn();
 	}
 
 	@Test
 	void getNewAccessTokenWithValidRefreshToken() throws Exception {
-		Cookie refreshTok = new Cookie("refresh-token", "mockRefreshToken");
-		Cookie accessTok = new Cookie("access-token", "mockAccessToken");
+		Cookie refreshTok = new Cookie(REFRESH_TOKEN, "mockRefreshToken");
+		Cookie accessTok = new Cookie(ACCESS_TOKEN, "mockAccessToken");
 
 		Mockito.when(authService.refreshAccessToken(ArgumentMatchers.any(Cookie[].class)))
 			.thenReturn(accessTok);
 
 		mockMvc.perform(MockMvcRequestBuilders.post(AUTH_ENDPOINT + "/refresh-token").cookie(refreshTok))
 			.andExpect(status().isOk())
-			.andExpect(cookie().exists("access-token"));
+			.andExpect(cookie().exists(ACCESS_TOKEN));
 	}
 
 	@Test
 	void anInvalidRefreshTokenShouldThrowWhenTryingToRefresh() throws Exception {
-		Cookie refresh = new Cookie("refresh-token", "INVALIDTOKEN");
+		Cookie refresh = new Cookie(REFRESH_TOKEN, "INVALIDTOKEN");
 		Cookie[] cookies = {refresh};
 
 		Mockito.when(authService.refreshAccessToken(ArgumentMatchers.any(Cookie[].class)))

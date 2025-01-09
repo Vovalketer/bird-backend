@@ -16,6 +16,7 @@ import jakarta.servlet.http.Cookie;
 
 import java.nio.CharBuffer;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
@@ -65,7 +66,7 @@ public class AuthService {
 				handleLoginAttempts(user, LoginType.LOGIN_SUCCESS);
 				Cookie accessTokenCookie = jwtService.createJwtCookie(user, TokenType.ACCESS);
 				Cookie refreshTokenCookie = jwtService.createJwtCookie(user, TokenType.REFRESH);
-				publisher.handleLogin(user.getUsername());
+				publisher.publishUserLoggedInEvent(UUID.fromString(user.getUsername()));
 
 				return new LoginResponse(accessTokenCookie, refreshTokenCookie);
 
