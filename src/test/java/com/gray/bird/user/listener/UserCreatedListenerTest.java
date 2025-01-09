@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import java.util.UUID;
+
 import com.gray.bird.email.EmailService;
 import com.gray.bird.user.event.UserCreatedEvent;
 import com.gray.bird.user.registration.AccountVerificationService;
@@ -22,8 +24,8 @@ public class UserCreatedListenerTest {
 
 	@Test
 	void testOnUserCreated() {
-		UserCreatedEvent event = new UserCreatedEvent(1L, "referenceId", "handle", "email");
-		Mockito.when(accountVerificationService.createVerificationToken(Mockito.anyLong()))
+		UserCreatedEvent event = new UserCreatedEvent(UUID.randomUUID(), "testUser", "handle", "email");
+		Mockito.when(accountVerificationService.createVerificationToken(Mockito.any(UUID.class)))
 			.thenReturn("token");
 		Mockito.doNothing()
 			.when(emailService)
@@ -34,6 +36,6 @@ public class UserCreatedListenerTest {
 		Mockito.verify(emailService, Mockito.times(1))
 			.sendNewAccountEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 		Mockito.verify(accountVerificationService, Mockito.times(1))
-			.createVerificationToken(Mockito.anyLong());
+			.createVerificationToken(Mockito.any(UUID.class));
 	}
 }

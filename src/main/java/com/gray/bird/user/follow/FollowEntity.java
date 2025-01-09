@@ -10,14 +10,10 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
-
-import com.gray.bird.user.UserEntity;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -27,23 +23,12 @@ import com.gray.bird.user.UserEntity;
 @EntityListeners(AuditingEntityListener.class)
 public class FollowEntity {
 	@EmbeddedId
-	private FollowId id = new FollowId();
-
-	@ManyToOne
-	@JoinColumn(name = "following_id")
-	@MapsId("followingUser")
-	private UserEntity followingUser;
-
-	@ManyToOne
-	@JoinColumn(name = "followed_id")
-	@MapsId("followedUser")
-	private UserEntity followedUser;
+	private FollowId id;
 
 	@CreatedDate
 	private LocalDateTime createdAt;
 
-	public FollowEntity(UserEntity followingUser, UserEntity followedUser) {
-		this.followingUser = followingUser;
-		this.followedUser = followedUser;
+	public FollowEntity(UUID followingUser, UUID followedUser) {
+		this.id = new FollowId(followingUser, followedUser);
 	}
 }

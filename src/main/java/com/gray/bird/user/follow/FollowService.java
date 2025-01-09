@@ -4,15 +4,19 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import com.gray.bird.user.UserEntity;
+import java.util.UUID;
+
+import com.gray.bird.user.UserService;
 
 @Service
 @RequiredArgsConstructor
 public class FollowService {
 	private final FollowRepository repo;
+	private final UserService userService;
 
-	public void followUser(UserEntity currentUser, UserEntity userToFOllow) {
-		FollowEntity followEntity = new FollowEntity(currentUser, userToFOllow);
+	public void followUser(UUID currentUser, String usernameToFollow) {
+		UUID userToFollow = userService.getUserIdByUsername(usernameToFollow);
+		FollowEntity followEntity = new FollowEntity(currentUser, userToFollow);
 		repo.save(followEntity);
 	}
 }

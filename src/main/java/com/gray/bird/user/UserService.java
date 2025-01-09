@@ -51,7 +51,7 @@ public class UserService {
 		CredentialsEntity credential = new CredentialsEntity(user, encoder.encode(data.password()));
 		credentialsRepository.save(credential);
 		AccountVerificationTokenEntity confirmation = new AccountVerificationTokenEntity(
-			user.getId(), LocalDateTime.now().plusSeconds(ACCOUNT_CONFIRMATION_EXPIRATION));
+			user.getUuid(), LocalDateTime.now().plusSeconds(ACCOUNT_CONFIRMATION_EXPIRATION));
 		verificationRepository.save(confirmation);
 		publisher.publishEvent(
 			new UserEvent(user, EventType.REGISTRATION, Map.of("token", confirmation.getToken())));
@@ -68,7 +68,7 @@ public class UserService {
 		if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
 			throw new InvalidConfirmationTokenException();
 		}
-		UserEntity user = getUserEntityById(verificationToken.getUserId());
+		UserEntity user = getUserEntityByUuid(verificationToken.getUserId());
 		user.setEnabled(true);
 		userRepository.save(user);
 		verificationRepository.delete(verificationToken);
@@ -88,9 +88,9 @@ public class UserService {
 		return userMapper.toUserProjection(user);
 	}
 
-	public UserProjection getUserByReferenceId(String referenceId) {
-		UserEntity user = userRepository.findByReferenceId(referenceId)
-							  .orElseThrow(() -> new ApiException("No user found"));
+	public UserProjection getUserByUuid(UUID uuid) {
+		UserEntity user =
+			userRepository.findByUuid(uuid).orElseThrow(() -> new ApiException("No user found"));
 		return userMapper.toUserProjection(user);
 	}
 
@@ -127,15 +127,14 @@ public class UserService {
 		return userRepository.findById(userId).orElseThrow(() -> new ApiException("No user found"));
 	}
 
-	public UserEntity getUserEntityByReferenceId(String referenceId) {
-		return userRepository.findByReferenceId(referenceId)
-			.orElseThrow(() -> new ApiException("No user found"));
+	public UserEntity getUserEntityByUuid(UUID uuid) {
+		return userRepository.findByUuid(uuid).orElseThrow(() -> new ApiException("No user found"));
 	}
 
 	private UserEntity createNewUser(String username, String handle, String email) {
 		RoleEntity role = getRoleByName(RoleType.USER.name());
 		var user = UserEntity.builder()
-					   .referenceId(UUID.randomUUID().toString())
+					   .uuid(UUID.randomUUID())
 					   .username(username)
 					   .email(email)
 					   .handle(handle)
@@ -163,5 +162,10 @@ public class UserService {
 		UserEntity user = getUserEntityByUsername(username);
 		user.setLastLogin(loginDateTime);
 		save(user);
+	}
+
+	public UUID getUserIdByUsername(String username) {
+		return userRepository.findUuidByUsername(username).orElseThrow(
+			() -> new ApiException("No user found"));
 	}
 }

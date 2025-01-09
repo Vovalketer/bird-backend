@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.UUID;
+
 import com.gray.bird.exception.ResourceNotFoundException;
 
 @Service
@@ -13,7 +15,7 @@ import com.gray.bird.exception.ResourceNotFoundException;
 public class RepostQueryService {
 	private final RepostRepository repostRepository;
 
-	public Page<Long> getRepostIdsByUserId(Long userId, Pageable pageable) {
+	public Page<Long> getRepostIdsByUserId(UUID userId, Pageable pageable) {
 		return repostRepository.findRepostsByUserId(userId, pageable);
 	}
 
@@ -22,7 +24,6 @@ public class RepostQueryService {
 	}
 
 	public Long getRepostCountByPostId(Long id) {
-		return repostRepository.countByPostId(id).orElseThrow(
-			() -> new ResourceNotFoundException());
+		return repostRepository.countByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
 	}
 }

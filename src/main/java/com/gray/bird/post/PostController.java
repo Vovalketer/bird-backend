@@ -61,7 +61,7 @@ public class PostController {
 
 		ResourceSingleAggregate aggregate = postResourceConverter.toAggregate(postAggregate);
 
-		UserProjection user = userQueryService.getUserById(postAggregate.post().userId());
+		UserProjection user = userQueryService.getUserByUuid(postAggregate.post().userId());
 
 		ResourceData userResource = userResourceConverter.toResource(user);
 

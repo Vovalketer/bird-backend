@@ -14,12 +14,10 @@ import com.gray.bird.media.dto.MediaRequestContent;
 
 @Mapper(injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface MediaMapper {
-	@Mapping(target = "postId", source = "media.post.id")
 	MediaDto toMediaDto(MediaEntity media);
 
 	List<MediaDto> toMediaDto(Set<MediaEntity> media);
 
-	@Mapping(target = "postId", source = "media.post.id")
 	MediaProjection toMediaProjection(MediaEntity media);
 
 	List<MediaProjection> toMediaProjection(List<MediaEntity> media);

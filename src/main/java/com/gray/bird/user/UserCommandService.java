@@ -15,6 +15,7 @@ import com.gray.bird.role.RoleRepository;
 import com.gray.bird.role.RoleType;
 import com.gray.bird.user.command.EnableAccountCommand;
 import com.gray.bird.user.command.RegisterUserCommand;
+import com.gray.bird.user.command.UpdateLastLoginCommand;
 import com.gray.bird.user.event.UserEventPublisher;
 
 @Service
@@ -34,12 +35,18 @@ public class UserCommandService {
 		credentialsRepository.save(credentials);
 
 		publisher.publishUserCreatedEvent(
-			savedUser.getId(), savedUser.getReferenceId(), savedUser.getHandle(), savedUser.getEmail());
+			savedUser.getUuid(), savedUser.getUsername(), savedUser.getHandle(), savedUser.getEmail());
 	}
 
 	public void enableAccount(EnableAccountCommand command) {
-		UserEntity user = getUserEntity(command.userId());
+		UserEntity user = getUserEntityByUuid(command.userId());
 		user.setEnabled(true);
+		userRepository.save(user);
+	}
+
+	public void updateLastLogin(UpdateLastLoginCommand command) {
+		UserEntity user = getUserEntityById(command.userId());
+		user.setLastLogin(LocalDateTime.now());
 		userRepository.save(user);
 	}
 
@@ -47,7 +54,7 @@ public class UserCommandService {
 		RoleEntity role =
 			roleRepository.findByType(RoleType.USER).orElseThrow(() -> new RoleNotFoundException());
 		return UserEntity.builder()
-			.referenceId(UUID.randomUUID().toString())
+			.uuid(UUID.randomUUID())
 			.username(command.username())
 			.email(command.email())
 			.handle(command.handle())
@@ -66,8 +73,14 @@ public class UserCommandService {
 			.build();
 	}
 
-	private UserEntity getUserEntity(Long userId) {
+	private UserEntity getUserEntityById(Long userId) {
 		UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException());
+		return user;
+	}
+
+	private UserEntity getUserEntityByUuid(UUID userId) {
+		UserEntity user =
+			userRepository.findByUuid(userId).orElseThrow(() -> new ResourceNotFoundException());
 		return user;
 	}
 }

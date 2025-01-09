@@ -35,7 +35,7 @@ public class PostResourceConverter {
 		ResourceIdentifier resourceId = resourceFactory.createIdentifier(POST_TYPE, post.id().toString());
 		ResourceData content = resourceFactory.createContent(resourceId, attributes);
 		RelationshipToOne authorRelationship = resourceFactory.createRelationshipToOne(
-			resourceFactory.createIdentifier(USER_TYPE, post.userReferenceId()));
+			resourceFactory.createIdentifier(USER_TYPE, post.userId().toString()));
 		content.addRelationshipToOne(USER_TYPE, authorRelationship);
 		if (post.parentPostId() != null) {
 			ResourceIdentifier parentId =

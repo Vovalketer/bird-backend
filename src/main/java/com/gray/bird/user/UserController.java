@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.common.ResourcePaths;
@@ -88,10 +90,9 @@ public class UserController {
 	}
 
 	@PostMapping("/{username}/following")
-	public ResponseEntity<?> postMethodName(@PathVariable String username) {
-		UserEntity currentUser = userService.getUserEntityByUsername(authService.getPrincipalUsername());
-		UserEntity toFollow = userService.getUserEntityByUsername(username);
-		followService.followUser(currentUser, toFollow);
+	public ResponseEntity<?> postMethodName(
+		@PathVariable String username, @AuthenticationPrincipal UUID userId) {
+		followService.followUser(userId, username);
 		return ResponseEntity.ok(null);
 	}
 

@@ -28,12 +28,13 @@ public class AccountVerificationTokenEntity extends TimestampedEntity {
 	@Id
 	@GeneratedValue
 	private Long id;
+	// string representation of the token for ease of use
 	private String token;
 	@Column(nullable = false)
-	private Long userId;
+	private UUID userId;
 	private LocalDateTime expiresAt;
 
-	public AccountVerificationTokenEntity(Long userId, LocalDateTime expiresAt) {
+	public AccountVerificationTokenEntity(UUID userId, LocalDateTime expiresAt) {
 		this.userId = userId;
 		this.expiresAt = expiresAt;
 		this.token = UUID.randomUUID().toString();

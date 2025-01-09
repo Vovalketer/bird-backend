@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.gray.bird.role.RoleType;
 
@@ -12,7 +13,7 @@ import com.gray.bird.role.RoleType;
 @AllArgsConstructor
 public class UserDataDto {
 	private Long id;
-	private String referenceId;
+	private UUID uuid;
 	private String handle;
 	private String username;
 	private LocalDate dateOfBirth;

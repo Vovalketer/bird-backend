@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.gray.bird.exception.ResourceNotFoundException;
@@ -21,26 +22,30 @@ public class UserQueryService {
 			.orElseThrow(() -> new ResourceNotFoundException());
 	}
 
+	public UserProjection getUserByUuid(UUID uuid) {
+		return userRepository.findByUuid(uuid, UserProjection.class)
+			.orElseThrow(() -> new ResourceNotFoundException());
+	}
+
 	public UserProjection getUserByUsername(String username) {
 		return userRepository.findByUsernameIgnoreCase(username, UserProjection.class)
 			.orElseThrow(() -> new ResourceNotFoundException());
 	}
 
-	public List<UserProjection> getAllUsersById(Iterable<Long> userIds) {
-		return userRepository.findAllByIdIn(userIds, UserProjection.class);
+	public List<UserProjection> getAllUsersById(Iterable<UUID> userIds) {
+		return userRepository.findAllByUuidIn(userIds, UserProjection.class);
 	}
 
 	public Long getUserIdByUsername(String username) {
-		return userRepository.findUserIdByUsername(username).orElseThrow(
-			() -> new ResourceNotFoundException());
+		return userRepository.findIdByUsername(username).orElseThrow(() -> new ResourceNotFoundException());
 	}
 
 	public List<UserProjection> getUsersFromPosts(List<PostAggregate> posts) {
-		List<Long> ids = getUserIdsFromPosts(posts);
+		List<UUID> ids = getUserIdsFromPosts(posts);
 		return getAllUsersById(ids);
 	}
 
-	private List<Long> getUserIdsFromPosts(List<PostAggregate> posts) {
+	private List<UUID> getUserIdsFromPosts(List<PostAggregate> posts) {
 		return posts.stream().map(p -> p.post().userId()).collect(Collectors.toList());
 	}
 }

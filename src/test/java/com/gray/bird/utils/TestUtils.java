@@ -41,15 +41,14 @@ import com.gray.bird.user.view.UserView;
 public class TestUtils {
 	private final UserMapper userMapper = new UserMapperImpl();
 	private final MediaMapper mediaMapper = new MediaMapperImpl();
-	private final PostMapper postMapper = new PostMapperImpl(mediaMapper);
-	private final PostAggregateMapper postAggregateMapper =
-		new PostAggregateMapperImpl(postMapper, mediaMapper);
+	private final PostMapper postMapper = new PostMapperImpl();
+	private final PostAggregateMapper postAggregateMapper = new PostAggregateMapperImpl(postMapper);
 
 	public UserEntity createUser(String username, String handle, String email) {
 		RoleEntity role = createRole(RoleType.USER);
 		UserEntity user = UserEntity.builder()
 							  .id(randomId())
-							  .referenceId(UUID.randomUUID().toString())
+							  .uuid(UUID.randomUUID())
 							  .username(username)
 							  .email(email)
 							  .handle(handle)
@@ -73,7 +72,7 @@ public class TestUtils {
 		UserEntity user = UserEntity.builder()
 							  .id(randomId())
 							  .username(username)
-							  .referenceId(UUID.randomUUID().toString())
+							  .uuid(UUID.randomUUID())
 							  .email(email)
 							  .handle(handle)
 							  // security
@@ -142,7 +141,7 @@ public class TestUtils {
 		UserEntity user, ReplyType replyType, boolean deleted, PostEntity parentPost) {
 		return PostEntity.builder()
 			.id(randomId())
-			.user(user)
+			.userId(user.getUuid())
 			.text(UUID.randomUUID().toString())
 			.replyType(replyType)
 			.deleted(deleted)
@@ -154,23 +153,6 @@ public class TestUtils {
 		var parent = createPost(createUser(), ReplyType.EVERYONE, false, null);
 
 		return createPost(createUser(), ReplyType.EVERYONE, false, parent);
-	}
-
-	public PostView createPostView() {
-		PostEntity post1 = createPost();
-
-		return postMapper.toPostView(post1);
-	}
-
-	public Page<PostView> createPostViewPage(Pageable pageable) {
-		PostView post1 = createPostView();
-		PostView post2 = createPostView();
-		PostView post3 = createPostView();
-		PostView post4 = createPostView();
-
-		List<PostView> list = List.of(post1, post2, post3, post4);
-
-		return new PageImpl<>(list, pageable, list.size());
 	}
 
 	public UserView createUserView() {

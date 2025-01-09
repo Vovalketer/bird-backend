@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.UUID;
+
 import com.gray.bird.exception.ApiException;
 import com.gray.bird.user.CredentialsEntity;
 import com.gray.bird.user.CredentialsRepository;
@@ -35,10 +37,9 @@ public class UserPrincipalService implements UserDetailsService {
 			userMapper.toUserDto(credentials.getUser()), userMapper.toCredentialsDto(credentials));
 	}
 
-	public UserPrincipal loadUserByReferenceId(String referenceId) {
-		CredentialsEntity credentials =
-			credentialsRepository.findCredentialsByUserReferenceId(referenceId)
-				.orElseThrow(() -> new ApiException("Unable to find the credentials"));
+	public UserPrincipal loadUserByUuid(UUID userId) {
+		CredentialsEntity credentials = credentialsRepository.findCredentialsByUserUuid(userId).orElseThrow(
+			() -> new ApiException("Unable to find the credentials"));
 		return new UserPrincipal(
 			userMapper.toUserDto(credentials.getUser()), userMapper.toCredentialsDto(credentials));
 	}

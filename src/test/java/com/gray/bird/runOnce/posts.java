@@ -30,8 +30,7 @@ public class posts {
 		post.setParentPost(null);
 		post.setParentPostId(null);
 		post.setText("testPost1");
-		post.setUser(user.get());
-		post.setUserReferenceId(user.get().getReferenceId());
+		post.setUserId(user.get().getUuid());
 
 		postRepository.save(post);
 	}
