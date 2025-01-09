@@ -22,8 +22,7 @@ import com.gray.bird.common.ResourcePaths;
 @RequiredArgsConstructor
 @RequestMapping(ResourcePaths.LIKES)
 public class LikeController {
-	private final LikeCommandService likeCommandService;
-	private final LikeQueryService likesQueryService;
+	private final LikeService likeService;
 
 	@GetMapping
 	public ResponseEntity<?> getLikingUsers(@PathVariable Long postId,
@@ -35,14 +34,14 @@ public class LikeController {
 	@PostMapping
 	public ResponseEntity<?> likePost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
 		// TODO: make sure the.userId is the same as the one in the JWT
-		likeCommandService.likePost(userId, postId);
+		likeService.likePost(userId, postId);
 
 		return ResponseEntity.ok(null);
 	}
 
 	@DeleteMapping
 	public ResponseEntity<?> unlikePost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		likeCommandService.unlikePost(userId, postId);
+		likeService.unlikePost(userId, postId);
 
 		return ResponseEntity.ok(null);
 	}

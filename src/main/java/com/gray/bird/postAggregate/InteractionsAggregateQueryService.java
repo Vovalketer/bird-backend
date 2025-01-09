@@ -6,15 +6,15 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import com.gray.bird.like.LikeQueryService;
+import com.gray.bird.like.LikeService;
 import com.gray.bird.post.PostQueryService;
 import com.gray.bird.repost.RepostQueryService;
 
 @Service
 @RequiredArgsConstructor
 public class InteractionsAggregateQueryService {
-	private final LikeQueryService likesQueryService;
 	private final RepostQueryService repostQueryService;
+	private final LikeService likesQueryService;
 	private final PostQueryService postQueryService;
 
 	public InteractionsAggregate getInteractionsById(Long id) {
