@@ -20,8 +20,7 @@ import com.gray.bird.common.ResourcePaths;
 @RequiredArgsConstructor
 @RequestMapping(ResourcePaths.RETWEETS)
 public class RepostController {
-	private final RepostManager repostManager;
-	private final RepostQueryService repostQueryService;
+	private final RepostService repostService;
 
 	@GetMapping
 	public ResponseEntity<?> getRepostedByUsers(@PathVariable Long postId,
@@ -31,14 +30,14 @@ public class RepostController {
 
 	@PostMapping
 	public ResponseEntity<?> repostPost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		repostManager.repost(userId, postId);
+		repostService.repost(userId, postId);
 
 		return ResponseEntity.ok(null);
 	}
 
 	@DeleteMapping
 	public ResponseEntity<?> unrepostPost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		repostManager.unrepost(userId, postId);
+		repostService.unrepost(userId, postId);
 
 		return ResponseEntity.ok(null);
 	}

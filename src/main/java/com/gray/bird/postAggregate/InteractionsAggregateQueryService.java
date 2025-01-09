@@ -8,13 +8,13 @@ import java.util.List;
 
 import com.gray.bird.like.LikeService;
 import com.gray.bird.post.PostQueryService;
-import com.gray.bird.repost.RepostQueryService;
+import com.gray.bird.repost.RepostService;
 
 @Service
 @RequiredArgsConstructor
 public class InteractionsAggregateQueryService {
-	private final RepostQueryService repostQueryService;
 	private final LikeService likesQueryService;
+	private final RepostService repostQueryService;
 	private final PostQueryService postQueryService;
 
 	public InteractionsAggregate getInteractionsById(Long id) {
