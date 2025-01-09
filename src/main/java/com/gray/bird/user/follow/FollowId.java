@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
 class FollowId implements Serializable {
-	private Long followingUser;
-	private Long followedUser;
+	private UUID followingUser;
+	private UUID followedUser;
 }

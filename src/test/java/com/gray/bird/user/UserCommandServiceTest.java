@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import com.gray.bird.role.RoleEntity;
 import com.gray.bird.role.RoleRepository;
@@ -51,7 +52,7 @@ public class UserCommandServiceTest {
 			.thenReturn(credentials);
 		Mockito.when(encoder.encode(command.password())).thenReturn("test_password");
 		Mockito.doNothing().when(publisher).publishUserCreatedEvent(
-			Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+			Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
 		userCommandService.createUser(command);
 
@@ -60,20 +61,20 @@ public class UserCommandServiceTest {
 		Mockito.verify(credentialsRepository, Mockito.times(1)).save(Mockito.any(CredentialsEntity.class));
 		Mockito.verify(encoder, Mockito.times(1)).encode(command.password());
 		Mockito.verify(publisher, Mockito.times(1))
-			.publishUserCreatedEvent(user.getId(), user.getReferenceId(), user.getHandle(), user.getEmail());
+			.publishUserCreatedEvent(user.getUuid(), user.getUsername(), user.getHandle(), user.getEmail());
 	}
 
 	@Test
 	void testEnableAccount() {
 		UserEntity user = testUtils.createUser();
 		user.setEnabled(false);
-		Mockito.when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+		Mockito.when(userRepository.findByUuid(user.getUuid())).thenReturn(Optional.of(user));
 		Mockito.when(userRepository.save(Mockito.any(UserEntity.class))).thenReturn(user);
 
-		userCommandService.enableAccount(new EnableAccountCommand(user.getId()));
+		userCommandService.enableAccount(new EnableAccountCommand(user.getUuid()));
 
 		Assertions.assertThat(user.isEnabled()).isTrue();
-		Mockito.verify(userRepository, Mockito.times(1)).findById(user.getId());
+		Mockito.verify(userRepository, Mockito.times(1)).findByUuid(user.getUuid());
 		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(UserEntity.class));
 	}
 }

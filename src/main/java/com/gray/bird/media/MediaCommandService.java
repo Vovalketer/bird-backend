@@ -11,7 +11,7 @@ import com.gray.bird.media.dto.MediaRequest;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class MediaCommandService {
-	public Set<MediaEntity> uploadImages(MediaRequest mediaRequest) {
+	public Set<Long> uploadImages(MediaRequest mediaRequest) {
 		if (mediaRequest != null) {
 			return Collections.emptySet();
 		} else {

@@ -5,13 +5,15 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserEventPublisher {
 	private final ApplicationEventPublisher publisher;
 
-	public void publishUserCreatedEvent(Long userId, String referenceId, String handle, String email) {
-		UserCreatedEvent userCreatedEvent = new UserCreatedEvent(userId, referenceId, handle, email);
+	public void publishUserCreatedEvent(UUID uuid, String username, String handle, String email) {
+		UserCreatedEvent userCreatedEvent = new UserCreatedEvent(uuid, username, handle, email);
 		publisher.publishEvent(userCreatedEvent);
 	}
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.gray.bird.exception.InvalidConfirmationTokenException;
 import com.gray.bird.user.registration.event.AccountVerificationEventPublisher;
@@ -17,7 +18,7 @@ public class AccountVerificationService {
 
 	private static final Integer ACCOUNT_CONFIRMATION_EXPIRATION = 86400;
 
-	public String createVerificationToken(Long userId) {
+	public String createVerificationToken(UUID userId) {
 		AccountVerificationTokenEntity token = new AccountVerificationTokenEntity(
 			userId, LocalDateTime.now().plusSeconds(ACCOUNT_CONFIRMATION_EXPIRATION));
 		tokenRepository.save(token);

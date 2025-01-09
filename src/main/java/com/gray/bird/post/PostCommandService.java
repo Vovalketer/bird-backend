@@ -6,15 +6,13 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Set;
+import java.util.UUID;
 
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.media.MediaCommandService;
-import com.gray.bird.media.MediaEntity;
 import com.gray.bird.post.dto.PostDto;
 import com.gray.bird.post.dto.PostRequest;
-import com.gray.bird.user.UserEntity;
 import com.gray.bird.user.UserService;
 
 @Service
@@ -41,44 +39,50 @@ public class PostCommandService {
 
 	public PostDto createPost(PostRequest postRequest) {
 		String username = authService.getPrincipalUsername();
-		UserEntity user = userService.getUserEntityByUsername(username);
-		Set<MediaEntity> media = mediaService.uploadImages(postRequest.media());
-		PostEntity post = createPostEntity(postRequest, user, media);
+		UUID userId = userService.getUserIdByUsername(username);
+		boolean hasMedia = hasMedia(postRequest);
+		if (hasMedia) {
+			mediaService.uploadImages(postRequest.media());
+		}
+		PostEntity post = createPostEntity(postRequest, userId, hasMedia);
 		PostEntity savedPost = savePost(post);
 		return postMapper.toPostDto(savedPost);
 	}
 
 	public PostDto createReply(PostRequest postRequest, Long parentPostId) {
 		String username = authService.getPrincipalUsername();
-		UserEntity user = userService.getUserEntityByUsername(username);
+		UUID userId = userService.getUserIdByUsername(username);
 		PostEntity parent = getByPostId(parentPostId);
-		Set<MediaEntity> media = mediaService.uploadImages(postRequest.media());
-		PostEntity post = createPostEntity(postRequest, parent, user, media);
+		boolean hasMedia = hasMedia(postRequest);
+		if (hasMedia) {
+			mediaService.uploadImages(postRequest.media());
+		}
+		PostEntity post = createPostEntity(postRequest, parent, userId, hasMedia);
 
 		PostEntity savedPost = savePost(post);
 
 		return postMapper.toPostDto(savedPost);
 	}
 
-	private PostEntity createPostEntity(PostRequest post, UserEntity user, Set<MediaEntity> media) {
+	private PostEntity createPostEntity(PostRequest post, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
 			.text(post.text())
 			.replyType(post.replyType())
-			.user(user)
-			.userReferenceId(user.getReferenceId())
-			.media(media)
+			.userId(userId)
+			.hasMedia(hasMedia)
 			.build();
 	}
 
-	private PostEntity createPostEntity(
-		PostRequest post, PostEntity parent, UserEntity user, Set<MediaEntity> media) {
+	private PostEntity createPostEntity(PostRequest post, PostEntity parent, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
 			.text(post.text())
 			.replyType(post.replyType())
-			.user(user)
-			.userReferenceId(user.getReferenceId())
-			.media(media)
-			.parentPost(parent)
+			.userId(userId)
+			.hasMedia(hasMedia)
 			.build();
+	}
+
+	private boolean hasMedia(PostRequest postRequest) {
+		return postRequest.media() != null;
 	}
 }

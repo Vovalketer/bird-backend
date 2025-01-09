@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import java.util.UUID;
+
 @SpringJUnitConfig
 public class UserEventPublisherTest {
 	@Mock
@@ -17,14 +19,14 @@ public class UserEventPublisherTest {
 
 	@Test
 	void testPublishUserCreatedEvent() {
-		Long userId = 1L;
-		String referenceId = "referenceId";
+		UUID uuid = UUID.randomUUID();
+		String username = "testUser";
 		String handle = "handle";
 		String email = "email@test.com";
 
 		Mockito.doNothing().when(publisher).publishEvent(Mockito.any(UserCreatedEvent.class));
 
-		userEventPublisher.publishUserCreatedEvent(userId, referenceId, handle, email);
+		userEventPublisher.publishUserCreatedEvent(uuid, username, handle, email);
 
 		Mockito.verify(publisher).publishEvent(Mockito.any(UserCreatedEvent.class));
 	}

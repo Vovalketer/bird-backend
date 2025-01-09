@@ -20,9 +20,9 @@ public interface PostAggregateMapper {
 		if (post == null) {
 			return Optional.empty();
 		}
-		long likesCount = post.getLikes() != null ? post.getLikes().size() : 0;
-		long repostsCount = post.getReposts() != null ? post.getReposts().size() : 0;
-		long repliesCount = post.getReplies() != null ? post.getReplies().size() : 0;
+		long likesCount = 0;
+		long repostsCount = 0;
+		long repliesCount = 0;
 		return Optional.of(new InteractionsAggregate(post.getId(), repliesCount, likesCount, repostsCount));
 	}
 

@@ -1,4 +1,6 @@
 package com.gray.bird.user.registration.event;
 
-public record AccountVerifiedEvent(Long userId) {
+import java.util.UUID;
+
+public record AccountVerifiedEvent(UUID userId) {
 }

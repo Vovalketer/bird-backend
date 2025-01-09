@@ -7,8 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.gray.bird.post.PostEntity;
-import com.gray.bird.user.UserEntity;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +24,14 @@ public class LikeService {
 	}
 
 	@Transactional
-	public void likePost(UserEntity user, PostEntity post) {
-		LikeEntity like = new LikeEntity(user, post);
+	public void likePost(UUID userId, Long postId) {
+		LikeEntity like = new LikeEntity(userId, postId);
 		repo.save(like);
 	}
 
 	@Transactional
-	public void unlikePost(UserEntity user, PostEntity post) {
-		LikeEntity like = new LikeEntity(user, post);
+	public void unlikePost(UUID userId, Long postId) {
+		LikeEntity like = new LikeEntity(userId, postId);
 		repo.delete(like);
 	}
 }

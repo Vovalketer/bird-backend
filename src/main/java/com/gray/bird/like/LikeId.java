@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
 public class LikeId implements Serializable {
-	private Long userId;
+	private UUID userId;
 	private Long postId;
 }

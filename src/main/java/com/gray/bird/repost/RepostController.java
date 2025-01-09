@@ -1,6 +1,7 @@
 package com.gray.bird.repost;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.UUID;
 
 import com.gray.bird.common.ResourcePaths;
 
@@ -27,15 +30,15 @@ public class RepostController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> repostPost(@PathVariable Long postId) {
-		repostManager.repost(postId);
+	public ResponseEntity<?> repostPost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
+		repostManager.repost(userId, postId);
 
 		return ResponseEntity.ok(null);
 	}
 
 	@DeleteMapping
-	public ResponseEntity<?> unrepostPost(@PathVariable Long postId) {
-		repostManager.unrepost(postId);
+	public ResponseEntity<?> unrepostPost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
+		repostManager.unrepost(userId, postId);
 
 		return ResponseEntity.ok(null);
 	}

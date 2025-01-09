@@ -10,11 +10,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import com.gray.bird.common.entity.TimestampedEntity;
-import com.gray.bird.post.PostEntity;
 
 @Getter
 @Setter
@@ -26,8 +24,7 @@ public class MediaEntity extends TimestampedEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@ManyToOne
-	private PostEntity post;
+	private Long postId;
 	private String url;
 	private String description;
 	private Integer width;

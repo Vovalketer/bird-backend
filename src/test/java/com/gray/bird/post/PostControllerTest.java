@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.media.dto.MediaProjection;
@@ -44,7 +45,7 @@ public class PostControllerTest {
 
 	void testOutput() throws Exception {
 		PostProjection post = new PostProjection(
-			1L, 11L, "uuid", "testText", false, ReplyType.EVERYONE, null, LocalDateTime.now());
+			1L, UUID.randomUUID(), "testText", false, ReplyType.EVERYONE, null, LocalDateTime.now());
 		List<MediaProjection> media = new ArrayList<>();
 		Optional<InteractionsAggregate> interactions = Optional.of(new InteractionsAggregate(1L, 3L, 9L, 3L));
 		PostAggregate postAggregate = new PostAggregate(post, media, interactions);

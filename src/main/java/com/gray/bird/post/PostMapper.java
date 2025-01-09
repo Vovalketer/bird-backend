@@ -12,15 +12,10 @@ import com.gray.bird.post.view.PostView;
 
 @Mapper(uses = MediaMapper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface PostMapper {
-	@Mapping(target = "media", ignore = true)
 	PostEntity toPostEntity(PostRequest post);
 
 	// no interactions mapped, might deprecate PostDto later
 	PostDto toPostDto(PostEntity post);
 
-	PostView toPostView(PostEntity post);
-
-	@Mapping(target = "userId", source = "post.user.id")
-	@Mapping(target = "userReferenceId", source = "post.user.referenceId")
 	PostProjection toPostProjection(PostEntity post);
 }
