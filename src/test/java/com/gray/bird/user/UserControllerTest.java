@@ -12,11 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
@@ -26,6 +28,8 @@ import com.gray.bird.post.PostQueryService;
 import com.gray.bird.postAggregate.PostAggregate;
 import com.gray.bird.postAggregate.PostAggregateQueryService;
 import com.gray.bird.postAggregate.PostResourceConverter;
+import com.gray.bird.user.dto.UserCreationRequest;
+import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.follow.FollowService;
 import com.gray.bird.utils.TestResources;
 
@@ -36,6 +40,8 @@ public class UserControllerTest {
 	private final String USERS_ENDPOINT = ResourcePaths.USERS;
 	@Autowired
 	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
 	private TestResources testResources = new TestResources();
 
 	@MockitoBean
@@ -54,6 +60,7 @@ public class UserControllerTest {
 	private UserResourceConverter userResourceConverter;
 	@MockitoBean
 	private PostResourceConverter postResourceConverter;
+
 	@Test
 	void testGetUserPosts() throws Exception {
 		// Mock ResourceCollectionAggregate
@@ -91,5 +98,40 @@ public class UserControllerTest {
 			.andExpect(MockMvcResultMatchers.jsonPath("$.data[1].type").value("post"))
 			.andExpect(MockMvcResultMatchers.jsonPath("$.data[1].attributes.text")
 					.value(aggregate.getData().get(1).getAttribute("text")));
+	}
+
+	@Test
+	void registerValidData() throws Exception {
+		UserCreationRequest data =
+			new UserCreationRequest("username", "some@email.com", "securepassword", "handle");
+		UserProjection user =
+			UserProjection.builder().username(data.username()).handle(data.handle()).build();
+		Mockito.when(userService.createUser(data)).thenReturn(user);
+		mockMvc
+			.perform(MockMvcRequestBuilders.post(USERS_ENDPOINT + "/register")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(data)))
+			.andExpect(MockMvcResultMatchers.status().isCreated())
+			.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.data.username").value(user.username()))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.data.handle").value(user.handle()));
+	}
+
+	@Test
+	void registerInvalidData() throws Exception {
+		UserCreationRequest data = new UserCreationRequest("username", "someemail.com", "secu", "handle");
+		UserProjection user =
+			UserProjection.builder().username(data.username()).handle(data.handle()).build();
+		Mockito.when(userService.createUser(data)).thenReturn(user);
+		mockMvc
+			.perform(MockMvcRequestBuilders.post(USERS_ENDPOINT + "/register")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(data)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest())
+			.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(
+				MockMvcResultMatchers.jsonPath("$.message", Matchers.containsString("Validation failed")))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.errors.email").exists())
+			.andExpect(MockMvcResultMatchers.jsonPath("$.errors.password").exists());
 	}
 }
