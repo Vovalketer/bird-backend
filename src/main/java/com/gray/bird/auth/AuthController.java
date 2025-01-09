@@ -23,7 +23,7 @@ import com.gray.bird.common.HttpResponse;
 import com.gray.bird.common.HttpUtils;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.exception.ApiException;
-import com.gray.bird.user.UserService;
+import com.gray.bird.user.registration.AccountVerificationService;
 
 @RestController
 @RequestMapping(path = ResourcePaths.AUTH)
@@ -31,7 +31,7 @@ import com.gray.bird.user.UserService;
 @Slf4j
 public class AuthController {
 	private final AuthService authService;
-	private final UserService userService;
+	private final AccountVerificationService accountVerificationService;
 
 	@PostMapping("/reset-password")
 	public ResponseEntity<HttpResponse<Void>> resetPassword() {
@@ -60,7 +60,7 @@ public class AuthController {
 
 	@GetMapping("/verify/account")
 	public ResponseEntity<?> verifyAccount(@RequestParam("token") String token, HttpServletRequest request) {
-		userService.validateAccount(token);
+		accountVerificationService.verifyAccount(token);
 		return ResponseEntity.ok(HttpUtils.getResponse(request, "Account verified", HttpStatus.OK));
 	}
 }
