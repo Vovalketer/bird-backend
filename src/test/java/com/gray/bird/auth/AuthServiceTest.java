@@ -21,11 +21,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.CharBuffer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
@@ -81,13 +83,12 @@ public class AuthServiceTest {
 
 		// when
 		when(userPrincipalService.loadUserByEmail(loginRequest.email())).thenReturn(principal);
-		when(encoder.matches(CharBuffer.wrap(loginRequest.password()), principal.getPassword()))
-			.thenReturn(true);
+		when(encoder.matches(Mockito.any(CharBuffer.class), Mockito.anyString())).thenReturn(true);
 		when(jwtService.createJwtCookie(any(UserPrincipal.class), eq(TokenType.ACCESS)))
 			.thenReturn(accessTok);
 		when(jwtService.createJwtCookie(any(UserPrincipal.class), eq(TokenType.REFRESH)))
 			.thenReturn(refreshTok);
-		doNothing().when(publisher).handleLogin(anyString());
+		doNothing().when(publisher).publishUserLoggedInEvent(any(UUID.class));
 
 		LoginResponse loginResponse = authService.login(loginRequest);
 
@@ -108,8 +109,7 @@ public class AuthServiceTest {
 
 		// when
 		when(userPrincipalService.loadUserByEmail(anyString())).thenReturn(principal);
-		when(encoder.matches(CharBuffer.wrap(loginRequest.password()), principal.getPassword()))
-			.thenReturn(false);
+		when(encoder.matches(Mockito.any(CharBuffer.class), Mockito.anyString())).thenReturn(false);
 
 		// then
 		Assertions.assertThatThrownBy(() -> authService.login(loginRequest))
@@ -127,8 +127,7 @@ public class AuthServiceTest {
 
 		// when
 		when(userPrincipalService.loadUserByEmail(anyString())).thenReturn(principal);
-		when(userCache.getLoginAttempts(anyString()))
-			.thenReturn(AuthConstants.MAX_LOGIN_ATTEMPTS + 1);
+		when(userCache.getLoginAttempts(anyString())).thenReturn(AuthConstants.MAX_LOGIN_ATTEMPTS + 1);
 
 		// then
 		Assertions.assertThatThrownBy(() -> authService.login(loginRequest))

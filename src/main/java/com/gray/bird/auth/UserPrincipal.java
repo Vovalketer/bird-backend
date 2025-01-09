@@ -1,16 +1,16 @@
 package com.gray.bird.auth;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.gray.bird.user.dto.CredentialsDto;
-import com.gray.bird.user.dto.UserDataDto;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collection;
+import java.util.Collections;
+
+import com.gray.bird.user.dto.CredentialsDto;
+import com.gray.bird.user.dto.UserDataDto;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -39,7 +39,7 @@ public class UserPrincipal implements UserDetails {
 
 	@Override
 	public String getUsername() {
-		return user.getUsername();
+		return user.getUuid().toString();
 	}
 
 	@Override
