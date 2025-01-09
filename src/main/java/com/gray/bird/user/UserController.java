@@ -30,7 +30,7 @@ import com.gray.bird.post.PostQueryService;
 import com.gray.bird.postAggregate.PostAggregate;
 import com.gray.bird.postAggregate.PostAggregateQueryService;
 import com.gray.bird.postAggregate.PostResourceConverter;
-import com.gray.bird.user.dto.RegisterRequest;
+import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.follow.FollowService;
 
@@ -48,7 +48,8 @@ public class UserController {
 	private final PostResourceConverter postResourceConverter;
 
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest data, HttpServletRequest request) {
+	public ResponseEntity<?> register(
+		@RequestBody @Valid UserCreationRequest data, HttpServletRequest request) {
 		UserProjection user = userService.createUser(data);
 		ResourceSingleAggregate aggregate = userResourceConverter.toAggregate(user);
 		aggregate.addMetadata("message", "Account created. Check your email to enable it");
