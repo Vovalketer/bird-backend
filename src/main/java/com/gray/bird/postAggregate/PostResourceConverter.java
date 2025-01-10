@@ -18,7 +18,6 @@ import com.gray.bird.media.dto.MediaAttributes;
 import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.postAggregate.dto.PostAttributes;
-import com.gray.bird.postAggregate.dto.PostInteractions;
 
 @Component
 @RequiredArgsConstructor
@@ -71,8 +70,7 @@ public class PostResourceConverter {
 		aggregate.includeAllResources(media);
 
 		if (post.interactions().isPresent()) {
-			PostInteractions interactions = toInteractions(post.interactions().get());
-			resourceData.addMetadata(INTERACTIONS_TYPE, interactions);
+			resourceData.addMetadata(INTERACTIONS_TYPE, post.interactions().get());
 		}
 		return aggregate;
 	}
@@ -86,16 +84,10 @@ public class PostResourceConverter {
 				MEDIA_TYPE, resourceFactory.createRelationshipToMany(resourceFactory.getIdentifiers(media)));
 			aggregate.includeAllResources(media);
 			if (p.interactions().isPresent()) {
-				PostInteractions interactions = toInteractions(p.interactions().get());
-				data.addMetadata(INTERACTIONS_TYPE, interactions);
+				data.addMetadata(INTERACTIONS_TYPE, p.interactions().get());
 			}
 			aggregate.addData(data);
 		}
 		return aggregate;
-	}
-
-	private PostInteractions toInteractions(InteractionsAggregate interactions) {
-		return new PostInteractions(
-			interactions.repliesCount(), interactions.likesCount(), interactions.repostsCount());
 	}
 }

@@ -1,4 +1,7 @@
 package com.gray.bird.postAggregate.dto;
 
-public record PostInteractions(long repliesCount, long likesCount, long repostCount) {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public record PostInteractions(
+	@JsonIgnore Long postId, Long repliesCount, Long likesCount, Long repostsCount) {
 }
