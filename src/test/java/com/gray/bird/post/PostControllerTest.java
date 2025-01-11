@@ -47,7 +47,7 @@ public class PostControllerTest {
 		PostProjection post = new PostProjection(
 			1L, UUID.randomUUID(), "testText", false, ReplyType.EVERYONE, null, LocalDateTime.now());
 		List<MediaProjection> media = new ArrayList<>();
-		Optional<InteractionsAggregate> interactions = Optional.of(new InteractionsAggregate(1L, 3L, 9L, 3L));
+		Optional<PostInteractions> interactions = Optional.of(new PostInteractions(1L, 3L, 9L, 3L));
 		PostAggregate postAggregate = new PostAggregate(post, media, interactions);
 
 		Mockito.when(postAggregateService.getPost(ArgumentMatchers.anyLong())).thenReturn(postAggregate);
