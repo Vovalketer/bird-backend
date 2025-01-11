@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.gray.bird.exception.ResourceNotFoundException;
-import com.gray.bird.postAggregate.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.user.dto.UserProjection;
 
 @Service

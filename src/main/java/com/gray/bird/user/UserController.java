@@ -27,9 +27,9 @@ import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.post.PostQueryService;
-import com.gray.bird.postAggregate.PostAggregate;
-import com.gray.bird.postAggregate.PostAggregateQueryService;
-import com.gray.bird.postAggregate.PostResourceConverter;
+import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregatorService;
+import com.gray.bird.postAggregator.PostResourceConverter;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.follow.FollowService;
@@ -39,7 +39,7 @@ import com.gray.bird.user.follow.FollowService;
 @RequiredArgsConstructor
 public class UserController {
 	private final UserService userService;
-	private final PostAggregateQueryService postAggregateQueryService;
+	private final PostAggregatorService postAggregatorService;
 	private final PostQueryService postQueryService;
 	private final FollowService followService;
 	private final AuthService authService;
@@ -70,7 +70,7 @@ public class UserController {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		Long userId = userQueryService.getUserIdByUsername(username);
 		Page<Long> postIds = postQueryService.getPostIdsByUserId(userId, pageable);
-		List<PostAggregate> posts = postAggregateQueryService.getPosts(postIds.getContent());
+		List<PostAggregate> posts = postAggregatorService.getPosts(postIds.getContent());
 		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(posts);
 
 		return ResponseEntity.ok(aggregate);

@@ -1,4 +1,4 @@
-package com.gray.bird.postAggregate;
+package com.gray.bird.postAggregator;
 
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ import com.gray.bird.like.LikeService;
 import com.gray.bird.like.dto.LikesCount;
 import com.gray.bird.post.PostQueryService;
 import com.gray.bird.post.dto.RepliesCount;
-import com.gray.bird.postAggregate.dto.PostInteractions;
+import com.gray.bird.postAggregator.dto.PostInteractions;
 import com.gray.bird.repost.RepostService;
 import com.gray.bird.repost.dto.RepostsCount;
 

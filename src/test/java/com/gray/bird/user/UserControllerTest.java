@@ -25,9 +25,9 @@ import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.post.PostQueryService;
-import com.gray.bird.postAggregate.PostAggregate;
-import com.gray.bird.postAggregate.PostAggregateQueryService;
-import com.gray.bird.postAggregate.PostResourceConverter;
+import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregatorService;
+import com.gray.bird.postAggregator.PostResourceConverter;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.follow.FollowService;
@@ -47,7 +47,7 @@ public class UserControllerTest {
 	@MockitoBean
 	private UserService userService;
 	@MockitoBean
-	private PostAggregateQueryService postAggregateQueryService;
+	private PostAggregatorService postAggregatorService;
 	@MockitoBean
 	private PostQueryService postQueryService;
 	@MockitoBean
@@ -78,7 +78,7 @@ public class UserControllerTest {
 		// Mock postAggregateQueryService
 		List<PostAggregate> posts =
 			List.of(Mockito.mock(PostAggregate.class), Mockito.mock(PostAggregate.class));
-		Mockito.when(postAggregateQueryService.getPosts(Mockito.anyIterable())).thenReturn(posts);
+		Mockito.when(postAggregatorService.getPosts(Mockito.anyCollection())).thenReturn(posts);
 
 		// Mock postResourceConverter
 		Mockito.when(postResourceConverter.toAggregate(Mockito.anyList())).thenReturn(aggregate);

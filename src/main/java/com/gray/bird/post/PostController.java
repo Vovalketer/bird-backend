@@ -26,9 +26,9 @@ import com.gray.bird.common.utils.MetadataType;
 import com.gray.bird.common.utils.MetadataUtils;
 import com.gray.bird.post.dto.PostDto;
 import com.gray.bird.post.dto.PostRequest;
-import com.gray.bird.postAggregate.PostAggregate;
-import com.gray.bird.postAggregate.PostAggregateQueryService;
-import com.gray.bird.postAggregate.PostResourceConverter;
+import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregatorService;
+import com.gray.bird.postAggregator.PostResourceConverter;
 import com.gray.bird.user.UserQueryService;
 import com.gray.bird.user.UserResourceConverter;
 import com.gray.bird.user.dto.UserProjection;
@@ -40,7 +40,7 @@ public class PostController {
 	private final PostCommandService postManagerService;
 	private final PostQueryService postQueryService;
 	private final UserQueryService userQueryService;
-	private final PostAggregateQueryService postAggregateService;
+	private final PostAggregatorService postAggregatorService;
 	private final PostResourceConverter postResourceConverter;
 	private final UserResourceConverter userResourceConverter;
 	private final MetadataUtils metadataUtils;
@@ -57,7 +57,7 @@ public class PostController {
 	@GetMapping("/{postId}")
 	public ResponseEntity<?> getPost(@PathVariable Long postId) {
 		System.out.println("getPostMethod");
-		PostAggregate postAggregate = postAggregateService.getPost(postId);
+		PostAggregate postAggregate = postAggregatorService.getPost(postId);
 
 		ResourceSingleAggregate aggregate = postResourceConverter.toAggregate(postAggregate);
 
@@ -78,7 +78,7 @@ public class PostController {
 		// user posts and reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		Page<Long> replyIds = postQueryService.getReplyIds(postId, pageable);
-		List<PostAggregate> replies = postAggregateService.getPosts(replyIds.getContent());
+		List<PostAggregate> replies = postAggregatorService.getPosts(replyIds.getContent());
 		List<UserProjection> users = userQueryService.getUsersFromPosts(replies);
 		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(replies);
 		aggregate.includeAllResources(userResourceConverter.toResource(users));

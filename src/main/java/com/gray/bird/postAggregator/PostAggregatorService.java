@@ -1,4 +1,4 @@
-package com.gray.bird.postAggregate;
+package com.gray.bird.postAggregator;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,12 +15,12 @@ import com.gray.bird.media.MediaQueryService;
 import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.post.PostQueryService;
 import com.gray.bird.post.dto.PostProjection;
-import com.gray.bird.postAggregate.dto.PostInteractions;
+import com.gray.bird.postAggregator.dto.PostInteractions;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PostAggregateQueryService {
+public class PostAggregatorService {
 	private final PostQueryService postQueryService;
 	private final MediaQueryService mediaQueryService;
 	private final PostInteractionsService interactionsQueryService;

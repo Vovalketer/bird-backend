@@ -1,4 +1,4 @@
-package com.gray.bird.postAggregate.dto;
+package com.gray.bird.postAggregator.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
