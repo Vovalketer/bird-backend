@@ -9,5 +9,5 @@ public interface AccountVerificationTokenRepository
 	extends JpaRepository<AccountVerificationTokenEntity, Long> {
 	Optional<AccountVerificationTokenEntity> findByToken(String token);
 
-	Optional<AccountVerificationTokenEntity> findByUserUuid(UUID userId);
+	Optional<AccountVerificationTokenEntity> findByUserId(UUID userId);
 }
