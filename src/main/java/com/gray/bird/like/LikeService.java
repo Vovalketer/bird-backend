@@ -7,9 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.gray.bird.exception.ResourceNotFoundException;
+import com.gray.bird.like.dto.LikesCount;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +39,11 @@ public class LikeService {
 		return repo.findLikedPostsByUserId(userId, pageable);
 	}
 
-	public Long getLikesCountByPostId(Long postId) {
+	public LikesCount getLikesCountByPostId(Long postId) {
 		return repo.countByPostId(postId).orElseThrow(() -> new ResourceNotFoundException());
+	}
+
+	public List<LikesCount> getLikesCountByPostIds(Iterable<Long> postids) {
+		return repo.countByPostIdsIn(postids);
 	}
 }

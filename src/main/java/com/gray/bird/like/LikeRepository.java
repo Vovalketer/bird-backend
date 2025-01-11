@@ -7,8 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.gray.bird.like.dto.LikesCount;
 
 @Repository
 public interface LikeRepository extends JpaRepository<LikeEntity, LikeId> {
@@ -18,5 +21,11 @@ public interface LikeRepository extends JpaRepository<LikeEntity, LikeId> {
 	@Query("SELECT l.id.userId FROM LikeEntity l WHERE l.id.postId = :postId")
 	Page<Long> findUsersLikingPostId(@Param("postId") Long postId, Pageable pageable);
 
-	Optional<Long> countByPostId(Long postId);
+	// @Query("SELECT new com.gray.bird.like.dto.LikesCount(l.id.postId, COUNT(l)) FROM LikeEntity l WHERE "
+	// 	+ "l.id.postId = :postId")
+	Optional<LikesCount> countByPostId(@Param("postId") Long postId);
+
+	// @Query("SELECT new com.gray.bird.like.dto.LikesCount(l.id.postId, COUNT(l)) FROM LikeEntity l WHERE "
+	// 	+ "l.id.postId IN :postId")
+	List<LikesCount> countByPostIdsIn(@Param("postId") Iterable<Long> postId);
 }
