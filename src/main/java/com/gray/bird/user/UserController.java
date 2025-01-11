@@ -67,7 +67,7 @@ public class UserController {
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		// just the user posts and its replies, no reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		Long userId = userQueryService.getUserIdByUsername(username);
+		UUID userId = userService.getUserIdByUsername(username);
 		Page<Long> postIds = postService.getPostIdsByUserId(userId, pageable);
 		List<PostAggregate> posts = postAggregatorService.getPosts(postIds.getContent());
 		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(posts);
