@@ -43,7 +43,6 @@ public class UserController {
 	private final PostService postService;
 	private final FollowService followService;
 	private final AuthService authService;
-	private final UserQueryService userQueryService;
 	private final UserResourceConverter userResourceConverter;
 	private final PostResourceConverter postResourceConverter;
 
@@ -58,7 +57,7 @@ public class UserController {
 
 	@GetMapping("/{username}")
 	public ResponseEntity<?> getUserProfile(@PathVariable String username, HttpServletRequest request) {
-		UserProjection userProfile = userQueryService.getUserByUsername(username);
+		UserProjection userProfile = userService.getUserByUsername(username);
 		ResourceSingleAggregate aggregate = userResourceConverter.toAggregate(userProfile);
 		return ResponseEntity.ok(aggregate);
 	}
