@@ -1,34 +1,37 @@
 package com.gray.bird.post;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.media.MediaCommandService;
 import com.gray.bird.post.dto.PostDto;
+import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostRequest;
+import com.gray.bird.post.dto.RepliesCount;
 import com.gray.bird.user.UserService;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor = Exception.class, readOnly = true)
 @Slf4j
-public class PostCommandService {
+public class PostService {
 	private final PostRepository postRepository;
 	private final AuthService authService;
 	private final UserService userService;
 	private final MediaCommandService mediaService;
 	private final PostMapper postMapper;
 
-	// TODO: merge Post and PostAggregate, possibly separate it from the JPA entity
-	// TODO: use weak references
-
+	@Transactional
 	public PostEntity savePost(PostEntity post) {
 		return postRepository.save(post);
 	}
@@ -37,6 +40,7 @@ public class PostCommandService {
 		return postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException());
 	}
 
+	@Transactional
 	public PostDto createPost(PostRequest postRequest) {
 		String username = authService.getPrincipalUsername();
 		UUID userId = userService.getUserIdByUsername(username);
@@ -49,6 +53,7 @@ public class PostCommandService {
 		return postMapper.toPostDto(savedPost);
 	}
 
+	@Transactional
 	public PostDto createReply(PostRequest postRequest, Long parentPostId) {
 		String username = authService.getPrincipalUsername();
 		UUID userId = userService.getUserIdByUsername(username);
@@ -84,5 +89,30 @@ public class PostCommandService {
 
 	private boolean hasMedia(PostRequest postRequest) {
 		return postRequest.media() != null;
+	}
+
+	public PostProjection getPostById(Long id) {
+		return postRepository.findById(id, PostProjection.class)
+			.orElseThrow(() -> new ResourceNotFoundException());
+	}
+
+	public List<PostProjection> getAllPostsById(Iterable<Long> ids) {
+		return postRepository.findAllByIdIn(ids, PostProjection.class);
+	}
+
+	public Page<Long> getReplyIds(Long postId, Pageable pageable) {
+		return postRepository.findRepliesByParentPostId(postId, pageable);
+	}
+
+	public RepliesCount getRepliesCountByPostId(Long id) {
+		return postRepository.countRepliesByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
+	}
+
+	public List<RepliesCount> getRepliesCountByPostIds(Iterable<Long> ids) {
+		return postRepository.countRepliesByPostIdsIn(ids);
+	}
+
+	public Page<Long> getPostIdsByUserId(Long userId, Pageable pageable) {
+		return postRepository.findPostIdsByUserId(userId, pageable);
 	}
 }

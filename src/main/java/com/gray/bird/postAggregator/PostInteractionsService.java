@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import com.gray.bird.like.LikeService;
 import com.gray.bird.like.dto.LikesCount;
-import com.gray.bird.post.PostQueryService;
+import com.gray.bird.post.PostService;
 import com.gray.bird.post.dto.RepliesCount;
 import com.gray.bird.postAggregator.dto.PostInteractions;
 import com.gray.bird.repost.RepostService;
@@ -22,12 +22,12 @@ import com.gray.bird.repost.dto.RepostsCount;
 public class PostInteractionsService {
 	private final LikeService likesQueryService;
 	private final RepostService repostQueryService;
-	private final PostQueryService postQueryService;
+	private final PostService postService;
 
 	public PostInteractions getInteractionsById(Long id) {
 		Long likesCount = likesQueryService.getLikesCountByPostId(id).likesCount();
 		Long repostCount = repostQueryService.getRepostCountByPostId(id).repostsCount();
-		Long repliesCount = postQueryService.getRepliesCountByPostId(id).repliesCount();
+		Long repliesCount = postService.getRepliesCountByPostId(id).repliesCount();
 
 		return new PostInteractions(id, repliesCount, likesCount, repostCount);
 	}
@@ -35,7 +35,7 @@ public class PostInteractionsService {
 	public List<PostInteractions> getAllInteractionsByIds(Collection<Long> postIds) {
 		List<LikesCount> likeCounts = likesQueryService.getLikesCountByPostIds(postIds);
 		List<RepostsCount> repostCounts = repostQueryService.getRepostCountByPostIds(postIds);
-		List<RepliesCount> replyCounts = postQueryService.getRepliesCountByPostIds(postIds);
+		List<RepliesCount> replyCounts = postService.getRepliesCountByPostIds(postIds);
 
 		// not the prettiest solution, but it works
 		// preferable over iterating/filtering through each list matching the postId

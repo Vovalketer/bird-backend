@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import com.gray.bird.media.MediaQueryService;
 import com.gray.bird.media.dto.MediaProjection;
-import com.gray.bird.post.PostQueryService;
+import com.gray.bird.post.PostService;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.postAggregator.dto.PostInteractions;
 
@@ -21,12 +21,12 @@ import com.gray.bird.postAggregator.dto.PostInteractions;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostAggregatorService {
-	private final PostQueryService postQueryService;
+	private final PostService postService;
 	private final MediaQueryService mediaQueryService;
 	private final PostInteractionsService interactionsQueryService;
 
 	public PostAggregate getPost(Long id) {
-		PostProjection post = postQueryService.getPostById(id);
+		PostProjection post = postService.getPostById(id);
 		List<MediaProjection> media = mediaQueryService.getMediaByPostId(id);
 		PostInteractions interactions = interactionsQueryService.getInteractionsById(id);
 		PostAggregate aggregate = new PostAggregate(post, media, Optional.of(interactions));
@@ -35,7 +35,7 @@ public class PostAggregatorService {
 	}
 
 	public List<PostAggregate> getPosts(Collection<Long> ids) {
-		List<PostProjection> posts = postQueryService.getAllPostsById(ids);
+		List<PostProjection> posts = postService.getAllPostsById(ids);
 		List<MediaProjection> media = mediaQueryService.getAllMediaByPostId(ids);
 		List<PostInteractions> interactions = interactionsQueryService.getAllInteractionsByIds(ids);
 		List<PostAggregate> packagedPosts = packagePosts(posts, media, interactions);

@@ -26,7 +26,7 @@ import com.gray.bird.utils.TestUtilsFactory;
 @ExtendWith(MockitoExtension.class)
 public class PostAggregatorServiceTest {
 	@Mock
-	private PostCommandService postService;
+	private PostService postService;
 	@Mock
 	private UserService userService;
 	@Mock

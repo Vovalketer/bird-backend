@@ -15,9 +15,9 @@ import java.util.Optional;
 
 import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.exception.ResourceNotFoundException;
-import com.gray.bird.post.PostCommandService;
 import com.gray.bird.post.PostEntity;
 import com.gray.bird.post.PostRepository;
+import com.gray.bird.post.PostService;
 import com.gray.bird.utils.TestUtils;
 import com.gray.bird.utils.TestUtilsFactory;
 
@@ -28,7 +28,7 @@ public class PostServiceTest {
 	@Mock
 	private PostRepository repository;
 	@InjectMocks
-	private PostCommandService service;
+	private PostService service;
 	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 
 	@Test

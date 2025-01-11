@@ -26,7 +26,7 @@ import com.gray.bird.auth.AuthService;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
-import com.gray.bird.post.PostQueryService;
+import com.gray.bird.post.PostService;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.postAggregator.PostResourceConverter;
@@ -40,7 +40,7 @@ import com.gray.bird.user.follow.FollowService;
 public class UserController {
 	private final UserService userService;
 	private final PostAggregatorService postAggregatorService;
-	private final PostQueryService postQueryService;
+	private final PostService postService;
 	private final FollowService followService;
 	private final AuthService authService;
 	private final UserQueryService userQueryService;
@@ -69,7 +69,7 @@ public class UserController {
 		// just the user posts and its replies, no reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		Long userId = userQueryService.getUserIdByUsername(username);
-		Page<Long> postIds = postQueryService.getPostIdsByUserId(userId, pageable);
+		Page<Long> postIds = postService.getPostIdsByUserId(userId, pageable);
 		List<PostAggregate> posts = postAggregatorService.getPosts(postIds.getContent());
 		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(posts);
 
