@@ -32,8 +32,28 @@ public class PostInteractionsService {
 		return new PostInteractions(id, repliesCount, likesCount, repostCount);
 	}
 
-	public List<InteractionsAggregate> getAllInteractionsByIds(Iterable<Long> postIds) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'getAllInteractionsByIds'");
+	public List<PostInteractions> getAllInteractionsByIds(Collection<Long> postIds) {
+		List<LikesCount> likeCounts = likesQueryService.getLikesCountByPostIds(postIds);
+		List<RepostsCount> repostCounts = repostQueryService.getRepostCountByPostIds(postIds);
+		List<RepliesCount> replyCounts = postQueryService.getRepliesCountByPostIds(postIds);
+
+		// not the prettiest solution, but it works
+		// preferable over iterating/filtering through each list matching the postId
+		Map<Long, Long> likeCountsMap =
+			likeCounts.stream().collect(Collectors.toMap(LikesCount::postId, LikesCount::likesCount));
+		Map<Long, Long> repostCountsMap =
+			repostCounts.stream().collect(Collectors.toMap(RepostsCount::postId, RepostsCount::repostsCount));
+		Map<Long, Long> replyCountsMap =
+			replyCounts.stream().collect(Collectors.toMap(RepliesCount::postId, RepliesCount::repliesCount));
+
+		List<PostInteractions> collect = postIds.stream()
+											 .map(postId
+												 -> new PostInteractions(postId,
+													 replyCountsMap.getOrDefault(postId, 0L),
+													 likeCountsMap.getOrDefault(postId, 0L),
+													 repostCountsMap.getOrDefault(postId, 0L)))
+											 .collect(Collectors.toList());
+
+		return collect;
 	}
 }
