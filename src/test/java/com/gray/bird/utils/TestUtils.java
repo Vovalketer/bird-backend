@@ -15,13 +15,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.gray.bird.auth.UserPrincipal;
 import com.gray.bird.media.MediaMapper;
 import com.gray.bird.media.MediaMapperImpl;
-import com.gray.bird.media.view.MediaView;
 import com.gray.bird.post.PostEntity;
 import com.gray.bird.post.PostMapper;
 import com.gray.bird.post.PostMapperImpl;
 import com.gray.bird.post.ReplyType;
-import com.gray.bird.post.view.InteractionsView;
-import com.gray.bird.post.view.PostView;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregateMapper;
 import com.gray.bird.postAggregator.PostAggregateMapperImpl;
@@ -35,7 +32,6 @@ import com.gray.bird.user.UserMapperImpl;
 import com.gray.bird.user.dto.CredentialsDto;
 import com.gray.bird.user.dto.UserDataDto;
 import com.gray.bird.user.dto.UserProjection;
-import com.gray.bird.user.view.UserView;
 
 @Component
 public class TestUtils {
@@ -153,30 +149,6 @@ public class TestUtils {
 		var parent = createPost(createUser(), ReplyType.EVERYONE, false, null);
 
 		return createPost(createUser(), ReplyType.EVERYONE, false, parent);
-	}
-
-	public UserView createUserView() {
-		return userMapper.toUserView(createUser());
-	}
-
-	public List<MediaView> createMediaViews(Iterable<Long> postIds) {
-		List<MediaView> list = new LinkedList<>();
-		for (Long id : postIds) {
-			list.add(MediaView.builder().id(randomId()).url("example.com/image.jpg").postId(id).build());
-		}
-		return list;
-	}
-
-	public InteractionsView createInteractionsView(Long id) {
-		return new InteractionsView(id, randomInt(), randomInt(), randomInt());
-	}
-
-	public List<InteractionsView> createInteractionsView(Iterable<Long> postIds) {
-		List<InteractionsView> list = new LinkedList<>();
-		for (Long id : postIds) {
-			list.add(new InteractionsView(id, randomInt(), randomInt(), randomInt()));
-		}
-		return list;
 	}
 
 	public UserProjection createUserProjection() {

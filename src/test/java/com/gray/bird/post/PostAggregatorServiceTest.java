@@ -13,12 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.media.MediaCommandService;
-import com.gray.bird.media.view.MediaViewService;
-import com.gray.bird.post.view.PostViewService;
 import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.user.UserEntity;
 import com.gray.bird.user.UserService;
-import com.gray.bird.user.view.UserViewService;
 import com.gray.bird.utils.TestUtils;
 import com.gray.bird.utils.TestUtilsFactory;
 
@@ -31,12 +28,6 @@ public class PostAggregatorServiceTest {
 	private UserService userService;
 	@Mock
 	private MediaCommandService mediaService;
-	@Mock
-	private PostViewService postViewService;
-	@Mock
-	private UserViewService userViewService;
-	@Mock
-	private MediaViewService mediaViewService;
 
 	@Mock
 	private AuthService authService;
