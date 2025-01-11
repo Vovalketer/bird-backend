@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
@@ -29,8 +31,8 @@ import com.gray.bird.post.dto.PostRequest;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.postAggregator.PostResourceConverter;
-import com.gray.bird.user.UserQueryService;
 import com.gray.bird.user.UserResourceConverter;
+import com.gray.bird.user.UserService;
 import com.gray.bird.user.dto.UserProjection;
 
 @RestController
@@ -39,7 +41,7 @@ import com.gray.bird.user.dto.UserProjection;
 public class PostController {
 	private final PostService postManagerService;
 	private final PostService postService;
-	private final UserQueryService userQueryService;
+	private final UserService userService;
 	private final PostAggregatorService postAggregatorService;
 	private final PostResourceConverter postResourceConverter;
 	private final UserResourceConverter userResourceConverter;
@@ -61,7 +63,7 @@ public class PostController {
 
 		ResourceSingleAggregate aggregate = postResourceConverter.toAggregate(postAggregate);
 
-		UserProjection user = userQueryService.getUserByUuid(postAggregate.post().userId());
+		UserProjection user = userService.getUserByUuid(postAggregate.post().userId());
 
 		ResourceData userResource = userResourceConverter.toResource(user);
 
@@ -79,7 +81,8 @@ public class PostController {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		Page<Long> replyIds = postService.getReplyIds(postId, pageable);
 		List<PostAggregate> replies = postAggregatorService.getPosts(replyIds.getContent());
-		List<UserProjection> users = userQueryService.getUsersFromPosts(replies);
+		List<UUID> userIds = replies.stream().map(p -> p.post().userId()).collect(Collectors.toList());
+		List<UserProjection> users = userService.getAllUsersById(userIds);
 		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(replies);
 		aggregate.includeAllResources(userResourceConverter.toResource(users));
 		aggregate.addMetadata(
