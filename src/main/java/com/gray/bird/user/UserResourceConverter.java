@@ -23,7 +23,7 @@ public class UserResourceConverter {
 
 	public ResourceData toResource(UserProjection user) {
 		UserAttributes userAttributes = getUserAttributes(user);
-		ResourceIdentifier identifier = resourceFactory.createIdentifier("user", user.referenceId());
+		ResourceIdentifier identifier = resourceFactory.createIdentifier("user", user.userId().toString());
 		ResourceAttributes attributes = resourceFactory.createAttributes(userAttributes);
 		ResourceData content = resourceFactory.createContent(identifier, attributes);
 		return content;
