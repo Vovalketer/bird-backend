@@ -112,7 +112,7 @@ public class PostService {
 		return postRepository.countRepliesByPostIdsIn(ids);
 	}
 
-	public Page<Long> getPostIdsByUserId(Long userId, Pageable pageable) {
+	public Page<Long> getPostIdsByUserId(UUID userId, Pageable pageable) {
 		return postRepository.findPostIdsByUserId(userId, pageable);
 	}
 }

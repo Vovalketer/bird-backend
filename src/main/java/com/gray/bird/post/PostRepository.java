@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.gray.bird.post.dto.RepliesCount;
 
@@ -17,15 +18,15 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 	Page<Long> findRepliesByParentPostId(Long postId, Pageable pageable);
 
 	@Query("SELECT new com.gray.bird.post.dto.RepliesCount(p.id, COUNT(p)) FROM PostEntity p WHERE "
-		   + "p.parentPostId = :id")
+		+ "p.parentPostId = :id")
 	Optional<RepliesCount>
 	countRepliesByPostId(@Param("id") Long id);
 
 	@Query("SELECT new com.gray.bird.post.dto.RepliesCount(p.id, COUNT(p)) FROM PostEntity p WHERE "
-		   + "p.parentPostId IN :ids")
+		+ "p.parentPostId IN :ids")
 	List<RepliesCount>
 	countRepliesByPostIdsIn(@Param("ids") Iterable<Long> ids);
 
 	@Query("SELECT p.id FROM PostEntity p WHERE p.userId = :userId")
-	Page<Long> findPostIdsByUserId(@Param("userId") Long userId, Pageable pageable);
+	Page<Long> findPostIdsByUserId(@Param("userId") UUID userId, Pageable pageable);
 }
