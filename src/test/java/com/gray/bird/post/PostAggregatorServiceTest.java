@@ -15,7 +15,7 @@ import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.media.MediaCommandService;
 import com.gray.bird.media.view.MediaViewService;
 import com.gray.bird.post.view.PostViewService;
-import com.gray.bird.postAggregate.PostAggregateQueryService;
+import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.user.UserEntity;
 import com.gray.bird.user.UserService;
 import com.gray.bird.user.view.UserViewService;
@@ -32,8 +32,6 @@ public class PostAggregatorServiceTest {
 	@Mock
 	private MediaCommandService mediaService;
 	@Mock
-	private InteractionsService interactionsService;
-	@Mock
 	private PostViewService postViewService;
 	@Mock
 	private UserViewService userViewService;
@@ -44,7 +42,7 @@ public class PostAggregatorServiceTest {
 	private AuthService authService;
 
 	@InjectMocks
-	private PostAggregateQueryService postAggregateService;
+	private PostAggregatorService postAggregatorService;
 
 	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 

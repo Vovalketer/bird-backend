@@ -1,4 +1,4 @@
-package com.gray.bird.postAggregate;
+package com.gray.bird.postAggregator;
 
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import com.gray.bird.common.utils.ResourceFactory;
 import com.gray.bird.media.dto.MediaAttributes;
 import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.post.dto.PostProjection;
-import com.gray.bird.postAggregate.dto.PostAttributes;
+import com.gray.bird.postAggregator.dto.PostAttributes;
 
 @Component
 @RequiredArgsConstructor

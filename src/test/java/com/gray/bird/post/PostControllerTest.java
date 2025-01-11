@@ -23,10 +23,10 @@ import java.util.UUID;
 import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.post.dto.PostProjection;
-import com.gray.bird.postAggregate.InteractionsAggregate;
-import com.gray.bird.postAggregate.PostAggregate;
-import com.gray.bird.postAggregate.PostAggregateQueryService;
-import com.gray.bird.postAggregate.PostResourceConverter;
+import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregatorService;
+import com.gray.bird.postAggregator.PostResourceConverter;
+import com.gray.bird.postAggregator.dto.PostInteractions;
 import com.gray.bird.user.UserResourceConverter;
 
 @WebMvcTest(controllers = PostController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class,
@@ -37,7 +37,7 @@ public class PostControllerTest {
 	@Autowired
 	MockMvc mockMvc;
 	@MockBean
-	PostAggregateQueryService postAggregateService;
+	PostAggregatorService postAggregatorService;
 	@MockBean
 	PostResourceConverter postResourceConverter;
 	@MockBean
@@ -50,7 +50,7 @@ public class PostControllerTest {
 		Optional<PostInteractions> interactions = Optional.of(new PostInteractions(1L, 3L, 9L, 3L));
 		PostAggregate postAggregate = new PostAggregate(post, media, interactions);
 
-		Mockito.when(postAggregateService.getPost(ArgumentMatchers.anyLong())).thenReturn(postAggregate);
+		Mockito.when(postAggregatorService.getPost(ArgumentMatchers.anyLong())).thenReturn(postAggregate);
 		mockMvc.perform(MockMvcRequestBuilders.get("api/posts/1").contentType(MediaType.APPLICATION_JSON))
 			.andExpect(MockMvcResultMatchers.status().isOk());
 	}

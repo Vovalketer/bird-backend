@@ -19,9 +19,9 @@ import com.gray.bird.common.jsonApi.ResourceData;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.post.dto.PostProjection;
-import com.gray.bird.postAggregate.InteractionsAggregate;
-import com.gray.bird.postAggregate.PostAggregate;
-import com.gray.bird.postAggregate.PostResourceConverter;
+import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostResourceConverter;
+import com.gray.bird.postAggregator.dto.PostInteractions;
 import com.gray.bird.utils.TestUtils;
 import com.gray.bird.utils.TestUtilsFactory;
 
