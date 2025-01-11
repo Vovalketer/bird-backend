@@ -14,7 +14,6 @@ import java.util.UUID;
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.media.MediaCommandService;
-import com.gray.bird.post.dto.PostDto;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostRequest;
 import com.gray.bird.post.dto.RepliesCount;
@@ -41,7 +40,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostDto createPost(PostRequest postRequest) {
+	public PostProjection createPost(PostRequest postRequest) {
 		String username = authService.getPrincipalUsername();
 		UUID userId = userService.getUserIdByUsername(username);
 		boolean hasMedia = hasMedia(postRequest);
@@ -50,11 +49,11 @@ public class PostService {
 		}
 		PostEntity post = createPostEntity(postRequest, userId, hasMedia);
 		PostEntity savedPost = savePost(post);
-		return postMapper.toPostDto(savedPost);
+		return postMapper.toPostProjection(savedPost);
 	}
 
 	@Transactional
-	public PostDto createReply(PostRequest postRequest, Long parentPostId) {
+	public PostProjection createReply(PostRequest postRequest, Long parentPostId) {
 		String username = authService.getPrincipalUsername();
 		UUID userId = userService.getUserIdByUsername(username);
 		PostEntity parent = getByPostId(parentPostId);
@@ -66,7 +65,7 @@ public class PostService {
 
 		PostEntity savedPost = savePost(post);
 
-		return postMapper.toPostDto(savedPost);
+		return postMapper.toPostProjection(savedPost);
 	}
 
 	private PostEntity createPostEntity(PostRequest post, UUID userId, boolean hasMedia) {
