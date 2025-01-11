@@ -19,7 +19,13 @@ public interface RepostRepository extends JpaRepository<RepostEntity, RepostId> 
 	@Query("SELECT r.id.userId FROM RepostEntity r WHERE r.id.postId = :postId")
 	Page<Long> findUsersRepostingByPostId(@Param("postId") Long postId, Pageable pageable);
 
-	Optional<RepostsCount> countByPostId(Long id);
+	@Query("SELECT new com.gray.bird.repost.dto.RepostsCount(r.id.postId, COUNT(r)) FROM RepostEntity r "
+		+ "WHERE r.id.postId = :postId")
+	Optional<RepostsCount>
+	countByPostId(Long id);
 
-	List<RepostsCount> countByPostIdsIn(Iterable<Long> ids);
+	@Query("SELECT new com.gray.bird.repost.dto.RepostsCount(r.id.postId, COUNT(r)) FROM RepostEntity r "
+		+ "WHERE r.id.postId IN :postId")
+	List<RepostsCount>
+	countByPostIdsIn(Iterable<Long> ids);
 }
