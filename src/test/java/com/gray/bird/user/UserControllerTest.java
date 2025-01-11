@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gray.bird.auth.AuthService;
@@ -24,7 +25,7 @@ import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.exception.GlobalExceptionHandler;
-import com.gray.bird.post.PostQueryService;
+import com.gray.bird.post.PostService;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.postAggregator.PostResourceConverter;
@@ -49,13 +50,11 @@ public class UserControllerTest {
 	@MockitoBean
 	private PostAggregatorService postAggregatorService;
 	@MockitoBean
-	private PostQueryService postQueryService;
+	private PostService postService;
 	@MockitoBean
 	private FollowService followService;
 	@MockitoBean
 	private AuthService authService;
-	@MockitoBean
-	private UserQueryService userQueryService;
 	@MockitoBean
 	private UserResourceConverter userResourceConverter;
 	@MockitoBean
@@ -67,12 +66,12 @@ public class UserControllerTest {
 		ResourceCollectionAggregate aggregate = testResources.createPostCollectionAggregate(5);
 
 		// Mock userQueryService
-		Mockito.when(userQueryService.getUserIdByUsername(Mockito.anyString())).thenReturn(1L);
+		Mockito.when(userService.getUserIdByUsername(Mockito.anyString())).thenReturn(UUID.randomUUID());
 
 		// Mock postQueryService
 		@SuppressWarnings("unchecked")
 		Page<Long> postIds = Mockito.mock(Page.class);
-		Mockito.when(postQueryService.getPostIdsByUserId(Mockito.anyLong(), Mockito.any(Pageable.class)))
+		Mockito.when(postService.getPostIdsByUserId(Mockito.any(UUID.class), Mockito.any(Pageable.class)))
 			.thenReturn(postIds);
 
 		// Mock postAggregateQueryService

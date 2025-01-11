@@ -37,8 +37,8 @@ import com.gray.bird.user.dto.UserProjection;
 @RequestMapping(ResourcePaths.POSTS)
 @RequiredArgsConstructor
 public class PostController {
-	private final PostCommandService postManagerService;
-	private final PostQueryService postQueryService;
+	private final PostService postManagerService;
+	private final PostService postService;
 	private final UserQueryService userQueryService;
 	private final PostAggregatorService postAggregatorService;
 	private final PostResourceConverter postResourceConverter;
@@ -77,7 +77,7 @@ public class PostController {
 		// public endpoint (unless the account is set to private)
 		// user posts and reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		Page<Long> replyIds = postQueryService.getReplyIds(postId, pageable);
+		Page<Long> replyIds = postService.getReplyIds(postId, pageable);
 		List<PostAggregate> replies = postAggregatorService.getPosts(replyIds.getContent());
 		List<UserProjection> users = userQueryService.getUsersFromPosts(replies);
 		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(replies);
