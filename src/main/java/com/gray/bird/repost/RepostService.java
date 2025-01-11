@@ -7,9 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.gray.bird.exception.ResourceNotFoundException;
+import com.gray.bird.repost.dto.RepostsCount;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +39,11 @@ public class RepostService {
 		return repo.findUsersRepostingByPostId(postId, pageable);
 	}
 
-	public Long getRepostCountByPostId(Long id) {
+	public RepostsCount getRepostCountByPostId(Long id) {
 		return repo.countByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
+	}
+
+	public List<RepostsCount> getRepostCountByPostIds(Iterable<Long> ids) {
+		return repo.countByPostIdsIn(ids);
 	}
 }

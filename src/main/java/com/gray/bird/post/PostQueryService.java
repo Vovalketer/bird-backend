@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.post.dto.PostProjection;
+import com.gray.bird.post.dto.RepliesCount;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +30,12 @@ public class PostQueryService {
 		return postRepository.findRepliesByParentPostId(postId, pageable);
 	}
 
-	public Long getRepliesCountByPostId(Long id) {
+	public RepliesCount getRepliesCountByPostId(Long id) {
 		return postRepository.countRepliesByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
+	}
+
+	public List<RepliesCount> getRepliesCountByPostIds(Iterable<Long> ids) {
+		return postRepository.countRepliesByPostIdsIn(ids);
 	}
 
 	public Page<Long> getPostIdsByUserId(Long userId, Pageable pageable) {

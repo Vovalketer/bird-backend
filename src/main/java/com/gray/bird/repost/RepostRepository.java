@@ -6,8 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.gray.bird.repost.dto.RepostsCount;
 
 public interface RepostRepository extends JpaRepository<RepostEntity, RepostId> {
 	@Query("SELECT r.id.postId FROM RepostEntity r WHERE r.id.userId = :userId")
@@ -16,5 +19,7 @@ public interface RepostRepository extends JpaRepository<RepostEntity, RepostId> 
 	@Query("SELECT r.id.userId FROM RepostEntity r WHERE r.id.postId = :postId")
 	Page<Long> findUsersRepostingByPostId(@Param("postId") Long postId, Pageable pageable);
 
-	Optional<Long> countByPostId(Long id);
+	Optional<RepostsCount> countByPostId(Long id);
+
+	List<RepostsCount> countByPostIdsIn(Iterable<Long> ids);
 }

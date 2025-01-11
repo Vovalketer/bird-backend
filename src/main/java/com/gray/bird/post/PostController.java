@@ -78,7 +78,7 @@ public class PostController {
 		// user posts and reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		Page<Long> replyIds = postQueryService.getReplyIds(postId, pageable);
-		List<PostAggregate> replies = postAggregateService.getPosts(replyIds);
+		List<PostAggregate> replies = postAggregateService.getPosts(replyIds.getContent());
 		List<UserProjection> users = userQueryService.getUsersFromPosts(replies);
 		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(replies);
 		aggregate.includeAllResources(userResourceConverter.toResource(users));
