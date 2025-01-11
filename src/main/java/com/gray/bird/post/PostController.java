@@ -26,7 +26,7 @@ import com.gray.bird.common.jsonApi.ResourceData;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.common.utils.MetadataType;
 import com.gray.bird.common.utils.MetadataUtils;
-import com.gray.bird.post.dto.PostDto;
+import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostRequest;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregatorService;
@@ -52,7 +52,7 @@ public class PostController {
 
 	@PostMapping
 	public ResponseEntity<?> createPost(@RequestBody PostRequest postRequest, HttpServletRequest request) {
-		PostDto post = postManagerService.createPost(postRequest);
+		PostProjection post = postManagerService.createPost(postRequest);
 		return ResponseEntity.ok(post);
 	}
 
@@ -91,9 +91,9 @@ public class PostController {
 	}
 
 	@PostMapping("/{postId}/replies")
-	public ResponseEntity<PostDto> postReply(
+	public ResponseEntity<?> postReply(
 		@PathVariable Long postId, @RequestBody PostRequest postRequest, HttpServletRequest request) {
-		PostDto reply = postManagerService.createReply(postRequest, postId);
+		PostProjection reply = postManagerService.createReply(postRequest, postId);
 		return ResponseEntity.ok(reply);
 	}
 
