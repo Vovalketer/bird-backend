@@ -31,7 +31,7 @@ import com.gray.bird.role.RoleEntity;
 @Table(name = "users",
 	indexes =
 	{
-		@Index(name = "idx_users_reference", columnList = "referenceId", unique = true)
+		@Index(name = "idx_users_uuid", columnList = "uuid", unique = true)
 		, @Index(name = "idx_users_username", columnList = "username", unique = true),
 			@Index(name = "idx_users_email", columnList = "email", unique = true)
 	})
