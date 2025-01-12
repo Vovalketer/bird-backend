@@ -57,8 +57,8 @@ public class AuthService {
 		UserPrincipal user = userPrincipalService.loadUserByEmail(data.email());
 		log.info("Logging user authorities upon login");
 		log.info(user.getAuthorities().toString());
-		handleLoginAttempts(user, LoginType.LOGIN_ATTEMPT);
 		if (isAccountValid(user)) {
+			handleLoginAttempts(user, LoginType.LOGIN_ATTEMPT);
 			log.info("valid account");
 			log.info("submitted pw: {}", data.password());
 			if (encoder.matches(CharBuffer.wrap(data.password()), user.getPassword())) {
