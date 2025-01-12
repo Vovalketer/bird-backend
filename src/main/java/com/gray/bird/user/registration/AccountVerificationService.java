@@ -21,8 +21,8 @@ public class AccountVerificationService {
 	public String createVerificationToken(UUID userId) {
 		AccountVerificationTokenEntity token = new AccountVerificationTokenEntity(
 			userId, LocalDateTime.now().plusSeconds(ACCOUNT_CONFIRMATION_EXPIRATION));
-		tokenRepository.save(token);
-		return token.getToken();
+		AccountVerificationTokenEntity savedToken = tokenRepository.save(token);
+		return savedToken.getToken();
 	}
 
 	public void verifyAccount(String token) {
