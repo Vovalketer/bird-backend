@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -37,10 +36,9 @@ import com.gray.bird.auth.jwt.TokenData;
 import com.gray.bird.auth.jwt.TokenType;
 import com.gray.bird.common.HttpUtils;
 import com.gray.bird.exception.GlobalExceptionHandler;
+import com.gray.bird.exception.InvalidJwtException;
 import com.gray.bird.exception.UnauthorizedException;
 import com.gray.bird.role.RoleType;
-import com.gray.bird.user.UserEntity;
-import com.gray.bird.user.UserMapper;
 import com.gray.bird.user.dto.CredentialsDto;
 import com.gray.bird.user.dto.UserDataDto;
 import com.gray.bird.utils.TestUtils;
@@ -61,10 +59,6 @@ public class AuthServiceTest {
 	private AuthEventPublisher publisher;
 	@InjectMocks
 	private AuthService authService;
-
-	@Autowired
-	private UserMapper userMapper;
-
 	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
 
 	@Test
@@ -167,41 +161,83 @@ public class AuthServiceTest {
 	}
 
 	@Test
-	void testValidateAccount() {
-		LoginRequest user1Request = new LoginRequest("user1@email.com", "password");
-		LoginRequest user2Request = new LoginRequest("user2@email.com", "password");
-		LoginRequest user3Request = new LoginRequest("user3@email.com", "password");
-		LoginRequest user4Request = new LoginRequest("user4@email.com", "password");
+	void invalidRefreshTokenShouldThrowException() {
+		Cookie refresh = HttpUtils.createCookie(TokenType.REFRESH.getValue(), "invalidtoken");
+		Mockito.when(jwtService.validateRefreshToken(Mockito.anyString())).thenReturn(false);
 
-		UserEntity user1 = testUtils.createUser("user", "handle", user1Request.email());
-		user1.setEnabled(false);
-		UserEntity user2 = testUtils.createUser("user", "handle", user2Request.email());
-		user2.setAccountNonLocked(false);
-		UserEntity user3 = testUtils.createUser("user", "handle", user3Request.email());
-		user3.setCredentialsNonExpired(false);
-		UserEntity user4 = testUtils.createUser("user", "handle", user4Request.email());
-		user4.setAccountNonExpired(false);
-		UserPrincipal principal1 =
-			new UserPrincipal(userMapper.toUserDto(user1), testUtils.createCredentialsDto());
-		UserPrincipal principal2 =
-			new UserPrincipal(userMapper.toUserDto(user2), testUtils.createCredentialsDto());
-		UserPrincipal principal3 =
-			new UserPrincipal(userMapper.toUserDto(user3), testUtils.createCredentialsDto());
-		UserPrincipal principal4 =
-			new UserPrincipal(userMapper.toUserDto(user4), testUtils.createCredentialsDto());
+		Assertions.assertThatThrownBy(() -> authService.refreshAccessToken(new Cookie[] {refresh}))
+			.isInstanceOf(InvalidJwtException.class);
+	}
 
-		when(userPrincipalService.loadUserByEmail(user1Request.email())).thenReturn(principal1);
-		when(userPrincipalService.loadUserByEmail(user2Request.email())).thenReturn(principal2);
-		when(userPrincipalService.loadUserByEmail(user3Request.email())).thenReturn(principal3);
-		when(userPrincipalService.loadUserByEmail(user4Request.email())).thenReturn(principal4);
+	@Test
+	void disabledAccountShouldThrowException() {
+		UserDataDto data = UserDataDto.builder()
+							   .enabled(false)
+							   .accountNonLocked(true)
+							   .credentialsNonExpired(true)
+							   .accountNonExpired(true)
+							   .build();
+		CredentialsDto creds = new CredentialsDto("password".toCharArray());
+		UserPrincipal user = new UserPrincipal(data, creds);
+		LoginRequest userRequest = new LoginRequest("user1@email.com", "password");
 
-		Assertions.assertThatThrownBy(() -> authService.login(user1Request))
+		Mockito.when(userPrincipalService.loadUserByEmail(Mockito.anyString())).thenReturn(user);
+
+		Assertions.assertThatThrownBy(() -> authService.login(userRequest))
 			.isInstanceOf(DisabledException.class);
-		Assertions.assertThatThrownBy(() -> authService.login(user2Request))
+	}
+
+	@Test
+	void lockedAccountShouldThrowException() {
+		UserDataDto data = UserDataDto.builder()
+							   .enabled(true)
+							   .accountNonLocked(false)
+							   .credentialsNonExpired(true)
+							   .accountNonExpired(true)
+							   .build();
+		CredentialsDto creds = new CredentialsDto("password".toCharArray());
+		UserPrincipal user = new UserPrincipal(data, creds);
+		LoginRequest userRequest = new LoginRequest("user1@email.com", "password");
+
+		Mockito.when(userPrincipalService.loadUserByEmail(Mockito.anyString())).thenReturn(user);
+
+		Assertions.assertThatThrownBy(() -> authService.login(userRequest))
 			.isInstanceOf(LockedException.class);
-		Assertions.assertThatThrownBy(() -> authService.login(user3Request))
+	}
+
+	@Test
+	void expiredCredentialsShouldThrowException() {
+		UserDataDto data = UserDataDto.builder()
+							   .enabled(true)
+							   .accountNonLocked(true)
+							   .credentialsNonExpired(false)
+							   .accountNonExpired(true)
+							   .build();
+		CredentialsDto creds = new CredentialsDto("password".toCharArray());
+		UserPrincipal user = new UserPrincipal(data, creds);
+		LoginRequest userRequest = new LoginRequest("user1@email.com", "password");
+
+		Mockito.when(userPrincipalService.loadUserByEmail(Mockito.anyString())).thenReturn(user);
+
+		Assertions.assertThatThrownBy(() -> authService.login(userRequest))
 			.isInstanceOf(CredentialsExpiredException.class);
-		Assertions.assertThatThrownBy(() -> authService.login(user4Request))
+	}
+
+	@Test
+	void expiredAccountShouldThrowException() {
+		UserDataDto data = UserDataDto.builder()
+							   .enabled(true)
+							   .accountNonLocked(true)
+							   .credentialsNonExpired(true)
+							   .accountNonExpired(false)
+							   .build();
+		CredentialsDto creds = new CredentialsDto("password".toCharArray());
+		UserPrincipal user = new UserPrincipal(data, creds);
+		LoginRequest userRequest = new LoginRequest("user1@email.com", "password");
+
+		Mockito.when(userPrincipalService.loadUserByEmail(Mockito.anyString())).thenReturn(user);
+
+		Assertions.assertThatThrownBy(() -> authService.login(userRequest))
 			.isInstanceOf(DisabledException.class);
 	}
 }
