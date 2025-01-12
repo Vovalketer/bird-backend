@@ -1,6 +1,7 @@
 package com.gray.bird.user.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import com.gray.bird.role.RoleType;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class UserDataDto {
 	private Long id;
 	private UUID uuid;
