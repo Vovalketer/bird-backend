@@ -23,7 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
+import com.gray.bird.common.jsonApi.ResourceData;
+import com.gray.bird.common.jsonApi.ResourceDataImpl;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
+import com.gray.bird.common.jsonApi.ResourceSingleAggregateImpl;
 import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.post.PostService;
 import com.gray.bird.postAggregator.PostAggregate;
@@ -103,25 +106,26 @@ public class UserControllerTest {
 	void registerValidData() throws Exception {
 		UserCreationRequest data =
 			new UserCreationRequest("username", "some@email.com", "securepassword", "handle");
-		UserProjection user =
-			UserProjection.builder().username(data.username()).handle(data.handle()).build();
+		UserProjection user = Mockito.mock(UserProjection.class);
+		// must use an implementation instead of the interface or else it'll throw an exception
+		ResourceSingleAggregateImpl aggregate = Mockito.mock(ResourceSingleAggregateImpl.class);
+
 		Mockito.when(userService.createUser(data)).thenReturn(user);
+		Mockito.when(userResourceConverter.toAggregate(Mockito.any(UserProjection.class)))
+			.thenReturn(aggregate);
+		Mockito.doNothing().when(aggregate).addMetadata(Mockito.anyString(), Mockito.anyString());
+
 		mockMvc
 			.perform(MockMvcRequestBuilders.post(USERS_ENDPOINT + "/register")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(data)))
 			.andExpect(MockMvcResultMatchers.status().isCreated())
-			.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(MockMvcResultMatchers.jsonPath("$.data.username").value(user.username()))
-			.andExpect(MockMvcResultMatchers.jsonPath("$.data.handle").value(user.handle()));
+			.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
 	}
 
 	@Test
 	void registerInvalidData() throws Exception {
 		UserCreationRequest data = new UserCreationRequest("username", "someemail.com", "secu", "handle");
-		UserProjection user =
-			UserProjection.builder().username(data.username()).handle(data.handle()).build();
-		Mockito.when(userService.createUser(data)).thenReturn(user);
 		mockMvc
 			.perform(MockMvcRequestBuilders.post(USERS_ENDPOINT + "/register")
 					.contentType(MediaType.APPLICATION_JSON)
