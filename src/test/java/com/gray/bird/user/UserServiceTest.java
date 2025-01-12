@@ -16,6 +16,7 @@ import com.gray.bird.role.RoleEntity;
 import com.gray.bird.role.RoleRepository;
 import com.gray.bird.role.RoleType;
 import com.gray.bird.user.dto.UserCreationRequest;
+import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.event.UserEventPublisher;
 import com.gray.bird.utils.TestUtils;
 
@@ -31,6 +32,8 @@ public class UserServiceTest {
 	private BCryptPasswordEncoder encoder;
 	@Mock
 	private UserEventPublisher publisher;
+	@Mock
+	private UserMapper userMapper;
 
 	@InjectMocks
 	private UserService userService;
@@ -44,6 +47,7 @@ public class UserServiceTest {
 		UserEntity user = testUtils.createUser(request.username(), request.handle(), request.email());
 		RoleEntity role = testUtils.createRole(RoleType.USER);
 		CredentialsEntity credentials = testUtils.createCredentials(user, "test_password");
+		UserProjection userProjection = Mockito.mock(UserProjection.class);
 
 		Mockito.when(roleRepository.findByType(RoleType.USER)).thenReturn(Optional.of(role));
 		Mockito.when(userRepository.save(Mockito.any(UserEntity.class))).thenReturn(user);
@@ -52,6 +56,7 @@ public class UserServiceTest {
 		Mockito.when(encoder.encode(request.password())).thenReturn("test_password");
 		Mockito.doNothing().when(publisher).publishUserCreatedEvent(
 			Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+		Mockito.when(userMapper.toUserProjection(Mockito.any(UserEntity.class))).thenReturn(userProjection);
 
 		userService.createUser(request);
 
