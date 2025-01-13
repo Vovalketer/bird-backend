@@ -14,8 +14,8 @@ import java.util.UUID;
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.media.MediaCommandService;
+import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
-import com.gray.bird.post.dto.PostRequest;
 import com.gray.bird.post.dto.RepliesCount;
 import com.gray.bird.user.UserService;
 
@@ -40,7 +40,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostProjection createPost(PostRequest postRequest) {
+	public PostProjection createPost(PostCreationRequest postRequest) {
 		String username = authService.getPrincipalUsername();
 		UUID userId = userService.getUserIdByUsername(username);
 		boolean hasMedia = hasMedia(postRequest);
@@ -53,7 +53,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostProjection createReply(PostRequest postRequest, Long parentPostId) {
+	public PostProjection createReply(PostCreationRequest postRequest, Long parentPostId) {
 		String username = authService.getPrincipalUsername();
 		UUID userId = userService.getUserIdByUsername(username);
 		PostEntity parent = getByPostId(parentPostId);
@@ -68,7 +68,7 @@ public class PostService {
 		return postMapper.toPostProjection(savedPost);
 	}
 
-	private PostEntity createPostEntity(PostRequest post, UUID userId, boolean hasMedia) {
+	private PostEntity createPostEntity(PostCreationRequest post, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
 			.text(post.text())
 			.replyType(post.replyType())
@@ -77,7 +77,8 @@ public class PostService {
 			.build();
 	}
 
-	private PostEntity createPostEntity(PostRequest post, PostEntity parent, UUID userId, boolean hasMedia) {
+	private PostEntity createPostEntity(
+		PostCreationRequest post, PostEntity parent, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
 			.text(post.text())
 			.replyType(post.replyType())
@@ -86,7 +87,7 @@ public class PostService {
 			.build();
 	}
 
-	private boolean hasMedia(PostRequest postRequest) {
+	private boolean hasMedia(PostCreationRequest postRequest) {
 		return postRequest.media() != null;
 	}
 
