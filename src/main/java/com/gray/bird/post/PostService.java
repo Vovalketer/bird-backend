@@ -6,27 +6,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
 
-import com.gray.bird.auth.AuthService;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.media.MediaCommandService;
 import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.RepliesCount;
-import com.gray.bird.user.UserService;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(rollbackFor = Exception.class, readOnly = true)
-@Slf4j
 public class PostService {
 	private final PostRepository postRepository;
-	private final AuthService authService;
-	private final UserService userService;
 	private final MediaCommandService mediaService;
 	private final PostMapper postMapper;
 
@@ -40,9 +34,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostProjection createPost(PostCreationRequest postRequest) {
-		String username = authService.getPrincipalUsername();
-		UUID userId = userService.getUserIdByUsername(username);
+	public PostProjection createPost(PostCreationRequest postRequest, UUID userId) {
 		boolean hasMedia = hasMedia(postRequest);
 		if (hasMedia) {
 			mediaService.uploadImages(postRequest.media());
@@ -53,9 +45,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostProjection createReply(PostCreationRequest postRequest, Long parentPostId) {
-		String username = authService.getPrincipalUsername();
-		UUID userId = userService.getUserIdByUsername(username);
+	public PostProjection createReply(PostCreationRequest postRequest, Long parentPostId, UUID userId) {
 		PostEntity parent = getByPostId(parentPostId);
 		boolean hasMedia = hasMedia(postRequest);
 		if (hasMedia) {
