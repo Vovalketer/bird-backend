@@ -73,6 +73,7 @@ public class PostService {
 			.text(post.text())
 			.replyType(post.replyType())
 			.userId(userId)
+			.parentPost(parent)
 			.hasMedia(hasMedia)
 			.build();
 	}
