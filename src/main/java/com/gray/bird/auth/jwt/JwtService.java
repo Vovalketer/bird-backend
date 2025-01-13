@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -119,14 +120,12 @@ public class JwtService {
 		Claims claims = claimsFunction.apply(token);
 		// WARNING
 		List<String> role = claims.get(RoleConstants.ROLE, List.class);
-		String username = claims.getSubject();
+		String userId = claims.getSubject();
+		UUID userUuid = UUID.fromString(userId);
 		Set<SimpleGrantedAuthority> roleSet =
 			role.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
-		// RoleType roleValue = RoleType.getType(role);
-		// Collections.singleton(roleValue);
-		log.info("Claims:{ \nusername: {} \nrole: {}\n}", username, role);
 
-		return new UsernamePasswordAuthenticationToken(username, null, roleSet);
+		return new UsernamePasswordAuthenticationToken(userUuid, null, roleSet);
 	}
 
 	private final Supplier<SecretKey> key = () -> Keys.hmacShaKeyFor(Decoders.BASE64.decode(JWT_SECRET));
