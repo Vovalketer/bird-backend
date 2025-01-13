@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -52,8 +51,8 @@ public class PostController {
 
 	@PostMapping
 	public ResponseEntity<?> createPost(
-		@RequestBody PostCreationRequest postRequest, HttpServletRequest request) {
-		PostProjection post = postManagerService.createPost(postRequest);
+		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
+		PostProjection post = postManagerService.createPost(postRequest, userId);
 		return ResponseEntity.ok(post);
 	}
 
@@ -92,9 +91,9 @@ public class PostController {
 	}
 
 	@PostMapping("/{postId}/replies")
-	public ResponseEntity<?> postReply(
-		@PathVariable Long postId, @RequestBody PostCreationRequest postRequest, HttpServletRequest request) {
-		PostProjection reply = postManagerService.createReply(postRequest, postId);
+	public ResponseEntity<?> postReply(@PathVariable Long postId,
+		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
+		PostProjection reply = postManagerService.createReply(postRequest, postId, userId);
 		return ResponseEntity.ok(reply);
 	}
 
