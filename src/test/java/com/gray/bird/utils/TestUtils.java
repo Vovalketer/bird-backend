@@ -146,9 +146,16 @@ public class TestUtils {
 	}
 
 	public PostEntity createPost() {
-		var parent = createPost(createUser(), ReplyType.EVERYONE, false, null);
+		return createPost(createUser(), ReplyType.EVERYONE, false, null);
+	}
 
-		return createPost(createUser(), ReplyType.EVERYONE, false, parent);
+	public PostEntity createReply() {
+		PostEntity parent = createPost(createUser(), ReplyType.EVERYONE, false, null);
+
+		PostEntity reply = createPost(createUser(), ReplyType.EVERYONE, false, parent);
+		reply.setParentPostId(parent.getId());
+
+		return reply;
 	}
 
 	public UserProjection createUserProjection() {
