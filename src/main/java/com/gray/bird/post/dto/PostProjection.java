@@ -5,6 +5,6 @@ import java.util.UUID;
 
 import com.gray.bird.post.ReplyType;
 
-public record PostProjection(Long id, UUID userId, String text, boolean deleted, ReplyType replyType,
-	Long parentPostId, LocalDateTime createdAt) {
+public record PostProjection(Long id, UUID userId, String text, boolean deleted, boolean hasMedia,
+	ReplyType replyType, Long parentPostId, LocalDateTime createdAt) {
 }

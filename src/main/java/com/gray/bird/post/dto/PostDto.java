@@ -5,18 +5,18 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.gray.bird.media.dto.MediaDto;
 import com.gray.bird.post.ReplyType;
 
-// TODO: record or class?
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @Data
 @Builder
 public class PostDto {
 	private Long id;
-	private String userReferenceId;
+	private UUID userId;
 	private String text;
 	private ReplyType replyType;
 	private boolean deleted;
