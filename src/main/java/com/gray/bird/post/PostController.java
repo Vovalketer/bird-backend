@@ -38,7 +38,6 @@ import com.gray.bird.user.dto.UserProjection;
 @RequestMapping(ResourcePaths.POSTS)
 @RequiredArgsConstructor
 public class PostController {
-	private final PostService postManagerService;
 	private final PostService postService;
 	private final UserService userService;
 	private final PostAggregatorService postAggregatorService;
@@ -52,7 +51,7 @@ public class PostController {
 	@PostMapping
 	public ResponseEntity<?> createPost(
 		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
-		PostProjection post = postManagerService.createPost(postRequest, userId);
+		PostProjection post = postService.createPost(postRequest, userId);
 		return ResponseEntity.ok(post);
 	}
 
@@ -93,7 +92,7 @@ public class PostController {
 	@PostMapping("/{postId}/replies")
 	public ResponseEntity<?> postReply(@PathVariable Long postId,
 		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
-		PostProjection reply = postManagerService.createReply(postRequest, postId, userId);
+		PostProjection reply = postService.createReply(postRequest, postId, userId);
 		return ResponseEntity.ok(reply);
 	}
 
