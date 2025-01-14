@@ -1,4 +1,4 @@
-package com.gray.bird.postAggregator.dto;
+package com.gray.bird.post.dto;
 
 import java.time.LocalDateTime;
 
