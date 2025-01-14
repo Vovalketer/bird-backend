@@ -21,15 +21,18 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.gray.bird.auth.AuthService;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
+import com.gray.bird.common.jsonApi.ResourceData;
+import com.gray.bird.common.jsonApi.ResourceResponseFactory;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.post.PostService;
 import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
-import com.gray.bird.postAggregator.PostResourceConverter;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.follow.FollowService;
@@ -43,23 +46,28 @@ public class UserController {
 	private final PostService postService;
 	private final FollowService followService;
 	private final AuthService authService;
-	private final UserResourceConverter userResourceConverter;
-	private final PostResourceConverter postResourceConverter;
+	private final PostAggregateResourceMapper postAggregateResourceMapper;
+	private final UserResourceMapper userResourceMapper;
+	private final ResourceResponseFactory responseFactory;
 
 	@PostMapping("/register")
 	public ResponseEntity<?> register(
 		@RequestBody @Valid UserCreationRequest data, HttpServletRequest request) {
 		UserProjection user = userService.createUser(data);
-		ResourceSingleAggregate aggregate = userResourceConverter.toAggregate(user);
-		aggregate.addMetadata("message", "Account created. Check your email to enable it");
-		return ResponseEntity.created(getUri(user.username())).body(aggregate);
+		ResourceData resource = userResourceMapper.toResource(user);
+
+		ResourceSingleAggregate response = responseFactory.createResponse(resource);
+		response.addMetadata("message", "Account created. Check your email to enable it");
+
+		return ResponseEntity.created(getUri(user.username())).body(response);
 	}
 
 	@GetMapping("/{username}")
 	public ResponseEntity<?> getUserProfile(@PathVariable String username, HttpServletRequest request) {
 		UserProjection userProfile = userService.getUserByUsername(username);
-		ResourceSingleAggregate aggregate = userResourceConverter.toAggregate(userProfile);
-		return ResponseEntity.ok(aggregate);
+		ResourceData resource = userResourceMapper.toResource(userProfile);
+		ResourceSingleAggregate response = responseFactory.createResponse(resource);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{username}/posts")
@@ -69,10 +77,13 @@ public class UserController {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		UUID userId = userService.getUserIdByUsername(username);
 		Page<Long> postIds = postService.getPostIdsByUserId(userId, pageable);
-		List<PostAggregate> posts = postAggregatorService.getPosts(postIds.getContent());
-		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(posts);
+		List<ResourceData> resources = postAggregatorService.getPosts(postIds.getContent())
+										   .stream()
+										   .map(postAggregateResourceMapper::toResource)
+										   .collect(Collectors.toList());
+		ResourceCollectionAggregate response = responseFactory.createResponse(resources);
 
-		return ResponseEntity.ok(aggregate);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{username}/timelines/following")
