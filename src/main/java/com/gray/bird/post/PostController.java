@@ -22,15 +22,16 @@ import java.util.stream.Collectors;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceData;
+import com.gray.bird.common.jsonApi.ResourceResponseFactory;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.common.utils.MetadataType;
 import com.gray.bird.common.utils.MetadataUtils;
 import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
-import com.gray.bird.postAggregator.PostResourceConverter;
-import com.gray.bird.user.UserResourceConverter;
+import com.gray.bird.user.UserResourceMapper;
 import com.gray.bird.user.UserService;
 import com.gray.bird.user.dto.UserProjection;
 
@@ -41,8 +42,10 @@ public class PostController {
 	private final PostService postService;
 	private final UserService userService;
 	private final PostAggregatorService postAggregatorService;
-	private final PostResourceConverter postResourceConverter;
-	private final UserResourceConverter userResourceConverter;
+	private final PostAggregateResourceMapper postAggregateResourceMapper;
+	private final PostResourceMapper postResourceMapper;
+	private final UserResourceMapper userResourceMapper;
+	private final ResourceResponseFactory responseFactory;
 	private final MetadataUtils metadataUtils;
 
 	// TODO: handle protected accounts
@@ -52,24 +55,25 @@ public class PostController {
 	public ResponseEntity<?> createPost(
 		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
 		PostProjection post = postService.createPost(postRequest, userId);
-		return ResponseEntity.ok(post);
+		ResourceData resource = postResourceMapper.toResource(post);
+
+		ResourceSingleAggregate response = responseFactory.createResponse(resource);
+
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{postId}")
 	public ResponseEntity<?> getPost(@PathVariable Long postId) {
 		System.out.println("getPostMethod");
 		PostAggregate postAggregate = postAggregatorService.getPost(postId);
-
-		ResourceSingleAggregate aggregate = postResourceConverter.toAggregate(postAggregate);
+		ResourceData postResource = postAggregateResourceMapper.toResource(postAggregate);
 
 		UserProjection user = userService.getUserByUuid(postAggregate.post().userId());
+		ResourceData userResource = userResourceMapper.toResource(user);
 
-		ResourceData userResource = userResourceConverter.toResource(user);
+		ResourceSingleAggregate response = responseFactory.createResponse(postResource, userResource);
 
-		// TODO: add the relationship on this step
-		aggregate.includeResource(userResource);
-
-		return ResponseEntity.ok(aggregate);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{postId}/replies")
@@ -80,20 +84,30 @@ public class PostController {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		Page<Long> replyIds = postService.getReplyIds(postId, pageable);
 		List<PostAggregate> replies = postAggregatorService.getPosts(replyIds.getContent());
+		List<ResourceData> repliesResource =
+			replies.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
+
 		List<UUID> userIds = replies.stream().map(p -> p.post().userId()).collect(Collectors.toList());
 		List<UserProjection> users = userService.getAllUsersById(userIds);
-		ResourceCollectionAggregate aggregate = postResourceConverter.toAggregate(replies);
-		aggregate.includeAllResources(userResourceConverter.toResource(users));
-		aggregate.addMetadata(
+		List<ResourceData> usersResource =
+			users.stream().map(userResourceMapper::toResource).collect(Collectors.toList());
+
+		ResourceCollectionAggregate response = responseFactory.createResponse(repliesResource, usersResource);
+		response.addMetadata(
 			MetadataType.PAGINATION.getValue(), metadataUtils.extractPaginationMetadata(replyIds));
-		return ResponseEntity.ok(aggregate);
+
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/{postId}/replies")
 	public ResponseEntity<?> postReply(@PathVariable Long postId,
 		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
 		PostProjection reply = postService.createReply(postRequest, postId, userId);
-		return ResponseEntity.ok(reply);
+		ResourceData resource = postResourceMapper.toResource(reply);
+
+		ResourceSingleAggregate response = responseFactory.createResponse(resource);
+
+		return ResponseEntity.ok(response);
 	}
 
 	// TODO: latest posts on /posts, no filters
