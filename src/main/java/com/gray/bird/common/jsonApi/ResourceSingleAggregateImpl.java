@@ -10,22 +10,8 @@ public class ResourceSingleAggregateImpl
 	private ResourceData data;
 
 	public ResourceSingleAggregateImpl(
-		ResourceData data, List<ResourceData> included, ResourceMetadata meta) {
-		super(included, meta);
-		this.data = data;
-	}
-
-	public ResourceSingleAggregateImpl(ResourceData data, List<ResourceData> included) {
-		super(included);
-		this.data = data;
-	}
-
-	public ResourceSingleAggregateImpl(ResourceData data, ResourceMetadata meta) {
-		super(meta);
-		this.data = data;
-	}
-
-	public ResourceSingleAggregateImpl(ResourceData data) {
+		ResourceData data, List<ResourceData> included, ResourceMetadata meta, ResourceLinks links) {
+		super(included, meta, links);
 		this.data = data;
 	}
 

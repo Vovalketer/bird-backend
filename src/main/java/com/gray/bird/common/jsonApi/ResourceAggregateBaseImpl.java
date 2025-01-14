@@ -3,25 +3,19 @@ package com.gray.bird.common.jsonApi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class ResourceAggregateBaseImpl implements ResourceAggregateBase {
 	private List<ResourceData> included;
-	private ResourceMetadata meta;
+	private ResourceMetadata metadata;
+	private ResourceLinks links;
 
-	public ResourceAggregateBaseImpl(List<ResourceData> included, ResourceMetadata meta) {
+	public ResourceAggregateBaseImpl(
+		List<ResourceData> included, ResourceMetadata metadata, ResourceLinks links) {
 		this.included = included;
-		this.meta = meta;
-	}
-
-	public ResourceAggregateBaseImpl(List<ResourceData> included) {
-		this.included = included;
-	}
-
-	public ResourceAggregateBaseImpl(ResourceMetadata meta) {
-		this.meta = meta;
-	}
-
-	public ResourceAggregateBaseImpl() {
+		this.metadata = metadata;
+		this.links = links;
 	}
 
 	@Override
@@ -30,8 +24,8 @@ public class ResourceAggregateBaseImpl implements ResourceAggregateBase {
 	}
 
 	@Override
-	public ResourceMetadata getMeta() {
-		return meta;
+	public Map<String, Object> getMetadata() {
+		return metadata.getMetadata();
 	}
 
 	@Override
@@ -57,24 +51,47 @@ public class ResourceAggregateBaseImpl implements ResourceAggregateBase {
 
 	@Override
 	public void addMetadata(String key, Object value) {
-		meta.addMetadata(key, value);
+		metadata.addMetadata(key, value);
 	}
 
 	@Override
 	public void removeMetadata(String key) {
-		meta.removeMetadata(key);
+		metadata.removeMetadata(key);
 	}
 
 	@Override
 	public String toString() {
-		return "ResourceAggregateBaseImpl [included=" + included + ", meta=" + meta + "]";
+		return "ResourceAggregateBaseImpl [included=" + included + ", metadata=" + metadata
+			+ ", links=" + links + "]";
 	}
 
-	public void setIncluded(List<ResourceData> included) {
-		this.included = included;
+	@Override
+	public void addLink(String key, String url) {
+		links.addLink(key, url);
 	}
 
-	public void setMeta(ResourceMetadata meta) {
-		this.meta = meta;
+	@Override
+	public Optional<String> getLink(String key) {
+		return links.getLink(key);
+	}
+
+	@Override
+	public void removeLink(String key) {
+		links.removeLink(key);
+	}
+
+	@Override
+	public Map<String, String> getLinks() {
+		return links.getLinks();
+	}
+
+	@Override
+	public Optional<Object> getMetadata(String key) {
+		return metadata.getMetadata(key);
+	}
+
+	@Override
+	public <T> Optional<T> getMetadata(String key, Class<T> type) {
+		return metadata.getMetadata(key, type);
 	}
 }

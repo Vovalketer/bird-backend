@@ -12,7 +12,7 @@ public class ResourceDataImpl implements ResourceData {
 	private ResourceAttributes attributes;
 	private ResourceRelationships relationships;
 	private ResourceLinks links;
-	private ResourceMetadata meta;
+	private ResourceMetadata metadata;
 
 	public ResourceDataImpl() {
 	}
@@ -24,7 +24,7 @@ public class ResourceDataImpl implements ResourceData {
 		this.attributes = attributes;
 		this.relationships = relationships;
 		this.links = links;
-		this.meta = meta;
+		this.metadata = meta;
 	}
 
 	@Override
@@ -104,19 +104,19 @@ public class ResourceDataImpl implements ResourceData {
 
 	@Override
 	public Map<String, Object> getMetadata() {
-		return meta.getMetadata();
+		return metadata.getMetadata();
 	}
 
 	@Override
 	public Optional<Object> getMetadata(String type) {
-		return meta.getMetadata(type);
+		return metadata.getMetadata(type);
 	}
 
 	@Override
 	public <T> Optional<T> getMetadata(String type, Class<T> classType) {
-		Object metadata = meta.getMetadata(type);
-		if (metadata != null) {
-			return Optional.ofNullable(classType.cast(metadata));
+		Object meta = metadata.getMetadata(type);
+		if (meta != null) {
+			return Optional.ofNullable(classType.cast(meta));
 		} else {
 			return Optional.empty();
 		}
@@ -124,18 +124,18 @@ public class ResourceDataImpl implements ResourceData {
 
 	@Override
 	public void removeMetadata(String key) {
-		meta.removeMetadata(key);
+		metadata.removeMetadata(key);
 	}
 
 	@Override
 	public void addMetadata(String key, Object value) {
-		meta.addMetadata(key, value);
+		metadata.addMetadata(key, value);
 	}
 
 	@Override
 	public String toString() {
 		return "ResourceContentImpl [type=" + type + ", id=" + id + ", attributes=" + attributes
-			+ ", relationships=" + relationships + ", links=" + links + ", meta=" + meta + "]";
+			+ ", relationships=" + relationships + ", links=" + links + ", meta=" + metadata + "]";
 	}
 
 	public void setType(String type) {
@@ -158,7 +158,7 @@ public class ResourceDataImpl implements ResourceData {
 		this.links = links;
 	}
 
-	public void setMeta(ResourceMetadata meta) {
-		this.meta = meta;
+	public void setMetadata(ResourceMetadata meta) {
+		this.metadata = meta;
 	}
 }
