@@ -16,6 +16,7 @@ public class ResourceResponseFactory {
 
 	public ResourceSingleAggregate createResponse(ResourceData data, ResourceData included) {
 		ResourceSingleAggregateImpl res = initializeSingleAggregate();
+		res.setData(data);
 		res.includeResource(included);
 		return res;
 	}
@@ -54,9 +55,10 @@ public class ResourceResponseFactory {
 	}
 
 	private ResourceCollectionAggregateImpl initializeCollectionAggregate() {
+		List<ResourceData> data = new ArrayList<>();
 		List<ResourceData> included = new ArrayList<>();
 		ResourceMetadata metadata = new ResourceMetadataImpl();
 		ResourceLinks links = new ResourceLinksImpl();
-		return new ResourceCollectionAggregateImpl(null, included, metadata, links);
+		return new ResourceCollectionAggregateImpl(data, included, metadata, links);
 	}
 }
