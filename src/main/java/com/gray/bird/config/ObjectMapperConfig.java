@@ -7,13 +7,14 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class ObjectMapperConfig {
 	@Bean
-	public Jackson2ObjectMapperBuilder objectMapperBuilder() {
+	public ObjectMapper objectMapperBuilder() {
 		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder.modules(new JavaTimeModule());
 		builder.featuresToEnable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
@@ -22,6 +23,6 @@ public class ObjectMapperConfig {
 			DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		builder.serializationInclusion(JsonInclude.Include.NON_NULL);
 
-		return builder;
+		return builder.build();
 	}
 }
