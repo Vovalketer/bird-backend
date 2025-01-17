@@ -16,12 +16,13 @@ public class ResourceAttributesImpl implements ResourceAttributes {
 
 	@Override
 	public Object getAttribute(String key) {
-		return attributes.get((key));
+		return attributes.get(key);
 	}
 
 	@Override
 	public <T> T getAttribute(String key, Class<T> type) {
-		return type.cast(attributes.get((key)));
+		// passing the type to cast introduces a cycle
+		return type.cast(attributes.get(key));
 	}
 
 	@Override

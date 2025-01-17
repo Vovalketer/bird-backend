@@ -89,7 +89,7 @@ public class ResourceDataImpl implements ResourceData {
 
 	@Override
 	public <T> T getAttribute(String key, Class<T> type) {
-		return getAttribute(key, type);
+		return type.cast(attributes.getAttribute(key));
 	}
 
 	@Override
