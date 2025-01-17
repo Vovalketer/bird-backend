@@ -5,5 +5,6 @@ import java.util.List;
 public interface RelationshipToMany extends ResourceLinks, ResourceMetadata {
 	List<ResourceIdentifier> getData();
 	void addData(ResourceIdentifier data);
+	void addAllData(List<ResourceIdentifier> data);
 	Boolean isPresent(ResourceIdentifier resourceIdentifier);
 }
