@@ -91,6 +91,11 @@ public class RelationshipToManyImpl implements RelationshipToMany {
 	}
 
 	@Override
+	public void addAllData(List<ResourceIdentifier> data) {
+		this.data.addAll(data);
+	}
+
+	@Override
 	public Boolean isPresent(ResourceIdentifier resourceIdentifier) {
 		return data.contains(resourceIdentifier);
 	}
