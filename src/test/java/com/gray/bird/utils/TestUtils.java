@@ -1,14 +1,14 @@
 package com.gray.bird.utils;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedList;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -19,9 +19,9 @@ import com.gray.bird.post.PostEntity;
 import com.gray.bird.post.PostMapper;
 import com.gray.bird.post.PostMapperImpl;
 import com.gray.bird.post.ReplyType;
+import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.postAggregator.PostAggregate;
-import com.gray.bird.postAggregator.PostAggregateMapper;
-import com.gray.bird.postAggregator.PostAggregateMapperImpl;
+import com.gray.bird.postAggregator.dto.PostInteractions;
 import com.gray.bird.role.RoleEntity;
 import com.gray.bird.role.RoleType;
 import com.gray.bird.security.SecurityConstants;
@@ -38,7 +38,6 @@ public class TestUtils {
 	private final UserMapper userMapper = new UserMapperImpl();
 	private final MediaMapper mediaMapper = new MediaMapperImpl();
 	private final PostMapper postMapper = new PostMapperImpl();
-	private final PostAggregateMapper postAggregateMapper = new PostAggregateMapperImpl(postMapper);
 
 	public UserEntity createUser(String username, String handle, String email) {
 		RoleEntity role = createRole(RoleType.USER);
@@ -54,7 +53,7 @@ public class TestUtils {
 							  .credentialsNonExpired(true)
 							  .enabled(true)
 							  .role(role)
-							  .dateOfBirth(null)
+							  .dateOfBirth(LocalDate.now().minus(randomInt(), ChronoUnit.WEEKS))
 							  .bio(null)
 							  .location(null)
 							  .profileImage(null)
@@ -149,6 +148,12 @@ public class TestUtils {
 		return createPost(createUser(), ReplyType.EVERYONE, false, null);
 	}
 
+	public PostEntity createPost(UUID userId) {
+		PostEntity post = createPost(createUser(), ReplyType.EVERYONE, false, null);
+		post.setUserId(userId);
+		return post;
+	}
+
 	public PostEntity createReply() {
 		PostEntity parent = createPost(createUser(), ReplyType.EVERYONE, false, null);
 
@@ -158,20 +163,71 @@ public class TestUtils {
 		return reply;
 	}
 
+	public PostProjection createPostProjection() {
+		PostEntity post = createPost();
+		return postMapper.toPostProjection(post);
+	}
+
+	public PostProjection createPostProjection(UUID userId) {
+		PostEntity post = createPost(userId);
+		return postMapper.toPostProjection(post);
+	}
+
+	public PostProjection createReplyPostProjection(Long parentPostId) {
+		PostEntity post = createPost();
+		post.setParentPostId(parentPostId);
+		return postMapper.toPostProjection(post);
+	}
+
+	public PostInteractions createPostInteractions(Long postId) {
+		PostInteractions postInteractions =
+			new PostInteractions(postId, randomInt(), randomInt(), randomInt());
+		return postInteractions;
+	}
+
 	public UserProjection createUserProjection() {
 		return userMapper.toUserProjection(createUser());
 	}
 
-	public PostAggregate createPostAggregate() {
-		PostEntity post = createPost();
-		return postAggregateMapper.toPostAggregate(post);
+	public UserProjection createUserProjection(UUID userId) {
+		UserEntity user = createUser();
+		user.setUuid(userId);
+		return userMapper.toUserProjection(user);
+	}
+
+	public PostAggregate createPostAggregateWithoutMedia() {
+		PostProjection postProjection = createPostProjection();
+		PostInteractions postInteractions = createPostInteractions(postProjection.id());
+		return new PostAggregate(postProjection, null, Optional.of(postInteractions));
+	}
+
+	public PostAggregate createReplyPostAggregateWithoutMedia(Long parentPostId) {
+		PostProjection replyPostProjection = createReplyPostProjection(parentPostId);
+		PostInteractions postInteractions = createPostInteractions(replyPostProjection.id());
+		return new PostAggregate(replyPostProjection, null, Optional.of(postInteractions));
+	}
+
+	public List<PostAggregate> createPostAggregateWithoutMedia(int count) {
+		List<PostAggregate> postAggregates = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			postAggregates.add(createPostAggregateWithoutMedia());
+		}
+		return postAggregates;
+	}
+
+	public List<PostAggregate> createReplyPostAggregateWithoutMedia(Long parentPostId, int count) {
+		List<PostAggregate> postAggregates = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			postAggregates.add(createReplyPostAggregateWithoutMedia(parentPostId));
+		}
+		return postAggregates;
 	}
 
 	private long randomId() {
-		return ThreadLocalRandom.current().nextLong();
+		return Math.abs(ThreadLocalRandom.current().nextLong());
 	}
 
 	private long randomInt() {
-		return ThreadLocalRandom.current().nextInt();
+		return Math.abs(ThreadLocalRandom.current().nextInt());
 	}
 }

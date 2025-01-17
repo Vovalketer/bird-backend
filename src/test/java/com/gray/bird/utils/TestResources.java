@@ -7,19 +7,24 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gray.bird.common.jsonApi.ResourceAttributesImpl;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregateImpl;
 import com.gray.bird.common.jsonApi.ResourceData;
 import com.gray.bird.common.jsonApi.ResourceDataImpl;
+import com.gray.bird.common.jsonApi.ResourceFactory;
 import com.gray.bird.common.jsonApi.ResourceIdentifierImpl;
 import com.gray.bird.common.jsonApi.ResourceLinksImpl;
 import com.gray.bird.common.jsonApi.ResourceMetadataImpl;
 import com.gray.bird.common.jsonApi.ResourceRelationshipsImpl;
+import com.gray.bird.common.jsonApi.ResourceResponseFactory;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregateImpl;
 
 public class TestResources {
+	private ResourceResponseFactory responseFactory = new ResourceResponseFactory();
+
 	public ResourceData createPostResourceData() {
 		ResourceIdentifierImpl id = new ResourceIdentifierImpl("post", randomLong().toString());
 		Map<String, Object> att = Map.of("text",
@@ -44,19 +49,19 @@ public class TestResources {
 	}
 
 	public ResourceSingleAggregate createPostSingleAggregate() {
-		return new ResourceSingleAggregateImpl(createPostResourceData());
+		return responseFactory.createResponse(createPostResourceData());
 	}
 
 	public ResourceCollectionAggregate createPostCollectionAggregate(int size) {
-		return new ResourceCollectionAggregateImpl(createPostResourceData(size));
+		return responseFactory.createResponse(createPostResourceData(size));
 	}
 
 	public ResourceSingleAggregate createUserSingleAggregate() {
-		return new ResourceSingleAggregateImpl(createUserResourceData());
+		return responseFactory.createResponse(createUserResourceData());
 	}
 
 	private ResourceData createUserResourceData() {
-		ResourceIdentifierImpl id = new ResourceIdentifierImpl("user", randomLong().toString());
+		ResourceIdentifierImpl id = new ResourceIdentifierImpl("user", UUID.randomUUID().toString());
 		Map<String, Object> att = Map.of("username",
 			UUID.randomUUID().toString(),
 			"handle",
