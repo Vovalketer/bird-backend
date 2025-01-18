@@ -19,7 +19,6 @@ import jakarta.validation.Valid;
 
 import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
-import com.gray.bird.common.HttpResponse;
 import com.gray.bird.common.HttpUtils;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.exception.ApiException;
@@ -34,7 +33,7 @@ public class AuthController {
 	private final AccountVerificationService accountVerificationService;
 
 	@PostMapping("/reset-password")
-	public ResponseEntity<HttpResponse<Void>> resetPassword() {
+	public ResponseEntity<?> resetPassword() {
 		throw new ApiException("Unimplemented");
 	}
 

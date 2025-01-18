@@ -45,7 +45,6 @@ public class UserController {
 	private final PostAggregatorService postAggregatorService;
 	private final PostService postService;
 	private final FollowService followService;
-	private final AuthService authService;
 	private final PostAggregateResourceMapper postAggregateResourceMapper;
 	private final UserResourceMapper userResourceMapper;
 	private final ResourceResponseFactory responseFactory;
