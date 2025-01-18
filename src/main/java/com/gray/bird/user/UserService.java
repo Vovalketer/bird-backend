@@ -77,7 +77,7 @@ public class UserService {
 		return userMapper.toUserProjection(user);
 	}
 
-	public UserProjection getUserByUuid(UUID uuid) {
+	public UserProjection getUserById(UUID uuid) {
 		UserEntity user =
 			userRepository.findByUuid(uuid).orElseThrow(() -> new ApiException("No user found"));
 		return userMapper.toUserProjection(user);
