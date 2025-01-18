@@ -68,7 +68,7 @@ public class PostController {
 		PostAggregate postAggregate = postAggregatorService.getPost(postId);
 		ResourceData postResource = postAggregateResourceMapper.toResource(postAggregate);
 
-		UserProjection user = userService.getUserByUuid(postAggregate.post().userId());
+		UserProjection user = userService.getUserById(postAggregate.post().userId());
 		ResourceData userResource = userResourceMapper.toResource(user);
 
 		ResourceSingleAggregate response = responseFactory.createResponse(postResource, userResource);
