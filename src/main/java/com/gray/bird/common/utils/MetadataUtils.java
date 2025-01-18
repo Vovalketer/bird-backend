@@ -9,32 +9,20 @@ import com.gray.bird.common.PaginationMetadata;
 @Component
 public class MetadataUtils {
 	public <T> PaginationMetadata extractPaginationMetadata(Page<T> page) {
-		// int number = page.getNumber();
 		int numberOfElements = page.getNumberOfElements();
 		Pageable pageable = page.getPageable();
-		// int size = page.getSize();
-		// Sort sort = page.getSort();
 		long totalElements = page.getTotalElements();
-		// int totalPages = page.getTotalPages();
 		boolean empty = page.isEmpty();
 		boolean first = page.isFirst();
 		boolean last = page.isLast();
-		Pageable nextPageable = page.nextPageable();
-		Pageable previousPageable = page.previousPageable();
 
-		return PaginationMetadata
-			.builder()
-			// .pageNumber(number)
+		return PaginationMetadata.builder()
 			.numberOfElements(numberOfElements)
 			.pageable(pageable)
-			// .size(size)
 			.totalElements(totalElements)
-			// .totalPages(totalPages)
 			.empty(empty)
 			.first(first)
 			.last(last)
-			.nextPageable(nextPageable)
-			.previousPageable(previousPageable)
 			.build();
 	}
 }

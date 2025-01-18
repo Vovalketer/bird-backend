@@ -5,9 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
-/**
- * UserRequest
- */
 public record UserCreationRequest(
 	@NotEmpty(message = "Username is required") @NotBlank(message = "Username is required") String username,
 

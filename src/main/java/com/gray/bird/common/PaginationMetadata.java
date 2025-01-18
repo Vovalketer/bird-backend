@@ -6,36 +6,29 @@ import org.springframework.data.domain.Pageable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.io.Serializable;
+
 @Builder
 @Getter
 @AllArgsConstructor
-public class PaginationMetadata {
+public class PaginationMetadata implements Serializable {
 	long totalElements;
-	// int totalPages;
-	// int pageNumber;
-	// int size;
 	int numberOfElements;
 	boolean first;
 	boolean last;
 	boolean empty;
 	Pageable pageable;
-	Pageable nextPageable;
-	Pageable previousPageable;
 
 	// coupled with Spring boot
 	public static PaginationMetadata fromPage(Page<?> page) {
 		return PaginationMetadata.builder()
 			.numberOfElements(page.getNumberOfElements())
 			.pageable(page.getPageable())
-			// int size = page.getSize();
-			// Sort sort = page.getSort();
 			.totalElements(page.getTotalElements())
-			// int totalPages = page.getTotalPages();
 			.empty(page.isEmpty())
 			.first(page.isFirst())
 			.last(page.isLast())
-			.nextPageable(page.nextPageable())
-			.previousPageable(page.previousPageable())
 			.build();
 	}
 }
