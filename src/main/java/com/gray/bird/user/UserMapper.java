@@ -10,7 +10,7 @@ import com.gray.bird.user.dto.UserProjection;
 
 @Mapper
 public interface UserMapper {
-	@Mapping(target = "role", source = "user.role.type")
+	@Mapping(target = "role", source = "role.type")
 	UserDataDto toUserDto(UserEntity user);
 
 	UserProfileDto toUserProfile(UserEntity user);
@@ -19,5 +19,6 @@ public interface UserMapper {
 	CredentialsDto toCredentialsDto(CredentialsEntity credentials);
 
 	@Mapping(target = "roleType", source = "user.role.type")
+	@Mapping(target = "userId", source = "user.uuid")
 	UserProjection toUserProjection(UserEntity user);
 }
