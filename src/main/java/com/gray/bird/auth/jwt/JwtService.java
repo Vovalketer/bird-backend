@@ -1,7 +1,6 @@
 package com.gray.bird.auth.jwt;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.server.Cookie.SameSite;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,17 +9,14 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.servlet.http.Cookie;
+import org.apache.commons.lang3.function.TriFunction;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -43,44 +39,17 @@ import io.jsonwebtoken.security.Keys;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtService {
-	@Value("${jwt.access-token-expiration}")
-	private Integer JWT_ACCESS_TOKEN_EXPIRATION;
-	@Value("${jwt.refresh-token-expiration}")
-	private Integer JWT_REFRESH_TOKEN_EXPIRATION;
-	private String ACCESS_TOKEN_PATH = "/";
-	private String REFRESH_TOKEN_PATH = "/auth";
 	@Value("${jwt.issuer")
 	private String ISSUER;
 	@Value("${jwt.secret}")
 	private String JWT_SECRET;
 
-	private final RefreshTokenRepository refreshTokenRepository;
-
-	public String createToken(UserPrincipal user, TokenType type) {
-		// String tokenId = new AlternativeJdkIdGenerator().generateId().toString();
-		String token = buildToken.apply(user, type);
-		if (type == TokenType.REFRESH) {
-			RefreshTokenEntity refresh = new RefreshTokenEntity(
-				token, user.getUsername(), LocalDateTime.now().plusSeconds(JWT_REFRESH_TOKEN_EXPIRATION));
-			refreshTokenRepository.save(refresh);
-		}
-		return token;
+	public String createAccessToken(UserPrincipal user, Integer expirationSeconds) {
+		return buildToken.apply(user, expirationSeconds, TokenType.ACCESS);
 	}
 
-	public String createAccessToken(UserPrincipal user) {
-		return createToken(user, TokenType.ACCESS);
-	}
-
-	public Cookie createRefreshToken(UserPrincipal user) {
-		String token = createToken(user, TokenType.REFRESH);
-		Cookie cookie = new Cookie(TokenType.REFRESH.getValue(), token);
-		cookie.setHttpOnly(true);
-		cookie.setAttribute("SameSite", SameSite.NONE.name());
-		// TODO: implement https support
-		// cookie.setSecure(true);
-		cookie.setMaxAge(JWT_REFRESH_TOKEN_EXPIRATION);
-		cookie.setPath(REFRESH_TOKEN_PATH);
-		return cookie;
+	public String createRefreshToken(UserPrincipal user, Integer expirationSeconds) {
+		return buildToken.apply(user, expirationSeconds, TokenType.REFRESH);
 	}
 
 	public boolean validateToken(String token) {
@@ -88,21 +57,6 @@ public class JwtService {
 		if (getClaimsValue(token, Claims::getExpiration).before(new Date())) {
 			throw new ExpiredJwtException();
 		}
-		return true;
-	}
-
-	public boolean validateRefreshToken(String refreshToken) {
-		Claims claims = claimsFunction.apply(refreshToken);
-		RefreshTokenEntity refresh =
-			refreshTokenRepository.findByToken(refreshToken).orElseThrow(() -> new InvalidJwtException());
-		if (refresh.getExpiresAt().isBefore(LocalDateTime.now()) || refresh.getRevokedAt() != null) {
-			log.info("expired here");
-			throw new ExpiredJwtException();
-		};
-		if (!Objects.equals(claims.getSubject(), refresh.getUsername())) {
-			log.info("claims subject: {} \nrefresh username: {}", claims.getSubject(), refresh.getUsername());
-			throw new InvalidJwtException();
-		};
 		return true;
 	}
 
@@ -138,10 +92,12 @@ public class JwtService {
 		return claimsFunction.andThen(claims).apply(token);
 	}
 
-	// public final Function<String, String> subject =
-	// token -> getClaimsValue(token, Claims::getSubject);
+	public String getSubject(String token) {
+		return getClaimsValue(token, Claims::getSubject);
+	}
 
-	private final BiFunction<UserPrincipal, TokenType, String> buildToken = (user, tokenType) -> {
+	private final TriFunction<UserPrincipal, Integer, TokenType, String> buildToken =
+		(user, expirationSeconds, tokenType) -> {
 		String tok = null;
 		Date currentTime = new Date();
 		JwtBuilder builder = Jwts.builder()
@@ -159,12 +115,12 @@ public class JwtService {
 			case TokenType.ACCESS -> {
 				tok = builder.subject(user.getUsername())
 						  .claim(RoleConstants.ROLE, user.getAuthorities())
-						  .expiration(Date.from(Instant.now().plusSeconds(JWT_ACCESS_TOKEN_EXPIRATION)))
+						  .expiration(Date.from(Instant.now().plusSeconds(expirationSeconds)))
 						  .compact();
 			}
 			case TokenType.REFRESH -> {
 				tok = builder.subject(user.getUsername())
-						  .expiration(Date.from(Instant.now().plusSeconds(JWT_REFRESH_TOKEN_EXPIRATION)))
+						  .expiration(Date.from(Instant.now().plusSeconds(expirationSeconds)))
 						  .compact();
 			}
 		}
