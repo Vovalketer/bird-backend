@@ -72,16 +72,14 @@ public class AuthServiceTest {
 		UserDataDto testUser = testUtils.createUserDto(username, handle, email);
 		CredentialsDto credentials = new CredentialsDto(rawPassword.toCharArray());
 		UserPrincipal principal = new UserPrincipal(testUser, credentials);
-		Cookie accessTok = new Cookie(TokenType.ACCESS.getValue(), "mockAccessToken");
+		String accessTok = "mockAccessToken";
 		Cookie refreshTok = new Cookie(TokenType.REFRESH.getValue(), "mockRefreshToken");
 
 		// when
 		when(userPrincipalService.loadUserByEmail(loginRequest.email())).thenReturn(principal);
 		when(encoder.matches(Mockito.any(CharBuffer.class), Mockito.anyString())).thenReturn(true);
-		when(jwtService.createJwtCookie(any(UserPrincipal.class), eq(TokenType.ACCESS)))
-			.thenReturn(accessTok);
-		when(jwtService.createJwtCookie(any(UserPrincipal.class), eq(TokenType.REFRESH)))
-			.thenReturn(refreshTok);
+		when(jwtService.createAccessToken(any(UserPrincipal.class))).thenReturn(accessTok);
+		when(jwtService.createRefreshToken(any(UserPrincipal.class))).thenReturn(refreshTok);
 		doNothing().when(publisher).publishUserLoggedInEvent(any(UUID.class));
 
 		LoginResponse loginResponse = authService.login(loginRequest);
@@ -131,7 +129,7 @@ public class AuthServiceTest {
 	@Test
 	void returnValidAccessTokenCookieWhenRefreshTokenIsProvided() {
 		// given
-		Cookie access = HttpUtils.createCookie(TokenType.ACCESS.getValue(), "accessmockvalue");
+		String access = "accessmockvalue";
 		Cookie refresh = HttpUtils.createCookie(TokenType.REFRESH.getValue(), "refreshmockvalue");
 		Cookie[] cookies = {refresh};
 		Set<String> audience = new HashSet<String>();
@@ -143,13 +141,13 @@ public class AuthServiceTest {
 		when(jwtService.validateRefreshToken(anyString())).thenReturn(true);
 		when(jwtService.getDataFromToken(anyString())).thenReturn(tokenData);
 		when(userPrincipalService.loadUserByUsername(anyString())).thenReturn(userPrincipal);
-		when(jwtService.createJwtCookie(userPrincipal, TokenType.ACCESS)).thenReturn(access);
+		when(jwtService.createAccessToken(userPrincipal)).thenReturn(access);
 
-		Cookie accessTokenCookie = authService.refreshAccessToken(cookies);
+		String accessTokenCookie = authService.refreshAccessToken(cookies);
 
 		// then
 		Assertions.assertThat(accessTokenCookie).isNotNull();
-		Assertions.assertThat(accessTokenCookie.getName()).isEqualTo(TokenType.ACCESS.getValue());
+		Assertions.assertThat(accessTokenCookie).isEqualTo(access);
 	}
 
 	@Test

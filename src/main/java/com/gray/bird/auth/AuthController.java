@@ -17,8 +17,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+import java.util.Collections;
+
 import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
+import com.gray.bird.auth.jwt.TokenType;
 import com.gray.bird.common.HttpUtils;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.exception.ApiException;
@@ -40,21 +43,17 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(
 		@RequestBody @Valid LoginRequest login, HttpServletRequest request, HttpServletResponse response) {
-		LoginResponse cookies = authService.login(login);
-		response.addCookie(cookies.accessToken());
-		response.addCookie(cookies.refreshToken());
-		return ResponseEntity.ok(null);
+		LoginResponse tokens = authService.login(login);
+		response.addCookie(tokens.refreshToken());
+		return ResponseEntity.ok(Collections.singletonMap(TokenType.ACCESS.getValue(), tokens.accessToken()));
 	}
 
 	@PostMapping("/refresh-token")
 	public ResponseEntity<?> getNewAccessToken(HttpServletRequest request, HttpServletResponse response) {
-		log.info("within refresh function");
 		Cookie[] cookies = request.getCookies();
-		Cookie accessToken = authService.refreshAccessToken(cookies);
-		response.addCookie(accessToken);
+		String accessToken = authService.refreshAccessToken(cookies);
 
-		return ResponseEntity.ok().body(
-			HttpUtils.getResponse(request, "Access token refreshed successfully", HttpStatus.OK));
+		return ResponseEntity.ok(Collections.singletonMap(TokenType.ACCESS.getValue(), accessToken));
 	}
 
 	@GetMapping("/verify/account")
