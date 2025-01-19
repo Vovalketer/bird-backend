@@ -67,23 +67,19 @@ public class JwtService {
 		return token;
 	}
 
-	public Cookie createJwtCookie(UserPrincipal user, TokenType type) {
-		String token = createToken(user, type);
-		Cookie cookie = new Cookie(type.getValue(), token);
+	public String createAccessToken(UserPrincipal user) {
+		return createToken(user, TokenType.ACCESS);
+	}
+
+	public Cookie createRefreshToken(UserPrincipal user) {
+		String token = createToken(user, TokenType.REFRESH);
+		Cookie cookie = new Cookie(TokenType.REFRESH.getValue(), token);
 		cookie.setHttpOnly(true);
 		cookie.setAttribute("SameSite", SameSite.NONE.name());
 		// TODO: implement https support
 		// cookie.setSecure(true);
-		switch (type) {
-			case ACCESS -> {
-				cookie.setMaxAge(JWT_ACCESS_TOKEN_EXPIRATION);
-				cookie.setPath(ACCESS_TOKEN_PATH);
-			}
-			case REFRESH -> {
-				cookie.setMaxAge(JWT_REFRESH_TOKEN_EXPIRATION);
-				cookie.setPath(REFRESH_TOKEN_PATH);
-			}
-		}
+		cookie.setMaxAge(JWT_REFRESH_TOKEN_EXPIRATION);
+		cookie.setPath(REFRESH_TOKEN_PATH);
 		return cookie;
 	}
 

@@ -1,7 +1,8 @@
 package com.gray.bird.auth.jwt;
 
 public enum TokenType {
-	ACCESS("access-token"), REFRESH("refresh-token");
+	ACCESS("access_token"),
+	REFRESH("refresh_token");
 
 	private final String value;
 

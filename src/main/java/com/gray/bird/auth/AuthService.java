@@ -39,7 +39,7 @@ public class AuthService {
 	private final UserPrincipalService userPrincipalService;
 	private final AuthEventPublisher publisher;
 
-	public Cookie refreshAccessToken(Cookie[] cookies) {
+	public String refreshAccessToken(Cookie[] cookies) {
 		// not a fan of passing the servlet objects, taking the cookies instead
 		Optional<Cookie> cookie = HttpUtils.extractCookie(cookies, TokenType.REFRESH.getValue());
 		if (cookie.isEmpty()) {
@@ -48,7 +48,7 @@ public class AuthService {
 		if (jwtService.validateRefreshToken(cookie.get().getValue())) {
 			TokenData data = jwtService.getDataFromToken(cookie.get().getValue());
 			UserPrincipal user = userPrincipalService.loadUserByUsername(data.username());
-			return jwtService.createJwtCookie(user, TokenType.ACCESS);
+			return jwtService.createAccessToken(user);
 		}
 		throw new InvalidJwtException();
 	}
@@ -64,8 +64,8 @@ public class AuthService {
 			if (encoder.matches(CharBuffer.wrap(data.password()), user.getPassword())) {
 				log.info("acc/pass match, proceeding...");
 				handleLoginAttempts(user, LoginType.LOGIN_SUCCESS);
-				Cookie accessTokenCookie = jwtService.createJwtCookie(user, TokenType.ACCESS);
-				Cookie refreshTokenCookie = jwtService.createJwtCookie(user, TokenType.REFRESH);
+				String accessTokenCookie = jwtService.createAccessToken(user);
+				Cookie refreshTokenCookie = jwtService.createRefreshToken(user);
 				publisher.publishUserLoggedInEvent(UUID.fromString(user.getUsername()));
 
 				return new LoginResponse(accessTokenCookie, refreshTokenCookie);
