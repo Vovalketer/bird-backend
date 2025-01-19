@@ -1,8 +1,8 @@
-package com.gray.bird.auth.jwt;
+package com.gray.bird.auth;
 
-import java.time.LocalDateTime;
-
-import com.gray.bird.common.entity.TimestampedEntity;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,9 +10,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import com.gray.bird.common.entity.TimestampedEntity;
 
 @Entity
 @Getter
@@ -27,17 +29,16 @@ public class RefreshTokenEntity extends TimestampedEntity {
 	@Column(nullable = false, unique = true, columnDefinition = "text")
 	private String token;
 	@Column(nullable = false)
-	private String username;
+	private UUID userId;
 	@Column(nullable = false)
 	private LocalDateTime expiresAt;
 	// we dont want to modify the expiresAt value so we'll use revokedAt to handle logouts
 	private LocalDateTime revokedAt;
 
 	// private String ip;
-	public RefreshTokenEntity(String token, String username, LocalDateTime expiresAt) {
+	public RefreshTokenEntity(String token, UUID userId, LocalDateTime expiresAt) {
 		this.token = token;
-		this.username = username;
+		this.userId = userId;
 		this.expiresAt = expiresAt;
 	}
-
 }
