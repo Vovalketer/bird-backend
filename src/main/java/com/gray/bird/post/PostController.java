@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+import jakarta.validation.Valid;
+
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,19 +55,18 @@ public class PostController {
 	// TODO: validation of the type of reply
 
 	@PostMapping
-	public ResponseEntity<?> createPost(
-		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
+	public ResponseEntity<ResourceSingleAggregate> createPost(
+		@RequestBody @Valid PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
 		PostProjection post = postService.createPost(postRequest, userId);
 		ResourceData resource = postResourceMapper.toResource(post);
 
 		ResourceSingleAggregate response = responseFactory.createResponse(resource);
 
-		return ResponseEntity.ok(response);
+		return ResponseEntity.created(URI.create(ResourcePaths.POSTS + "/" + post.id())).body(response);
 	}
 
 	@GetMapping("/{postId}")
-	public ResponseEntity<?> getPost(@PathVariable Long postId) {
-		System.out.println("getPostMethod");
+	public ResponseEntity<ResourceSingleAggregate> getPost(@PathVariable Long postId) {
 		PostAggregate postAggregate = postAggregatorService.getPost(postId);
 		ResourceData postResource = postAggregateResourceMapper.toResource(postAggregate);
 
@@ -77,16 +79,17 @@ public class PostController {
 	}
 
 	@GetMapping("/{postId}/replies")
-	public ResponseEntity<?> getReplies(@PathVariable Long postId,
+	public ResponseEntity<ResourceCollectionAggregate> getReplies(@PathVariable Long postId,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
-		// public endpoint (unless the account is set to private)
-		// user posts and reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		// get replies
 		Page<Long> replyIds = postService.getReplyIds(postId, pageable);
 		List<PostAggregate> replies = postAggregatorService.getPosts(replyIds.getContent());
 		List<ResourceData> repliesResource =
 			replies.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
 
+		// get users
 		List<UUID> userIds = replies.stream().map(p -> p.post().userId()).collect(Collectors.toList());
 		List<UserProjection> users = userService.getAllUsersById(userIds);
 		List<ResourceData> usersResource =
@@ -100,14 +103,14 @@ public class PostController {
 	}
 
 	@PostMapping("/{postId}/replies")
-	public ResponseEntity<?> postReply(@PathVariable Long postId,
+	public ResponseEntity<ResourceSingleAggregate> postReply(@PathVariable Long postId,
 		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
 		PostProjection reply = postService.createReply(postRequest, postId, userId);
 		ResourceData resource = postResourceMapper.toResource(reply);
 
 		ResourceSingleAggregate response = responseFactory.createResponse(resource);
 
-		return ResponseEntity.ok(response);
+		return ResponseEntity.created(URI.create(ResourcePaths.POSTS + "/" + reply.id())).body(response);
 	}
 
 	// TODO: latest posts on /posts, no filters
