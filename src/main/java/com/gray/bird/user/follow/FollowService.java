@@ -19,4 +19,10 @@ public class FollowService {
 		FollowEntity followEntity = new FollowEntity(currentUser, userToFollow);
 		repo.save(followEntity);
 	}
+
+	public void unfollowUser(UUID currentUser, String usernameToUnfollow) {
+		UUID userToUnfollow = userService.getUserIdByUsername(usernameToUnfollow);
+		FollowEntity followEntity = new FollowEntity(currentUser, userToUnfollow);
+		repo.delete(followEntity);
+	}
 }
