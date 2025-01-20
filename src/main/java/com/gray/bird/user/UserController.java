@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,12 +24,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.gray.bird.auth.AuthService;
+import com.gray.bird.common.PaginationMetadata;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceData;
 import com.gray.bird.common.jsonApi.ResourceResponseFactory;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
+import com.gray.bird.common.utils.MetadataUtils;
 import com.gray.bird.post.PostService;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregateResourceMapper;
@@ -48,10 +50,10 @@ public class UserController {
 	private final PostAggregateResourceMapper postAggregateResourceMapper;
 	private final UserResourceMapper userResourceMapper;
 	private final ResourceResponseFactory responseFactory;
+	private final MetadataUtils metadataUtils;
 
 	@PostMapping("/register")
-	public ResponseEntity<?> register(
-		@RequestBody @Valid UserCreationRequest data, HttpServletRequest request) {
+	public ResponseEntity<ResourceSingleAggregate> register(@RequestBody @Valid UserCreationRequest data) {
 		UserProjection user = userService.createUser(data);
 		ResourceData resource = userResourceMapper.toResource(user);
 
@@ -62,7 +64,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{username}")
-	public ResponseEntity<?> getUserProfile(@PathVariable String username, HttpServletRequest request) {
+	public ResponseEntity<ResourceSingleAggregate> getUserProfile(@PathVariable String username) {
 		UserProjection userProfile = userService.getUserByUsername(username);
 		ResourceData resource = userResourceMapper.toResource(userProfile);
 		ResourceSingleAggregate response = responseFactory.createResponse(resource);
@@ -70,7 +72,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{username}/posts")
-	public ResponseEntity<?> getUserPosts(@PathVariable String username,
+	public ResponseEntity<ResourceCollectionAggregate> getUserPosts(@PathVariable String username,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		// just the user posts and its replies, no reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -105,6 +107,7 @@ public class UserController {
 		followService.followUser(userId, username);
 		return ResponseEntity.ok(null);
 	}
+
 
 	// TODO: consider making an URI factory/provider
 	private URI getUri(String username) {
