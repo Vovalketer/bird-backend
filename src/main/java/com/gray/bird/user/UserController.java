@@ -83,6 +83,8 @@ public class UserController {
 										   .map(postAggregateResourceMapper::toResource)
 										   .collect(Collectors.toList());
 		ResourceCollectionAggregate response = responseFactory.createResponse(resources);
+		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(postIds);
+		response.addMetadata("pagination", paginationMetadata);
 
 		return ResponseEntity.ok(response);
 	}
