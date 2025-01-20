@@ -102,12 +102,17 @@ public class UserController {
 	}
 
 	@PostMapping("/{username}/following")
-	public ResponseEntity<?> postMethodName(
-		@PathVariable String username, @AuthenticationPrincipal UUID userId) {
+	public ResponseEntity<Void> follow(@PathVariable String username, @AuthenticationPrincipal UUID userId) {
 		followService.followUser(userId, username);
 		return ResponseEntity.ok(null);
 	}
 
+	@DeleteMapping("/{username}/following")
+	public ResponseEntity<Void> unfollow(
+		@PathVariable String username, @AuthenticationPrincipal UUID userId) {
+		followService.unfollowUser(userId, username);
+		return ResponseEntity.ok(null);
+	}
 
 	// TODO: consider making an URI factory/provider
 	private URI getUri(String username) {
