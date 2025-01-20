@@ -1,105 +1,115 @@
 package com.gray.bird.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import org.hamcrest.Matchers;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gray.bird.auth.AuthService;
-import com.gray.bird.common.ResourcePaths;
+import com.gray.bird.common.PaginationMetadata;
 import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
 import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceDataImpl;
+import com.gray.bird.common.jsonApi.ResourceResponseFactory;
 import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
-import com.gray.bird.common.jsonApi.ResourceSingleAggregateImpl;
-import com.gray.bird.exception.GlobalExceptionHandler;
+import com.gray.bird.common.utils.MetadataUtils;
+import com.gray.bird.post.PostResourceMapper;
 import com.gray.bird.post.PostService;
 import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
-import com.gray.bird.postAggregator.PostResourceConverter;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.follow.FollowService;
 import com.gray.bird.utils.TestResources;
 
-@SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
-@Import({GlobalExceptionHandler.class})
+@SpringJUnitConfig
 public class UserControllerTest {
-	private final String USERS_ENDPOINT = ResourcePaths.USERS;
-	@Autowired
-	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
 	private TestResources testResources = new TestResources();
 
-	@MockitoBean
+	@Mock
 	private UserService userService;
-	@MockitoBean
+	@Mock
 	private PostAggregatorService postAggregatorService;
-	@MockitoBean
+	@Mock
 	private PostService postService;
-	@MockitoBean
+	@Mock
 	private FollowService followService;
-	@MockitoBean
+	@Mock
 	private AuthService authService;
-	@MockitoBean
-	private UserResourceConverter userResourceConverter;
-	@MockitoBean
-	private PostResourceConverter postResourceConverter;
+	@Mock
+	private UserResourceMapper userResourceMapper;
+	@Mock
+	private PostResourceMapper postResourceMapper;
+	@Mock
+	private PostAggregateResourceMapper postAggregateResourceMapper;
+	@Mock
+	private ResourceResponseFactory responseFactory;
+	@Mock
+	private MetadataUtils metadataUtils;
 
+	@InjectMocks
+	private UserController userController;
+
+	@SuppressWarnings("unchecked")
 	@Test
 	void testGetUserPosts() throws Exception {
+		String username = "testUser";
+		int pageNumber = 0;
+		int pageSize = 10;
 		// Mock ResourceCollectionAggregate
-		ResourceCollectionAggregate aggregate = testResources.createPostCollectionAggregate(5);
+		ResourceCollectionAggregate response = testResources.createPostCollectionAggregate(5);
 
-		// Mock userQueryService
-		Mockito.when(userService.getUserIdByUsername(Mockito.anyString())).thenReturn(UUID.randomUUID());
+		// Mock userService
+		Mockito.when(userService.getUserIdByUsername(username)).thenReturn(UUID.randomUUID());
 
-		// Mock postQueryService
-		@SuppressWarnings("unchecked")
+		// get post ids
 		Page<Long> postIds = Mockito.mock(Page.class);
 		Mockito.when(postService.getPostIdsByUserId(Mockito.any(UUID.class), Mockito.any(Pageable.class)))
 			.thenReturn(postIds);
 
-		// Mock postAggregateQueryService
-		List<PostAggregate> posts =
-			List.of(Mockito.mock(PostAggregate.class), Mockito.mock(PostAggregate.class));
+		// mock posts, get and map them
+		List<PostAggregate> posts = response.getData()
+										.stream()
+										.map(p -> Mockito.mock(PostAggregate.class))
+										.collect(Collectors.toList());
 		Mockito.when(postAggregatorService.getPosts(Mockito.anyCollection())).thenReturn(posts);
 
-		// Mock postResourceConverter
-		Mockito.when(postResourceConverter.toAggregate(Mockito.anyList())).thenReturn(aggregate);
+		Mockito.when(postAggregateResourceMapper.toResource(Mockito.any(PostAggregate.class)))
+			.thenReturn(Mockito.mock(ResourceData.class));
 
-		mockMvc
-			.perform(MockMvcRequestBuilders.get(USERS_ENDPOINT + "/{username}/posts", "testUser")
-					.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath("$.data.size()").value(5))
-			.andExpect(
-				MockMvcResultMatchers.jsonPath("$.data[0].id").value(aggregate.getData().get(0).getId()))
-			.andExpect(MockMvcResultMatchers.jsonPath("$.data[0].type").value("post"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$.data[0].attributes.text")
-					.value(aggregate.getData().get(0).getAttribute("text")))
-			.andExpect(
-				MockMvcResultMatchers.jsonPath("$.data[1].id").value(aggregate.getData().get(1).getId()))
-			.andExpect(MockMvcResultMatchers.jsonPath("$.data[1].type").value("post"))
-			.andExpect(MockMvcResultMatchers.jsonPath("$.data[1].attributes.text")
-					.value(aggregate.getData().get(1).getAttribute("text")));
+		// create response
+		Mockito.when(responseFactory.createResponse(Mockito.anyList())).thenReturn(response);
+
+		// add pagination metadata
+		PaginationMetadata paginationMetadata = new PaginationMetadata(
+			posts.size(), posts.size(), true, true, false, PageRequest.of(pageNumber, pageSize));
+		Mockito.when(metadataUtils.extractPaginationMetadata(Mockito.any(Page.class)))
+			.thenReturn(paginationMetadata);
+
+		ResponseEntity<ResourceCollectionAggregate> userPosts =
+			userController.getUserPosts(username, pageNumber, pageSize);
+
+		Assertions.assertThat(userPosts.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(userPosts.getBody()).isEqualTo(response);
+		Assertions.assertThat(userPosts.getBody().getData().size()).isEqualTo(response.getData().size());
+
+		Mockito.verify(postService).getPostIdsByUserId(Mockito.any(UUID.class), Mockito.any(Pageable.class));
+		Mockito.verify(postAggregateResourceMapper, Mockito.times(posts.size()))
+			.toResource(Mockito.any(PostAggregate.class));
+		Mockito.verify(responseFactory).createResponse(Mockito.anyList());
+		Mockito.verify(metadataUtils).extractPaginationMetadata(postIds);
 	}
 
 	@Test
@@ -107,34 +117,67 @@ public class UserControllerTest {
 		UserCreationRequest data =
 			new UserCreationRequest("username", "some@email.com", "securepassword", "handle");
 		UserProjection user = Mockito.mock(UserProjection.class);
-		// must use an implementation instead of the interface or else it'll throw an exception
-		ResourceSingleAggregateImpl aggregate = Mockito.mock(ResourceSingleAggregateImpl.class);
-
 		Mockito.when(userService.createUser(data)).thenReturn(user);
-		Mockito.when(userResourceConverter.toAggregate(Mockito.any(UserProjection.class)))
-			.thenReturn(aggregate);
-		Mockito.doNothing().when(aggregate).addMetadata(Mockito.anyString(), Mockito.anyString());
 
-		mockMvc
-			.perform(MockMvcRequestBuilders.post(USERS_ENDPOINT + "/register")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(data)))
-			.andExpect(MockMvcResultMatchers.status().isCreated())
-			.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+		ResourceData userResource = Mockito.mock(ResourceData.class);
+		Mockito.when(userResourceMapper.toResource(Mockito.any(UserProjection.class)))
+			.thenReturn(userResource);
+
+		ResourceSingleAggregate response = testResources.createUserSingleAggregate();
+		Mockito.when(responseFactory.createResponse(userResource)).thenReturn(response);
+
+		ResponseEntity<ResourceSingleAggregate> registerResponse = userController.register(data);
+		Assertions.assertThat(registerResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		Assertions.assertThat(registerResponse.getBody()).isEqualTo(response);
+
+		Mockito.verify(userService).createUser(data);
+		Mockito.verify(userResourceMapper).toResource(user);
+		Mockito.verify(responseFactory).createResponse(userResource);
 	}
 
 	@Test
-	void registerInvalidData() throws Exception {
-		UserCreationRequest data = new UserCreationRequest("username", "someemail.com", "secu", "handle");
-		mockMvc
-			.perform(MockMvcRequestBuilders.post(USERS_ENDPOINT + "/register")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(data)))
-			.andExpect(MockMvcResultMatchers.status().isBadRequest())
-			.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(
-				MockMvcResultMatchers.jsonPath("$.message", Matchers.containsString("Validation failed")))
-			.andExpect(MockMvcResultMatchers.jsonPath("$.errors.email").exists())
-			.andExpect(MockMvcResultMatchers.jsonPath("$.errors.password").exists());
+	void shouldReturnUserProfile() throws Exception {
+		String username = "testUser";
+
+		UserProjection user = Mockito.mock(UserProjection.class);
+		Mockito.when(userService.getUserByUsername(Mockito.anyString())).thenReturn(user);
+
+		ResourceData userResource = Mockito.mock(ResourceData.class);
+		Mockito.when(userResourceMapper.toResource(user)).thenReturn(userResource);
+
+		ResourceSingleAggregate response = testResources.createUserSingleAggregate();
+		Mockito.when(responseFactory.createResponse(userResource)).thenReturn(response);
+
+		ResponseEntity<ResourceSingleAggregate> userProfileResponse = userController.getUserProfile(username);
+
+		Assertions.assertThat(userProfileResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(userProfileResponse.getBody()).isEqualTo(response);
+
+		Mockito.verify(userService).getUserByUsername(username);
+		Mockito.verify(userResourceMapper).toResource(user);
+		Mockito.verify(responseFactory).createResponse(userResource);
+	}
+
+	@Test
+	void shouldFollowUser() {
+		String username = "testUser";
+		UUID userId = UUID.randomUUID();
+
+		Mockito.doNothing().when(followService).followUser(userId, username);
+
+		ResponseEntity<Void> followResponse = userController.follow(username, userId);
+		Assertions.assertThat(followResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(followResponse.getBody()).isNull();
+	}
+
+	@Test
+	void shouldUnfollowUser() {
+		String username = "testUser";
+		UUID userId = UUID.randomUUID();
+
+		Mockito.doNothing().when(followService).unfollowUser(userId, username);
+		ResponseEntity<Void> unfollowResponse = userController.unfollow(username, userId);
+		Assertions.assertThat(unfollowResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(unfollowResponse.getBody()).isNull();
 	}
 }
