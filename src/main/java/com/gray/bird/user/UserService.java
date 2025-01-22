@@ -20,6 +20,7 @@ import com.gray.bird.role.RoleType;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.event.UserEventPublisher;
+import com.gray.bird.user.registration.AccountVerificationService;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -32,6 +33,7 @@ public class UserService {
 	private final BCryptPasswordEncoder encoder;
 	private final UserEventPublisher publisher;
 	private final UserMapper userMapper;
+	private final AccountVerificationService accountVerificationService;
 
 	/*
 	 * User tasks
@@ -43,9 +45,9 @@ public class UserService {
 
 		CredentialsEntity credentials = new CredentialsEntity(savedUser, encoder.encode(request.password()));
 		credentialsRepository.save(credentials);
+		String verificationToken = accountVerificationService.createVerificationToken(savedUser.getUuid());
 
-		publisher.publishUserCreatedEvent(
-			savedUser.getUuid(), savedUser.getUsername(), savedUser.getHandle(), savedUser.getEmail());
+		publisher.publishUserCreatedEvent(savedUser.getHandle(), savedUser.getEmail(), verificationToken);
 
 		return userMapper.toUserProjection(savedUser);
 	}
