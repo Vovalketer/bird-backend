@@ -1,4 +1,4 @@
-package com.gray.bird.user.registration.listener;
+package com.gray.bird.user.listener;
 
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -21,12 +21,12 @@ public class AccountVerifiedListenerTest {
 
 	@Test
 	void testOnAccountVerified() {
-		AccountVerifiedEvent event = new AccountVerifiedEvent(UUID.randomUUID());
-
-		Mockito.doNothing().when(userService).enableAccount(Mockito.any(UUID.class));
+		UUID userId = UUID.randomUUID();
+		AccountVerifiedEvent event = new AccountVerifiedEvent(userId);
+		Mockito.doNothing().when(userService).enableAccount(userId);
 
 		accountVerifiedListener.onAccountVerified(event);
 
-		Mockito.verify(userService, Mockito.times(1)).enableAccount(Mockito.any(UUID.class));
+		Mockito.verify(userService).enableAccount(userId);
 	}
 }

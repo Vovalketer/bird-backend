@@ -1,4 +1,4 @@
-package com.gray.bird.user.registration.listener;
+package com.gray.bird.user.listener;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
