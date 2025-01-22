@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.gray.bird.exception.InvalidConfirmationTokenException;
+import com.gray.bird.exception.InvalidVerificationTokenException;
 import com.gray.bird.user.registration.event.AccountVerificationEventPublisher;
 
 @SpringJUnitConfig
@@ -62,8 +62,7 @@ public class AccountVerificationServiceTest {
 			new AccountVerificationTokenEntity(UUID.randomUUID(), LocalDateTime.now().minusSeconds(300L));
 
 		Mockito.when(tokenRepository.findByToken(tokenParam)).thenReturn(Optional.of(token));
-		Mockito.doThrow(new InvalidConfirmationTokenException())
-			.when(publisher)
-			.accountVerified(token.getUserId());
+		Assertions.assertThatThrownBy(() -> accountVerificationService.verifyAccount(tokenParam))
+			.isInstanceOf(InvalidVerificationTokenException.class);
 	}
 }

@@ -28,8 +28,8 @@ import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.exception.GlobalExceptionHandler;
-import com.gray.bird.exception.InvalidConfirmationTokenException;
 import com.gray.bird.exception.InvalidJwtException;
+import com.gray.bird.exception.InvalidVerificationTokenException;
 import com.gray.bird.user.UserService;
 import com.gray.bird.user.registration.AccountVerificationService;
 
@@ -115,7 +115,7 @@ public class AuthControllerTest {
 	@Test
 	void invalidTokenVerifyAccount() throws Exception {
 		String token = "invalid token";
-		Mockito.doThrow(new InvalidConfirmationTokenException())
+		Mockito.doThrow(new InvalidVerificationTokenException())
 			.when(accountVerificationService)
 			.verifyAccount(token);
 
