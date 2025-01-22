@@ -195,9 +195,9 @@ public class GlobalExceptionHandler {
 			.body(HttpUtils.getErrorResponse(request, unauthorized, exception.getMessage()));
 	}
 
-	@ExceptionHandler(InvalidConfirmationTokenException.class)
+	@ExceptionHandler(InvalidVerificationTokenException.class)
 	public ResponseEntity<HttpErrorResponse> handleException(
-		final InvalidConfirmationTokenException exception, HttpServletRequest request) {
+		final InvalidVerificationTokenException exception, HttpServletRequest request) {
 		HttpStatus status = BAD_REQUEST;
 		return ResponseEntity.status(status)
 			.contentType(MediaType.APPLICATION_JSON)

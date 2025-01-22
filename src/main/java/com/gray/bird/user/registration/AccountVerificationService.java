@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.gray.bird.exception.InvalidConfirmationTokenException;
+import com.gray.bird.exception.InvalidVerificationTokenException;
 import com.gray.bird.user.registration.event.AccountVerificationEventPublisher;
 
 @Service
@@ -27,9 +27,9 @@ public class AccountVerificationService {
 
 	public void verifyAccount(String token) {
 		AccountVerificationTokenEntity tok =
-			tokenRepository.findByToken(token).orElseThrow(() -> new InvalidConfirmationTokenException());
+			tokenRepository.findByToken(token).orElseThrow(() -> new InvalidVerificationTokenException());
 		if (tok.getExpiresAt().isBefore(LocalDateTime.now())) {
-			throw new InvalidConfirmationTokenException();
+			throw new InvalidVerificationTokenException();
 		}
 
 		publisher.accountVerified(tok.getUserId());
