@@ -1,4 +1,4 @@
-package com.gray.bird.auth.listener;
+package com.gray.bird.user.listener;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ public class UserLoggedInListener {
 	private final UserService userService;
 
 	@EventListener
-	public void onUserLogin(UserLoggedInEvent event) {
+	public void onUserLogIn(UserLoggedInEvent event) {
 		userService.updateLastLogin(event.userId(), event.time());
 	}
 }
