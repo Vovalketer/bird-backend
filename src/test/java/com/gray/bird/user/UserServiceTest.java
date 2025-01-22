@@ -18,6 +18,7 @@ import com.gray.bird.role.RoleType;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.event.UserEventPublisher;
+import com.gray.bird.user.registration.AccountVerificationService;
 import com.gray.bird.utils.TestUtils;
 
 @SpringJUnitConfig
@@ -34,6 +35,8 @@ public class UserServiceTest {
 	private UserEventPublisher publisher;
 	@Mock
 	private UserMapper userMapper;
+	@Mock
+	private AccountVerificationService verificationService;
 
 	@InjectMocks
 	private UserService userService;
@@ -47,6 +50,7 @@ public class UserServiceTest {
 		UserEntity user = testUtils.createUser(request.username(), request.handle(), request.email());
 		RoleEntity role = testUtils.createRole(RoleType.USER);
 		CredentialsEntity credentials = testUtils.createCredentials(user, "test_password");
+		String verificationToken = "test_verification_token";
 		UserProjection userProjection = Mockito.mock(UserProjection.class);
 
 		Mockito.when(roleRepository.findByType(RoleType.USER)).thenReturn(Optional.of(role));
@@ -55,7 +59,9 @@ public class UserServiceTest {
 			.thenReturn(credentials);
 		Mockito.when(encoder.encode(request.password())).thenReturn("test_password");
 		Mockito.doNothing().when(publisher).publishUserCreatedEvent(
-			Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+			user.getHandle(), user.getEmail(), verificationToken);
+		Mockito.when(verificationService.createVerificationToken(user.getUuid()))
+			.thenReturn(verificationToken);
 		Mockito.when(userMapper.toUserProjection(Mockito.any(UserEntity.class))).thenReturn(userProjection);
 
 		userService.createUser(request);
@@ -65,7 +71,7 @@ public class UserServiceTest {
 		Mockito.verify(credentialsRepository, Mockito.times(1)).save(Mockito.any(CredentialsEntity.class));
 		Mockito.verify(encoder, Mockito.times(1)).encode(request.password());
 		Mockito.verify(publisher, Mockito.times(1))
-			.publishUserCreatedEvent(user.getUuid(), user.getUsername(), user.getHandle(), user.getEmail());
+			.publishUserCreatedEvent(user.getHandle(), user.getEmail(), verificationToken);
 	}
 
 	@Test
