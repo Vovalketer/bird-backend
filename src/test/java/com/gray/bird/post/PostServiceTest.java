@@ -16,6 +16,7 @@ import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
+import com.gray.bird.post.event.PostEventPublisher;
 import com.gray.bird.utils.TestUtils;
 import com.gray.bird.utils.TestUtilsFactory;
 
@@ -26,6 +27,8 @@ public class PostServiceTest {
 	private PostRepository repository;
 	@Mock
 	private PostMapper mapper;
+	@Mock
+	private PostEventPublisher postEventPublisher;
 	@InjectMocks
 	private PostService service;
 	private TestUtils testUtils = TestUtilsFactory.createTestUtils();
@@ -38,6 +41,7 @@ public class PostServiceTest {
 			post.getUserId(),
 			post.getText(),
 			post.isDeleted(),
+			post.isHasMedia(),
 			post.getReplyType(),
 			null,
 			post.getCreatedAt());
@@ -61,6 +65,8 @@ public class PostServiceTest {
 
 		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(PostEntity.class));
 		Mockito.verify(mapper, Mockito.times(1)).toPostProjection(Mockito.any(PostEntity.class));
+		Mockito.verify(postEventPublisher, Mockito.times(1))
+			.publishPostCreatedEvent(post.getUserId(), post.getId());
 	}
 
 	@Test
@@ -71,6 +77,7 @@ public class PostServiceTest {
 			post.getUserId(),
 			post.getText(),
 			post.isDeleted(),
+			post.isHasMedia(),
 			post.getReplyType(),
 			post.getParentPostId(),
 			post.getCreatedAt());
