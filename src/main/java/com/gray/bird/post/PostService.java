@@ -15,6 +15,7 @@ import com.gray.bird.media.MediaCommandService;
 import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.RepliesCount;
+import com.gray.bird.post.event.PostEventPublisher;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final MediaCommandService mediaService;
 	private final PostMapper postMapper;
+	private final PostEventPublisher postEventPublisher;
 
 	@Transactional
 	public PostEntity savePost(PostEntity post) {
@@ -41,6 +43,8 @@ public class PostService {
 		}
 		PostEntity post = createPostEntity(postRequest, userId, hasMedia);
 		PostEntity savedPost = savePost(post);
+
+		postEventPublisher.publishPostCreatedEvent(savedPost.getUserId(), savedPost.getId());
 		return postMapper.toPostProjection(savedPost);
 	}
 
