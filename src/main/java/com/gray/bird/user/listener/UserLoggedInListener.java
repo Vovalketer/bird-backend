@@ -14,7 +14,7 @@ public class UserLoggedInListener {
 	private final UserService userService;
 
 	@EventListener
-	public void onUserLogIn(UserLoggedInEvent event) {
+	public void onUserLogin(UserLoggedInEvent event) {
 		userService.updateLastLogin(event.userId(), event.time());
 	}
 }
