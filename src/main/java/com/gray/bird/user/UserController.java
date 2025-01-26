@@ -89,20 +89,6 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/{username}/timelines/following")
-	public ResponseEntity<?> getFollowingTimeline(@RequestParam String username) {
-		// following, AUTH REQUIRED
-		return null;
-	}
-
-	@GetMapping("/{username}/timelines/home")
-	public ResponseEntity<?> getUserTimeline(@PathVariable String username,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
-		// public endpoint (unless the account is set to private)
-		// user posts and reposts
-		return ResponseEntity.ok(null);
-	}
-
 	@PostMapping("/{username}/following")
 	public ResponseEntity<Void> follow(@PathVariable String username, @AuthenticationPrincipal UUID userId) {
 		followService.followUser(userId, username);
