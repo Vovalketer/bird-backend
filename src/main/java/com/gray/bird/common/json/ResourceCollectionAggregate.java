@@ -1,40 +1,35 @@
-package com.gray.bird.common.jsonApi;
+package com.gray.bird.common.json;
 
 import java.util.List;
 
-public class ResourceCollectionAggregateImpl
-	extends ResourceAggregateBaseImpl implements ResourceCollectionAggregate {
+public class ResourceCollectionAggregate extends ResourceAggregateBase {
 	private List<ResourceData> data;
 
-	public ResourceCollectionAggregateImpl(List<ResourceData> data, List<ResourceData> included,
+	public ResourceCollectionAggregate(List<ResourceData> data, List<ResourceData> included,
 		ResourceMetadata metadata, ResourceLinks links) {
 		super(included, metadata, links);
 		this.data = data;
 	}
 
-	@Override
 	public List<ResourceData> getData() {
 		return data;
 	}
 
-	@Override
 	public void addData(ResourceData data) {
 		this.data.add(data);
 	}
 
-	@Override
 	public void addAllData(List<ResourceData> data) {
 		this.data.addAll(data);
 	}
 
-	@Override
 	public void removeData(ResourceIdentifier id) {
-		this.data.removeIf(d -> d.idIsEqualTo(id));
+		this.data.removeIf(r -> r.getResourceIdentifier().equals(id));
 	}
 
 	@Override
 	public String toString() {
-		return "ResourceCollectionAggregateImpl [data=" + data + "]";
+		return "ResourceCollectionAggregate [data=" + data + "]";
 	}
 
 	public void setData(List<ResourceData> data) {
