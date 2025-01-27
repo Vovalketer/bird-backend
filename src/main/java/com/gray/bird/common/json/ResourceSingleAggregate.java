@@ -1,28 +1,30 @@
-package com.gray.bird.common.jsonApi;
+package com.gray.bird.common.json;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResourceSingleAggregateImpl
-	extends ResourceAggregateBaseImpl implements ResourceSingleAggregate {
+public class ResourceSingleAggregate extends ResourceAggregateBase {
 	private ResourceData data;
 
-	public ResourceSingleAggregateImpl(
+	public ResourceSingleAggregate(
 		ResourceData data, List<ResourceData> included, ResourceMetadata meta, ResourceLinks links) {
 		super(included, meta, links);
 		this.data = data;
 	}
 
-	@Override
+	public ResourceSingleAggregate() {
+		super();
+	}
+
 	public ResourceData getData() {
 		return data;
 	}
 
 	@Override
 	public String toString() {
-		return "ResourceSingleAggregateImpl [data=" + data + "]";
+		return "ResourceSingleAggregate [data=" + data + "]";
 	}
 
 	public void setData(ResourceData data) {

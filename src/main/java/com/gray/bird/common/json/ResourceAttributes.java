@@ -1,33 +1,36 @@
-package com.gray.bird.common.jsonApi;
+package com.gray.bird.common.json;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class ResourceAttributesImpl implements ResourceAttributes {
+public class ResourceAttributes {
 	private Map<String, Object> attributes;
 
-	public ResourceAttributesImpl(Map<String, Object> attributes) {
+	public ResourceAttributes(Map<String, Object> attributes) {
+		if (attributes == null) {
+			attributes = new HashMap<>();
+		}
 		this.attributes = attributes;
 	}
 
-	@Override
+	public ResourceAttributes() {
+	}
+
 	public Map<String, Object> getAttributes() {
 		return attributes;
 	}
 
-	@Override
 	public Object getAttribute(String key) {
 		return attributes.get(key);
 	}
 
-	@Override
 	public <T> T getAttribute(String key, Class<T> type) {
-		// passing the type to cast introduces a cycle
 		return type.cast(attributes.get(key));
 	}
 
 	@Override
 	public String toString() {
-		return "ResourceAttributesImpl [attributes=" + attributes + "]";
+		return "ResourceAttributes [attributes=" + attributes + "]";
 	}
 
 	public void setAttributes(Map<String, Object> attributes) {
