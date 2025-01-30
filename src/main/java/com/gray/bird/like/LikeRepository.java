@@ -21,13 +21,14 @@ public interface LikeRepository extends JpaRepository<LikeEntity, LikeId> {
 	@Query("SELECT l.id.userId FROM LikeEntity l WHERE l.id.postId = :postId")
 	Page<Long> findUsersLikingPostId(@Param("postId") Long postId, Pageable pageable);
 
-	@Query("SELECT new com.gray.bird.like.dto.LikesCount(l.id.postId, COUNT(l)) FROM LikeEntity l WHERE "
-		+ "l.id.postId = :postId")
+	@Query("SELECT new com.gray.bird.like.dto.LikesCount(l.id.postId, COUNT(l.id.userId)) FROM LikeEntity l "
+		+ "WHERE l.id.postId = :postId")
 	Optional<LikesCount>
 	countByPostId(@Param("postId") Long postId);
 
-	@Query("SELECT new com.gray.bird.like.dto.LikesCount(l.id.postId, COUNT(l)) FROM LikeEntity l WHERE "
-		+ "l.id.postId IN :postId")
+	@Query("SELECT new com.gray.bird.like.dto.LikesCount(l.id.postId, COUNT(l.id.userId)) FROM LikeEntity l "
+		+ "WHERE l.id.postId IN :postIds "
+		+ "GROUP BY l.id.postId ")
 	List<LikesCount>
-	countByPostIdsIn(@Param("postId") Iterable<Long> postId);
+	countByPostIdsIn(@Param("postIds") Iterable<Long> postIds);
 }
