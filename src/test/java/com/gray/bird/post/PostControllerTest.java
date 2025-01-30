@@ -20,19 +20,19 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
-import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceResponseFactory;
-import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
+import com.gray.bird.common.JsonApiResponse;
+import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataUtils;
 import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
+import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.user.UserResourceMapper;
 import com.gray.bird.user.UserService;
 import com.gray.bird.user.dto.UserProjection;
+import com.gray.bird.user.dto.UserResource;
 import com.gray.bird.utils.TestUtils;
 
 @ExtendWith(SpringExtension.class)
@@ -50,7 +50,7 @@ public class PostControllerTest {
 	@Mock
 	UserResourceMapper userResourceMapper;
 	@Mock
-	ResourceResponseFactory responseFactory;
+	JsonApiResponseFactory responseFactory;
 	@Mock
 	MetadataUtils metadataUtils;
 
@@ -65,21 +65,22 @@ public class PostControllerTest {
 		UUID userId = UUID.randomUUID();
 
 		PostProjection postProjection = Mockito.mock(PostProjection.class);
-		ResourceData resourceData = Mockito.mock(ResourceData.class);
-		ResourceSingleAggregate resourceSingleAggregate = Mockito.mock(ResourceSingleAggregate.class);
+		PostResource postResource = Mockito.mock(PostResource.class);
+		@SuppressWarnings("unchecked")
+		JsonApiResponse<PostResource> response = Mockito.mock(JsonApiResponse.class);
 
 		Mockito.when(postService.createPost(req, userId)).thenReturn(postProjection);
-		Mockito.when(postResourceMapper.toResource(postProjection)).thenReturn(resourceData);
-		Mockito.when(responseFactory.createResponse(resourceData)).thenReturn(resourceSingleAggregate);
+		Mockito.when(postResourceMapper.toResource(postProjection)).thenReturn(postResource);
+		Mockito.when(responseFactory.createResponse(postResource)).thenReturn(response);
 
-		ResponseEntity<ResourceSingleAggregate> postResponse = postController.createPost(req, userId);
+		ResponseEntity<JsonApiResponse<PostResource>> postResponse = postController.createPost(req, userId);
 
 		Assertions.assertThat(postResponse.getStatusCode())
 			.isEqualTo(ResponseEntity.status(201).build().getStatusCode());
-		Assertions.assertThat(postResponse.getBody()).isEqualTo(resourceSingleAggregate);
+		Assertions.assertThat(postResponse.getBody()).isEqualTo(response);
 		Mockito.verify(postService).createPost(req, userId);
 		Mockito.verify(postResourceMapper).toResource(postProjection);
-		Mockito.verify(responseFactory).createResponse(resourceData);
+		Mockito.verify(responseFactory).createResponse(postResource);
 	}
 
 	@Test
@@ -87,19 +88,20 @@ public class PostControllerTest {
 		PostAggregate post = testUtils.createPostAggregateWithoutMedia();
 		Long postId = post.post().id();
 		UUID userId = post.post().userId();
-		ResourceData postResourceData = Mockito.mock(ResourceData.class);
+		PostResource postResource = Mockito.mock(PostResource.class);
 		Mockito.when(postAggregatorService.getPost(postId)).thenReturn(post);
-		Mockito.when(postAggregateResourceMapper.toResource(post)).thenReturn(postResourceData);
+		Mockito.when(postAggregateResourceMapper.toResource(post)).thenReturn(postResource);
 
 		UserProjection userProjection = testUtils.createUserProjection(userId);
-		ResourceData userResourceData = Mockito.mock(ResourceData.class);
+		UserResource userResource = Mockito.mock(UserResource.class);
 		Mockito.when(userService.getUserById(userId)).thenReturn(userProjection);
-		Mockito.when(userResourceMapper.toResource(userProjection)).thenReturn(userResourceData);
+		Mockito.when(userResourceMapper.toResource(userProjection)).thenReturn(userResource);
 
-		ResourceSingleAggregate response = Mockito.mock(ResourceSingleAggregate.class);
-		Mockito.when(responseFactory.createResponse(postResourceData, userResourceData)).thenReturn(response);
+		@SuppressWarnings("unchecked")
+		JsonApiResponse<PostResource> response = Mockito.mock(JsonApiResponse.class);
+		Mockito.when(responseFactory.createResponse(postResource)).thenReturn(response);
 
-		ResponseEntity<ResourceSingleAggregate> postResponse = postController.getPost(postId);
+		ResponseEntity<JsonApiResponse<PostResource>> postResponse = postController.getPost(postId);
 
 		Assertions.assertThat(postResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(postResponse.getBody()).isEqualTo(response);
@@ -107,9 +109,10 @@ public class PostControllerTest {
 		Mockito.verify(postAggregateResourceMapper).toResource(post);
 		Mockito.verify(userService).getUserById(userId);
 		Mockito.verify(userResourceMapper).toResource(userProjection);
-		Mockito.verify(responseFactory).createResponse(postResourceData, userResourceData);
+		Mockito.verify(responseFactory).createResponse(postResource);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void shouldReturnRepliesWhenTheyAreRequested() {
 		Long postId = 1L;
@@ -126,7 +129,7 @@ public class PostControllerTest {
 		Mockito.when(postService.getReplyIds(Mockito.eq(postId), Mockito.any(Pageable.class)))
 			.thenReturn(replyIds);
 		Mockito.when(postAggregatorService.getPosts(Mockito.any(Collection.class))).thenReturn(replies);
-		ResourceData replyResource = Mockito.mock(ResourceData.class);
+		PostResource replyResource = Mockito.mock(PostResource.class);
 		Mockito.when(postAggregateResourceMapper.toResource(Mockito.any(PostAggregate.class)))
 			.thenReturn(replyResource);
 
@@ -135,15 +138,14 @@ public class PostControllerTest {
 										 .map(r -> testUtils.createUserProjection(r.post().userId()))
 										 .collect(Collectors.toList());
 		Mockito.when(userService.getAllUsersById(Mockito.any(Iterable.class))).thenReturn(users);
-		ResourceData userResource = Mockito.mock(ResourceData.class);
+		UserResource userResource = Mockito.mock(UserResource.class);
 		Mockito.when(userResourceMapper.toResource(Mockito.any(UserProjection.class)))
 			.thenReturn(userResource);
 
-		ResourceCollectionAggregate response = Mockito.mock(ResourceCollectionAggregate.class);
-		Mockito.when(responseFactory.createResponse(Mockito.anyList(), Mockito.anyList()))
-			.thenReturn(response);
+		JsonApiResponse<List<Object>> response = Mockito.mock(JsonApiResponse.class);
+		Mockito.when(responseFactory.createResponse(Mockito.anyList())).thenReturn(response);
 
-		ResponseEntity<ResourceCollectionAggregate> repliesResponse =
+		ResponseEntity<JsonApiResponse<List<PostResource>>> repliesResponse =
 			postController.getReplies(postId, pageNumber, pageSize);
 
 		Assertions.assertThat(repliesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -154,7 +156,7 @@ public class PostControllerTest {
 			.toResource(Mockito.any(PostAggregate.class));
 		Mockito.verify(userResourceMapper, Mockito.times(users.size()))
 			.toResource(Mockito.any(UserProjection.class));
-		Mockito.verify(responseFactory).createResponse(Mockito.anyList(), Mockito.anyList());
+		Mockito.verify(responseFactory).createResponse(Mockito.anyList());
 	}
 
 	@Test
@@ -163,18 +165,20 @@ public class PostControllerTest {
 		UUID userId = UUID.randomUUID();
 		PostCreationRequest req = Mockito.mock(PostCreationRequest.class);
 		PostProjection reply = testUtils.createReplyPostProjection(postId);
-		ResourceData resourceData = Mockito.mock(ResourceData.class);
-		ResourceSingleAggregate resourceSingleAggregate = Mockito.mock(ResourceSingleAggregate.class);
+		PostResource replyResource = Mockito.mock(PostResource.class);
+		@SuppressWarnings("unchecked")
+		JsonApiResponse<PostResource> response = Mockito.mock(JsonApiResponse.class);
 
 		Mockito.when(postService.createReply(req, postId, userId)).thenReturn(reply);
-		Mockito.when(postResourceMapper.toResource(reply)).thenReturn(resourceData);
-		Mockito.when(responseFactory.createResponse(resourceData)).thenReturn(resourceSingleAggregate);
+		Mockito.when(postResourceMapper.toResource(reply)).thenReturn(replyResource);
+		Mockito.when(responseFactory.createResponse(replyResource)).thenReturn(response);
 
-		ResponseEntity<ResourceSingleAggregate> replyResponse = postController.postReply(postId, req, userId);
+		ResponseEntity<JsonApiResponse<PostResource>> replyResponse =
+			postController.postReply(postId, req, userId);
 
 		Assertions.assertThat(replyResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		Assertions.assertThat(replyResponse.getBody()).isEqualTo(resourceSingleAggregate);
+		Assertions.assertThat(replyResponse.getBody()).isEqualTo(response);
 		Mockito.verify(postResourceMapper).toResource(reply);
-		Mockito.verify(responseFactory).createResponse(resourceData);
+		Mockito.verify(responseFactory).createResponse(replyResource);
 	}
 }
