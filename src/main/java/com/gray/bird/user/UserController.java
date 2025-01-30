@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import java.net.URI;
@@ -24,19 +23,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.gray.bird.common.JsonApiResponse;
 import com.gray.bird.common.PaginationMetadata;
 import com.gray.bird.common.ResourcePaths;
-import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
-import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceResponseFactory;
-import com.gray.bird.common.jsonApi.ResourceSingleAggregate;
+import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataUtils;
 import com.gray.bird.post.PostService;
-import com.gray.bird.postAggregator.PostAggregate;
+import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
+import com.gray.bird.user.dto.UserResource;
 import com.gray.bird.user.follow.FollowService;
 
 @RestController
@@ -49,40 +47,41 @@ public class UserController {
 	private final FollowService followService;
 	private final PostAggregateResourceMapper postAggregateResourceMapper;
 	private final UserResourceMapper userResourceMapper;
-	private final ResourceResponseFactory responseFactory;
+	private final JsonApiResponseFactory responseFactory;
 	private final MetadataUtils metadataUtils;
 
 	@PostMapping("/register")
-	public ResponseEntity<ResourceSingleAggregate> register(@RequestBody @Valid UserCreationRequest data) {
+	public ResponseEntity<JsonApiResponse<UserResource>> register(
+		@RequestBody @Valid UserCreationRequest data) {
 		UserProjection user = userService.createUser(data);
-		ResourceData resource = userResourceMapper.toResource(user);
+		UserResource resource = userResourceMapper.toResource(user);
 
-		ResourceSingleAggregate response = responseFactory.createResponse(resource);
+		var response = responseFactory.createResponse(resource);
 		response.addMetadata("message", "Account created. Check your email to enable it");
 
 		return ResponseEntity.created(getUri(user.username())).body(response);
 	}
 
 	@GetMapping("/{username}")
-	public ResponseEntity<ResourceSingleAggregate> getUserProfile(@PathVariable String username) {
+	public ResponseEntity<JsonApiResponse<UserResource>> getUserProfile(@PathVariable String username) {
 		UserProjection userProfile = userService.getUserByUsername(username);
-		ResourceData resource = userResourceMapper.toResource(userProfile);
-		ResourceSingleAggregate response = responseFactory.createResponse(resource);
+		UserResource resource = userResourceMapper.toResource(userProfile);
+		var response = responseFactory.createResponse(resource);
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{username}/posts")
-	public ResponseEntity<ResourceCollectionAggregate> getUserPosts(@PathVariable String username,
+	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserPosts(@PathVariable String username,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		// just the user posts and its replies, no reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		UUID userId = userService.getUserIdByUsername(username);
 		Page<Long> postIds = postService.getPostIdsByUserId(userId, pageable);
-		List<ResourceData> resources = postAggregatorService.getPosts(postIds.getContent())
+		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent())
 										   .stream()
 										   .map(postAggregateResourceMapper::toResource)
 										   .collect(Collectors.toList());
-		ResourceCollectionAggregate response = responseFactory.createResponse(resources);
+		var response = responseFactory.createResponse(resources);
 		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(postIds);
 		response.addMetadata("pagination", paginationMetadata);
 
