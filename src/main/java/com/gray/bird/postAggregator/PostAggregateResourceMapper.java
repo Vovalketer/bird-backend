@@ -2,37 +2,35 @@ package com.gray.bird.postAggregator;
 
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
-
-import com.gray.bird.common.jsonApi.RelationshipToMany;
-import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceDataMapper;
-import com.gray.bird.common.jsonApi.ResourceMetadata;
-import com.gray.bird.media.MediaResourceMapper;
-import com.gray.bird.post.PostResourceMapper;
+import com.gray.bird.common.json.ResourceMapper;
+import com.gray.bird.post.dto.PostAttributes;
+import com.gray.bird.post.dto.PostRelationships;
+import com.gray.bird.post.dto.PostResource;
 
 @Component
-@RequiredArgsConstructor
-public class PostAggregateResourceMapper implements ResourceDataMapper<PostAggregate> {
+public class PostAggregateResourceMapper implements ResourceMapper<PostAggregate, PostResource> {
 	private static final String INTERACTIONS = "interactions";
-	private static final String MEDIA = "media";
-	private final PostResourceMapper postResourceMapper;
-	private final MediaResourceMapper mediaResourceMapper;
-	private final PostInteractionsMetadataMapper postInteractionsMetadataMapper;
 
 	@Override
-	public ResourceData toResource(PostAggregate data) {
-		ResourceData resource = postResourceMapper.toResource(data.post());
-		if (data.post().hasMedia() && data.media().size() > 0) {
-			RelationshipToMany mediaRelationship = mediaResourceMapper.createMediaRelationship(data.media());
-			resource.addRelationshipToMany(MEDIA, mediaRelationship);
-		}
+	public PostResource toResource(PostAggregate data) {
+		PostResource resource = new PostResource(data.post().id(), toAttributes(data), toRelationship(data));
+
 		if (data.interactions().isPresent()) {
-			ResourceMetadata interactions =
-				postInteractionsMetadataMapper.toResourceMetadata(data.interactions().get());
-			resource.addMetadata(INTERACTIONS, interactions);
+			resource.addMetadata(INTERACTIONS, data.interactions().get());
 		}
 
 		return resource;
+	}
+
+	// duplicated from PostResourceMapper but has to be this way to keep it decoupled
+	// or else the relationships would have to be mutable and this would have to have dependencies
+	private PostAttributes toAttributes(PostAggregate data) {
+		return new PostAttributes(data.post().text(), data.post().replyType(), data.post().createdAt());
+	}
+
+	private PostRelationships toRelationship(PostAggregate data) {
+		return new PostRelationships(data.post().userId().toString(),
+			data.post().parentPostId(),
+			data.media().stream().map(media -> media.id()).toList());
 	}
 }
