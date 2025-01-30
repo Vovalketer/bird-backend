@@ -2,27 +2,20 @@ package com.gray.bird.user;
 
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
-
-import com.gray.bird.common.jsonApi.ResourceAttributes;
-import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceDataMapper;
-import com.gray.bird.common.jsonApi.ResourceFactory;
-import com.gray.bird.common.jsonApi.ResourceIdentifier;
+import com.gray.bird.common.json.ResourceMapper;
 import com.gray.bird.user.dto.UserAttributes;
 import com.gray.bird.user.dto.UserProjection;
+import com.gray.bird.user.dto.UserRelationships;
+import com.gray.bird.user.dto.UserResource;
 
 @Component
-@RequiredArgsConstructor
-public class UserResourceMapper implements ResourceDataMapper<UserProjection> {
-	private final ResourceFactory resourceFactory;
-
+public class UserResourceMapper implements ResourceMapper<UserProjection, UserResource> {
 	@Override
-	public ResourceData toResource(UserProjection data) {
+	public UserResource toResource(UserProjection data) {
 		UserAttributes userAttributes = getUserAttributes(data);
-		ResourceAttributes attributes = resourceFactory.createAttributes(userAttributes);
-		ResourceIdentifier identifier = resourceFactory.createIdentifier("user", data.userId().toString());
-		return resourceFactory.createData(identifier, attributes);
+		UserRelationships relationships = new UserRelationships();
+		UserResource resource = new UserResource(data.username(), userAttributes, relationships);
+		return resource;
 	}
 
 	private UserAttributes getUserAttributes(UserProjection data) {
