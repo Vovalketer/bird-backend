@@ -17,13 +17,15 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 	<T> List<T> findAllByIdIn(Iterable<Long> id, Class<T> type);
 	Page<Long> findRepliesByParentPostId(Long postId, Pageable pageable);
 
-	@Query("SELECT new com.gray.bird.post.dto.RepliesCount(p.id, COUNT(p)) FROM PostEntity p WHERE "
-		+ "p.parentPostId = :id")
+	@Query("SELECT new com.gray.bird.post.dto.RepliesCount(p.parentPostId, COUNT(p.id)) FROM PostEntity p "
+		+ "WHERE p.parentPostId = :id "
+		+ "GROUP BY p.parentPostId")
 	Optional<RepliesCount>
 	countRepliesByPostId(@Param("id") Long id);
 
-	@Query("SELECT new com.gray.bird.post.dto.RepliesCount(p.id, COUNT(p)) FROM PostEntity p WHERE "
-		+ "p.parentPostId IN :ids")
+	@Query("SELECT new com.gray.bird.post.dto.RepliesCount(p.parentPostId, COUNT(p.id)) FROM PostEntity p "
+		+ "WHERE p.parentPostId IN :ids "
+		+ "GROUP BY p.parentPostId")
 	List<RepliesCount>
 	countRepliesByPostIdsIn(@Param("ids") Iterable<Long> ids);
 
