@@ -4,33 +4,20 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.gray.bird.common.jsonApi.RelationshipToMany;
-import com.gray.bird.common.jsonApi.RelationshipToOne;
-import com.gray.bird.common.jsonApi.ResourceAttributes;
-import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceDataMapper;
-import com.gray.bird.common.jsonApi.ResourceFactory;
-import com.gray.bird.common.jsonApi.ResourceIdentifier;
+import com.gray.bird.common.json.ResourceMapper;
 import com.gray.bird.media.dto.MediaAttributes;
 import com.gray.bird.media.dto.MediaProjection;
+import com.gray.bird.media.dto.MediaRelationships;
+import com.gray.bird.media.dto.MediaResource;
 
 @Component
 @RequiredArgsConstructor
-public class MediaResourceMapper implements ResourceDataMapper<MediaProjection> {
-	private static final String POST = "post";
-	private static final String MEDIA = "media";
-	private final ResourceFactory resourceFactory;
-
+public class MediaResourceMapper implements ResourceMapper<MediaProjection, MediaResource> {
 	@Override
-	public ResourceData toResource(MediaProjection data) {
+	public MediaResource toResource(MediaProjection data) {
 		MediaAttributes mediaAttributes = getMediaAttributes(data);
-		ResourceAttributes attributes = resourceFactory.createAttributes(mediaAttributes);
-		ResourceIdentifier identifier = resourceFactory.createIdentifier(MEDIA, data.id().toString());
-		ResourceData resource = resourceFactory.createData(identifier, attributes);
-		resource.addRelationshipToOne(POST, createPostRelationship(data));
+		MediaRelationships relationships = new MediaRelationships(data.postId());
+		MediaResource resource = new MediaResource(data.id(), mediaAttributes, relationships);
 
 		return resource;
 	}
@@ -43,18 +30,5 @@ public class MediaResourceMapper implements ResourceDataMapper<MediaProjection> 
 			data.fileSize(),
 			data.duration(),
 			data.format());
-	}
-
-	private RelationshipToOne createPostRelationship(MediaProjection media) {
-		ResourceIdentifier identifier = resourceFactory.createIdentifier(POST, media.postId().toString());
-		return resourceFactory.createRelationshipToOne(identifier);
-	}
-
-	public RelationshipToMany createMediaRelationship(List<MediaProjection> media) {
-		List<ResourceIdentifier> identifiers =
-			media.stream()
-				.map(m -> resourceFactory.createIdentifier(MEDIA, m.id().toString()))
-				.collect(Collectors.toList());
-		return resourceFactory.createRelationshipToMany(identifiers);
 	}
 }
