@@ -1,23 +1,21 @@
 package com.gray.bird.common.json;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+@AllArgsConstructor
 @Getter
-public class RelationshipToOne {
-	private ResourceIdentifier data;
-	private ResourceLinks links;
-	private ResourceMetadata metadata;
+public class RelationshipToOne<ID> {
+	private ResourceIdentifier<ID> data;
+	private Metadata metadata = new Metadata();
+	private Links links = new Links();
 
-	public RelationshipToOne(ResourceIdentifier data, ResourceLinks links, ResourceMetadata metadata) {
+	public RelationshipToOne(ResourceIdentifier<ID> data) {
 		this.data = data;
-		this.links = links;
-		this.metadata = metadata;
 	}
 
-	public RelationshipToOne(ResourceIdentifier data) {
-		this.data = data;
-		this.links = new ResourceLinks();
-		this.metadata = new ResourceMetadata();
+	public RelationshipToOne(String type, ID id) {
+		this.data = new ResourceIdentifier<ID>(type, id);
 	}
 
 	@Override
@@ -36,7 +34,7 @@ public class RelationshipToOne {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RelationshipToOne other = (RelationshipToOne) obj;
+		RelationshipToOne<?> other = (RelationshipToOne<?>) obj;
 		if (data == null) {
 			if (other.data != null)
 				return false;
