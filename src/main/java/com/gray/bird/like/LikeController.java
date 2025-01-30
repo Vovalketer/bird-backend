@@ -20,7 +20,7 @@ import com.gray.bird.common.ResourcePaths;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ResourcePaths.LIKES)
+@RequestMapping(ResourcePaths.POSTS_POSTID_LIKES)
 public class LikeController {
 	private final LikeService likeService;
 

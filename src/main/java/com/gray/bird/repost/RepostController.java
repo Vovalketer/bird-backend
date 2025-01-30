@@ -18,7 +18,7 @@ import com.gray.bird.common.ResourcePaths;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ResourcePaths.RETWEETS)
+@RequestMapping(ResourcePaths.POSTS_POSTID_REPOSTS)
 public class RepostController {
 	private final RepostService repostService;
 
