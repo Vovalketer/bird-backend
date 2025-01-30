@@ -2,12 +2,14 @@ package com.gray.bird.common;
 
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.gray.bird.common.json.ResourceResponse;
 import com.gray.bird.media.dto.MediaResource;
 import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.user.dto.UserResource;
 
 public class JsonApiResponse<T> extends ResourceResponse<T, ResourceIncluded> {
+	@JsonCreator
 	public JsonApiResponse(T data, ResourceIncluded included) {
 		super(data, included);
 	}
