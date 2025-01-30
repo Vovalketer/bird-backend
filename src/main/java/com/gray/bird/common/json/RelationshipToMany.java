@@ -1,33 +1,23 @@
 package com.gray.bird.common.json;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.List;
+import java.util.Collection;
 
+@AllArgsConstructor
 @Getter
-public class RelationshipToMany {
-	private List<ResourceIdentifier> data;
-	private ResourceLinks links;
-	private ResourceMetadata metadata;
+public class RelationshipToMany<ID> {
+	private Collection<ResourceIdentifier<ID>> data;
+	private Metadata metadata = new Metadata();
+	private Links links = new Links();
 
-	public RelationshipToMany(List<ResourceIdentifier> data, ResourceLinks links, ResourceMetadata metadata) {
+	public RelationshipToMany(Collection<ResourceIdentifier<ID>> data) {
 		this.data = data;
-		this.links = links;
-		this.metadata = metadata;
 	}
 
-	public RelationshipToMany(List<ResourceIdentifier> data) {
-		this.data = data;
-		this.links = new ResourceLinks();
-		this.metadata = new ResourceMetadata();
-	}
-
-	public void addLink(String key, String url) {
-		links.addLink(key, url);
-	}
-
-	public void addMetadata(String key, Object value) {
-		metadata.addMetadata(key, value);
+	public RelationshipToMany(String type, Collection<ID> ids) {
+		this.data = ids.stream().map(id -> new ResourceIdentifier<>(type, id)).toList();
 	}
 
 	@Override
@@ -46,7 +36,7 @@ public class RelationshipToMany {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RelationshipToMany other = (RelationshipToMany) obj;
+		RelationshipToMany<?> other = (RelationshipToMany<?>) obj;
 		if (data == null) {
 			if (other.data != null)
 				return false;

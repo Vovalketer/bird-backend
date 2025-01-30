@@ -4,17 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class ResourceMetadata {
+public class Metadata {
 	private Map<String, Object> metadata;
 
-	public ResourceMetadata(Map<String, Object> meta) {
+	public Metadata(Map<String, Object> meta) {
 		if (meta == null) {
 			meta = new HashMap<>();
 		}
 		this.metadata = meta;
 	}
 
-	public ResourceMetadata() {
+	public Metadata() {
 		metadata = new HashMap<>();
 	}
 
