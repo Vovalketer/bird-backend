@@ -3,8 +3,11 @@ package com.gray.bird.common.json;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 @AllArgsConstructor
 @Getter
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ResourceError {
 	// private String id; // uuid
 	private String status;
