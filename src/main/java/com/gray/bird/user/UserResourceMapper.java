@@ -14,7 +14,7 @@ public class UserResourceMapper implements ResourceMapper<UserProjection, UserRe
 	public UserResource toResource(UserProjection data) {
 		UserAttributes userAttributes = getUserAttributes(data);
 		UserRelationships relationships = new UserRelationships();
-		UserResource resource = new UserResource(data.username(), userAttributes, relationships);
+		UserResource resource = new UserResource(data.userId().toString(), userAttributes, relationships);
 		return resource;
 	}
 
