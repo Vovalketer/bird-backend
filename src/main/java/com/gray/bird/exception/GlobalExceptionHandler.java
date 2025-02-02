@@ -13,14 +13,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import lombok.RequiredArgsConstructor;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.gray.bird.common.HttpErrorResponse;
-import com.gray.bird.common.HttpUtils;
+import com.gray.bird.common.json.ResourceError;
+import com.gray.bird.common.json.ResourceErrorResponse;
+import com.gray.bird.common.utils.JsonApiErrorFactory;
 
 // In a Spring Boot application, global exception handling is crucial for maintaining consistency
 // and providing a clear, user-friendly response when errors occur. Below is a list of common
@@ -133,101 +136,122 @@ import com.gray.bird.common.HttpUtils;
 // handled. Action: Return a 500 Internal Server Error response with a generic message such as
 // "An unexpected error occurred".
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+	private final JsonApiErrorFactory errorFactory;
+
 	@ExceptionHandler(ApiException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final ApiException exception, HttpServletRequest request) {
+		Set<ResourceError> errors = new HashSet<>();
+		errors.add(errorFactory.createError(
+			INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR.getReasonPhrase(), exception.getMessage()));
 		return ResponseEntity.internalServerError()
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(
-				HttpUtils.getErrorResponse(request, INTERNAL_SERVER_ERROR, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(errors));
 	}
 
 	// @Valid
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final MethodArgumentNotValidException exception, HttpServletRequest request) {
-		Map<String, String> errors = new HashMap<>();
-		exception.getBindingResult().getFieldErrors().forEach(
-			err -> errors.put(err.getField(), err.getDefaultMessage()));
+		HashSet<ResourceError> errors = new HashSet<>();
+		exception.getBindingResult().getFieldErrors().forEach(err -> {
+			errors.add(errorFactory.createError(BAD_REQUEST,
+				"Argument not valid",
+				err.getDefaultMessage(),
+				errorFactory.createErrorSource(null, err.getField(), null)));
+		});
 
 		return ResponseEntity.badRequest()
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, BAD_REQUEST, "Validation failed", errors));
+			.body(errorFactory.createErrorResponse(errors));
 	}
 
 	// @NotNull, @Size, etc
 	@ExceptionHandler(ConstraintViolationException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final ConstraintViolationException exception, HttpServletRequest request) {
-		Map<String, String> errors = new HashMap<>();
-		exception.getConstraintViolations().stream().forEach(
-			err -> errors.put(err.getInvalidValue().toString(), err.getMessage()));
+		HashSet<ResourceError> errors = new HashSet<>();
+		exception.getConstraintViolations().forEach(err -> {
+			errors.add(errorFactory.createError(BAD_REQUEST,
+				"Constraint Violation",
+				err.getMessage(),
+				errorFactory.createErrorSource(
+					err.getRootBean().toString(), err.getPropertyPath().toString(), null)));
+		});
 		return ResponseEntity.badRequest()
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, BAD_REQUEST, "Validation failed", errors));
+			.body(errorFactory.createErrorResponse(errors));
 	}
 
 	@ExceptionHandler(UnauthorizedException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final UnauthorizedException exception, HttpServletRequest request) {
 		HttpStatus unauthorized = UNAUTHORIZED;
 		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, unauthorized, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(
+				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
 	}
 
 	@ExceptionHandler(InvalidJwtException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final InvalidJwtException exception, HttpServletRequest request) {
 		HttpStatus unauthorized = UNAUTHORIZED;
 		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, unauthorized, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(
+				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
 	}
 
 	@ExceptionHandler(ExpiredJwtException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final ExpiredJwtException exception, HttpServletRequest request) {
 		HttpStatus unauthorized = UNAUTHORIZED;
 		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, unauthorized, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(
+				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
 	}
 
 	@ExceptionHandler(InvalidVerificationTokenException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final InvalidVerificationTokenException exception, HttpServletRequest request) {
-		HttpStatus status = BAD_REQUEST;
-		return ResponseEntity.status(status)
+		HttpStatus unauthorized = UNAUTHORIZED;
+		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, status, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(
+				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
 	}
 
 	@ExceptionHandler(ConflictException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final ConflictException exception, HttpServletRequest request) {
 		HttpStatus conflict = CONFLICT;
 		return ResponseEntity.status(conflict)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, conflict, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(
+				errorFactory.createError(conflict, "Conflict", exception.getMessage())));
 	}
 
 	@ExceptionHandler(CacheException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final CacheException exception, HttpServletRequest request) {
 		HttpStatus internalServerError = INTERNAL_SERVER_ERROR;
 		return ResponseEntity.status(internalServerError)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, internalServerError, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(errorFactory.createError(
+				internalServerError, "Internal server error", exception.getMessage())));
 	}
 
 	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<HttpErrorResponse> handleException(
+	public ResponseEntity<ResourceErrorResponse> handleException(
 		final ResourceNotFoundException exception, HttpServletRequest request) {
 		HttpStatus notFoundError = NOT_FOUND;
 		return ResponseEntity.status(notFoundError)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(HttpUtils.getErrorResponse(request, notFoundError, exception.getMessage()));
+			.body(errorFactory.createErrorResponse(
+				errorFactory.createError(notFoundError, "Not found", exception.getMessage())));
 	}
 }
