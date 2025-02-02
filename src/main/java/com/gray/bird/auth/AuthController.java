@@ -1,6 +1,5 @@
 package com.gray.bird.auth;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,8 +21,9 @@ import java.util.Collections;
 import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
 import com.gray.bird.auth.jwt.TokenType;
-import com.gray.bird.common.HttpUtils;
+import com.gray.bird.common.JsonApiResponse;
 import com.gray.bird.common.ResourcePaths;
+import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.exception.ApiException;
 import com.gray.bird.user.registration.AccountVerificationService;
 
@@ -34,6 +34,7 @@ import com.gray.bird.user.registration.AccountVerificationService;
 public class AuthController {
 	private final AuthService authService;
 	private final AccountVerificationService accountVerificationService;
+	private final JsonApiResponseFactory responseFactory;
 
 	@PostMapping("/reset-password")
 	public ResponseEntity<?> resetPassword() {
@@ -59,6 +60,8 @@ public class AuthController {
 	@GetMapping("/verify/account")
 	public ResponseEntity<?> verifyAccount(@RequestParam("token") String token, HttpServletRequest request) {
 		accountVerificationService.verifyAccount(token);
-		return ResponseEntity.ok(HttpUtils.getResponse(request, "Account verified", HttpStatus.OK));
+		JsonApiResponse<Object> response = responseFactory.createResponse(null);
+		response.addMetadata("message", "Account verified");
+		return ResponseEntity.ok(response);
 	}
 }
