@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.UUID;
 
+import com.gray.bird.exception.InvalidPostException;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.media.MediaCommandService;
 import com.gray.bird.post.dto.PostCreationRequest;
@@ -37,6 +38,9 @@ public class PostService {
 
 	@Transactional
 	public PostProjection createPost(PostCreationRequest postRequest, UUID userId) {
+		if (isPostEmpty(postRequest)) {
+			throw new InvalidPostException();
+		}
 		boolean hasMedia = hasMedia(postRequest);
 		if (hasMedia) {
 			mediaService.uploadImages(postRequest.media());
@@ -50,6 +54,9 @@ public class PostService {
 
 	@Transactional
 	public PostProjection createReply(PostCreationRequest postRequest, Long parentPostId, UUID userId) {
+		if (isPostEmpty(postRequest)) {
+			throw new InvalidPostException();
+		}
 		PostEntity parent = getByPostId(parentPostId);
 		boolean hasMedia = hasMedia(postRequest);
 		if (hasMedia) {
@@ -84,6 +91,14 @@ public class PostService {
 
 	private boolean hasMedia(PostCreationRequest postRequest) {
 		return postRequest.media() != null;
+	}
+
+	private boolean hasText(PostCreationRequest postRequest) {
+		return postRequest.text() != null && !postRequest.text().isBlank();
+	}
+
+	private boolean isPostEmpty(PostCreationRequest postRequest) {
+		return !hasText(postRequest) && !hasMedia(postRequest);
 	}
 
 	public PostProjection getPostById(Long id) {
