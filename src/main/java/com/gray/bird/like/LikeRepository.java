@@ -22,7 +22,8 @@ public interface LikeRepository extends JpaRepository<LikeEntity, LikeId> {
 	Page<Long> findUsersLikingPostId(@Param("postId") Long postId, Pageable pageable);
 
 	@Query("SELECT new com.gray.bird.like.dto.LikesCount(l.id.postId, COUNT(l.id.userId)) FROM LikeEntity l "
-		+ "WHERE l.id.postId = :postId")
+		+ "WHERE l.id.postId = :postId "
+		+ "GROUP BY l.id.postId ")
 	Optional<LikesCount>
 	countByPostId(@Param("postId") Long postId);
 

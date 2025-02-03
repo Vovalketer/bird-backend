@@ -21,14 +21,15 @@ public interface RepostRepository extends JpaRepository<RepostEntity, RepostId> 
 
 	@Query("SELECT new com.gray.bird.repost.dto.RepostsCount(r.id.postId, COUNT(r.id.userId)) FROM "
 		+ "RepostEntity r "
-		+ "WHERE r.id.postId = :postId")
+		+ "WHERE r.id.postId = :postId "
+		+ "GROUP BY r.id.postId ")
 	Optional<RepostsCount>
 	countByPostId(@Param("postId") Long postId);
 
 	@Query("SELECT new com.gray.bird.repost.dto.RepostsCount(r.id.postId, COUNT(r.id.userId)) FROM "
 		+ "RepostEntity r "
 		+ "WHERE r.id.postId IN :postId "
-		+ "GROUP BY r.id.postId")
+		+ "GROUP BY r.id.postId ")
 	List<RepostsCount>
 	countByPostIdsIn(@Param("postId") Iterable<Long> postIds);
 }
