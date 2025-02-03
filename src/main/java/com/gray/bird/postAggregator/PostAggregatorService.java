@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +28,10 @@ public class PostAggregatorService {
 
 	public PostAggregate getPost(Long id) {
 		PostProjection post = postService.getPostById(id);
-		List<MediaProjection> media = mediaQueryService.getMediaByPostId(id);
+		List<MediaProjection> media = new ArrayList<>();
+		if (post.hasMedia()) {
+			media.addAll(mediaQueryService.getMediaByPostId(id));
+		}
 		PostInteractions interactions = interactionsQueryService.getInteractionsById(id);
 		PostAggregate aggregate = new PostAggregate(post, media, Optional.of(interactions));
 
