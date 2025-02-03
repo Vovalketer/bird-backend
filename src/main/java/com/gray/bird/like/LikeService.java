@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.UUID;
 
-import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.like.dto.LikesCount;
 
 @Service
@@ -40,7 +39,7 @@ public class LikeService {
 	}
 
 	public LikesCount getLikesCountByPostId(Long postId) {
-		return repo.countByPostId(postId).orElseThrow(() -> new ResourceNotFoundException());
+		return repo.countByPostId(postId).orElse(new LikesCount(postId, 0L));
 	}
 
 	public List<LikesCount> getLikesCountByPostIds(Iterable<Long> postids) {

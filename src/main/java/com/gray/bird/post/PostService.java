@@ -100,7 +100,7 @@ public class PostService {
 	}
 
 	public RepliesCount getRepliesCountByPostId(Long id) {
-		return postRepository.countRepliesByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
+		return postRepository.countRepliesByPostId(id).orElse(new RepliesCount(id, 0L));
 	}
 
 	public List<RepliesCount> getRepliesCountByPostIds(Iterable<Long> ids) {

@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.UUID;
 
-import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.repost.dto.RepostsCount;
 
 @Service
@@ -40,7 +39,7 @@ public class RepostService {
 	}
 
 	public RepostsCount getRepostCountByPostId(Long id) {
-		return repo.countByPostId(id).orElseThrow(() -> new ResourceNotFoundException());
+		return repo.countByPostId(id).orElse(new RepostsCount(id, 0L));
 	}
 
 	public List<RepostsCount> getRepostCountByPostIds(Iterable<Long> ids) {
