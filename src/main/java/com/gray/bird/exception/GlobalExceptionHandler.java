@@ -254,4 +254,13 @@ public class GlobalExceptionHandler {
 			.body(errorFactory.createErrorResponse(
 				errorFactory.createError(notFoundError, "Not found", exception.getMessage())));
 	}
+
+	@ExceptionHandler(InvalidPostException.class)
+	public ResponseEntity<ResourceErrorResponse> handleException(final InvalidPostException exception) {
+		HttpStatus badRequest = BAD_REQUEST;
+		return ResponseEntity.status(badRequest)
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(errorFactory.createErrorResponse(
+				badRequest, "Invalid Post", exception.getMessage(), null, "text/media", null));
+	}
 }
