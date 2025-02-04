@@ -19,6 +19,6 @@ public interface UserMapper {
 	CredentialsDto toCredentialsDto(CredentialsEntity credentials);
 
 	@Mapping(target = "roleType", source = "user.role.type")
-	@Mapping(target = "userId", source = "user.uuid")
+	@Mapping(target = "uuid", source = "user.uuid")
 	UserProjection toUserProjection(UserEntity user);
 }
