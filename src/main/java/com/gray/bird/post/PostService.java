@@ -111,6 +111,9 @@ public class PostService {
 	}
 
 	public Page<Long> getReplyIds(Long postId, Pageable pageable) {
+		if (!postRepository.existsById(postId)) {
+			throw new ResourceNotFoundException();
+		}
 		return postRepository.findRepliesByParentPostId(postId, pageable);
 	}
 
