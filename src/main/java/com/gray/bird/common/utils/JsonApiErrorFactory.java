@@ -20,6 +20,16 @@ public class JsonApiErrorFactory {
 		return new ResourceErrorResponse(Collections.singletonList(error));
 	}
 
+	public ResourceErrorResponse createErrorResponse(
+		HttpStatus status, String title, String detail, String pointer, String parameter, String header) {
+		return new ResourceErrorResponse(Collections.singletonList(
+			createError(status, title, detail, createErrorSource(pointer, parameter, header))));
+	}
+
+	public ResourceErrorResponse createErrorResponse(HttpStatus status, String title, String detail) {
+		return new ResourceErrorResponse(Collections.singletonList(createError(status, title, detail)));
+	}
+
 	public ResourceError createError(
 		HttpStatus status, String title, String detail, ResourceErrorSource source) {
 		return new ResourceError(String.valueOf(status.value()), title, detail, source);
