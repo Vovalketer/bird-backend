@@ -12,6 +12,6 @@ import com.gray.bird.role.RoleType;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @Builder
-public record UserProjection(@JsonIgnore Long id, UUID userId, String username, String handle, String bio,
+public record UserProjection(@JsonIgnore Long id, UUID uuid, String username, String handle, String bio,
 	LocalDate dateOfBirth, String location, RoleType roleType, String profileImage, LocalDateTime createdAt) {
 }
