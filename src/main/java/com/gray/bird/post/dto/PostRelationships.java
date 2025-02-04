@@ -15,28 +15,26 @@ import com.gray.bird.common.json.ResourceIdentifier;
 
 @Getter
 public class PostRelationships {
-	RelationshipToOne<String> author;
+	RelationshipToOne<String> user;
 	RelationshipToOne<Long> parent; // might be better off as optional, to check later
 	RelationshipToMany<Long> media;
 
 	public PostRelationships(
-		@NotNull RelationshipToOne<String> author, @Nullable RelationshipToOne<Long> parent) {
-		this.author = author;
+		@NotNull RelationshipToOne<String> user, @Nullable RelationshipToOne<Long> parent) {
+		this.user = user;
 		this.parent = parent;
 	}
 
-	public PostRelationships(@NotNull String authorId, @Nullable Long parentId) {
-		this.author =
-			new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.USERS.getType(), authorId));
+	public PostRelationships(@NotNull String userId, @Nullable Long parentId) {
+		this.user = new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.USERS.getType(), userId));
 		if (parentId != null) {
 			this.parent =
 				new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.POSTS.getType(), parentId));
 		}
 	}
 
-	public PostRelationships(@NotNull String authorId, @Nullable Long parentId, Collection<Long> mediaIds) {
-		this.author =
-			new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.USERS.getType(), authorId));
+	public PostRelationships(@NotNull String userId, @Nullable Long parentId, Collection<Long> mediaIds) {
+		this.user = new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.USERS.getType(), userId));
 		if (parentId == null) {
 			this.parent =
 				new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.POSTS.getType(), parentId));
