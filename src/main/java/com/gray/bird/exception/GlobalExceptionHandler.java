@@ -191,8 +191,7 @@ public class GlobalExceptionHandler {
 		HttpStatus unauthorized = UNAUTHORIZED;
 		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorFactory.createErrorResponse(
-				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
+			.body(errorFactory.createErrorResponse(unauthorized, "Unauthorized", exception.getMessage()));
 	}
 
 	@ExceptionHandler(InvalidJwtException.class)
@@ -201,8 +200,7 @@ public class GlobalExceptionHandler {
 		HttpStatus unauthorized = UNAUTHORIZED;
 		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorFactory.createErrorResponse(
-				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
+			.body(errorFactory.createErrorResponse(unauthorized, "Unauthorized", exception.getMessage()));
 	}
 
 	@ExceptionHandler(ExpiredJwtException.class)
@@ -211,8 +209,7 @@ public class GlobalExceptionHandler {
 		HttpStatus unauthorized = UNAUTHORIZED;
 		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorFactory.createErrorResponse(
-				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
+			.body(errorFactory.createErrorResponse(unauthorized, "Unauthorized", exception.getMessage()));
 	}
 
 	@ExceptionHandler(InvalidVerificationTokenException.class)
@@ -221,8 +218,7 @@ public class GlobalExceptionHandler {
 		HttpStatus unauthorized = UNAUTHORIZED;
 		return ResponseEntity.status(unauthorized)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorFactory.createErrorResponse(
-				errorFactory.createError(unauthorized, "Unauthorized", exception.getMessage())));
+			.body(errorFactory.createErrorResponse(unauthorized, "Unauthorized", exception.getMessage()));
 	}
 
 	@ExceptionHandler(ConflictException.class)
@@ -231,8 +227,7 @@ public class GlobalExceptionHandler {
 		HttpStatus conflict = CONFLICT;
 		return ResponseEntity.status(conflict)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorFactory.createErrorResponse(
-				errorFactory.createError(conflict, "Conflict", exception.getMessage())));
+			.body(errorFactory.createErrorResponse(conflict, "Conflict", exception.getMessage()));
 	}
 
 	@ExceptionHandler(CacheException.class)
@@ -241,8 +236,8 @@ public class GlobalExceptionHandler {
 		HttpStatus internalServerError = INTERNAL_SERVER_ERROR;
 		return ResponseEntity.status(internalServerError)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorFactory.createErrorResponse(errorFactory.createError(
-				internalServerError, "Internal server error", exception.getMessage())));
+			.body(errorFactory.createErrorResponse(
+				internalServerError, "Internal server error", exception.getMessage()));
 	}
 
 	@ExceptionHandler(ResourceNotFoundException.class)
@@ -251,8 +246,7 @@ public class GlobalExceptionHandler {
 		HttpStatus notFoundError = NOT_FOUND;
 		return ResponseEntity.status(notFoundError)
 			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorFactory.createErrorResponse(
-				errorFactory.createError(notFoundError, "Not found", exception.getMessage())));
+			.body(errorFactory.createErrorResponse(notFoundError, "Not found", exception.getMessage()));
 	}
 
 	@ExceptionHandler(InvalidPostException.class)
