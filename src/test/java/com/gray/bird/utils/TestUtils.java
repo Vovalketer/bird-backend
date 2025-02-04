@@ -1,5 +1,6 @@
 package com.gray.bird.utils;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -53,10 +54,10 @@ public class TestUtils {
 							  .credentialsNonExpired(true)
 							  .enabled(true)
 							  .role(role)
-							  .dateOfBirth(LocalDate.now().minus(randomInt(), ChronoUnit.WEEKS))
-							  .bio(null)
-							  .location(null)
-							  .profileImage(null)
+							  .dateOfBirth(LocalDate.now().minus(randomInt(7200), ChronoUnit.DAYS))
+							  .bio(UUID.randomUUID().toString())
+							  .location(UUID.randomUUID().toString())
+							  .profileImage("http://www.example.com/" + UUID.randomUUID().toString() + ".jpg")
 							  .build();
 		return user;
 	}
@@ -144,6 +145,18 @@ public class TestUtils {
 			.build();
 	}
 
+	public PostEntity createPost(UserEntity user) {
+		return createPost(user, ReplyType.EVERYONE, false, null);
+	}
+
+	public List<PostEntity> createPosts(UserEntity user, int count) {
+		List<PostEntity> posts = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			posts.add(createPost(user));
+		}
+		return posts;
+	}
+
 	public PostEntity createPost() {
 		return createPost(createUser(), ReplyType.EVERYONE, false, null);
 	}
@@ -229,5 +242,9 @@ public class TestUtils {
 
 	private long randomInt() {
 		return Math.abs(ThreadLocalRandom.current().nextInt());
+	}
+
+	private long randomInt(int max) {
+		return ThreadLocalRandom.current().nextInt(max);
 	}
 }
