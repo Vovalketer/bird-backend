@@ -80,8 +80,7 @@ public class UserService {
 	}
 
 	public UserProjection getUserById(UUID uuid) {
-		UserEntity user =
-			userRepository.findByUuid(uuid).orElseThrow(() -> new ApiException("No user found"));
+		UserEntity user = userRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException());
 		return userMapper.toUserProjection(user);
 	}
 
@@ -100,8 +99,7 @@ public class UserService {
 	}
 
 	public UUID getUserIdByUsername(String username) {
-		return userRepository.findUuidByUsername(username).orElseThrow(
-			() -> new ApiException("No user found"));
+		return userRepository.findUuidByUsername(username).orElseThrow(() -> new ResourceNotFoundException());
 	}
 
 	/*
@@ -115,15 +113,16 @@ public class UserService {
 
 	public UserEntity getUserEntityByEmail(String email) {
 		return userRepository.findByEmailIgnoreCase(email).orElseThrow(
-			() -> new ApiException("No user found with this email"));
+			() -> new ResourceNotFoundException("No user found with this email"));
 	}
 
 	public UserEntity getUserEntityById(Long userId) {
-		return userRepository.findById(userId).orElseThrow(() -> new ApiException("No user found"));
+		return userRepository.findById(userId).orElseThrow(
+			() -> new ResourceNotFoundException("User not found"));
 	}
 
 	public UserEntity getUserEntityByUuid(UUID uuid) {
-		return userRepository.findByUuid(uuid).orElseThrow(() -> new ApiException("No user found"));
+		return userRepository.findByUuid(uuid).orElseThrow(() -> new ResourceNotFoundException());
 	}
 
 	private UserEntity createUserEntity(UserCreationRequest request) {
