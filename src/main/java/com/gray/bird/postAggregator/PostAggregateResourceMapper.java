@@ -2,6 +2,9 @@ package com.gray.bird.postAggregator;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.gray.bird.common.json.ResourceMapper;
 import com.gray.bird.post.dto.PostAttributes;
 import com.gray.bird.post.dto.PostRelationships;
@@ -29,8 +32,10 @@ public class PostAggregateResourceMapper implements ResourceMapper<PostAggregate
 	}
 
 	private PostRelationships toRelationship(PostAggregate data) {
-		return new PostRelationships(data.post().userId().toString(),
-			data.post().parentPostId(),
-			data.media().stream().map(media -> media.id()).toList());
+		List<Long> mediaIds = new ArrayList<>();
+		if (data.media() != null) {
+			mediaIds.addAll(data.media().stream().map(media -> media.id()).toList());
+		}
+		return new PostRelationships(data.post().userId().toString(), data.post().parentPostId(), mediaIds);
 	}
 }
