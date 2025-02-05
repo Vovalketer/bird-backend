@@ -15,7 +15,8 @@ import com.gray.bird.post.dto.RepliesCount;
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
 	<T> Optional<T> findById(Long id, Class<T> type);
 	<T> List<T> findAllByIdIn(Iterable<Long> id, Class<T> type);
-	Page<Long> findRepliesByParentPostId(Long postId, Pageable pageable);
+	@Query("SELECT p.id FROM PostEntity p WHERE p.parentPostId = :postId")
+	Page<Long> findRepliesByParentPostId(@Param("postId") Long postId, Pageable pageable);
 
 	@Query("SELECT new com.gray.bird.post.dto.RepliesCount(p.parentPostId, COUNT(p.id)) FROM PostEntity p "
 		+ "WHERE p.parentPostId = :id "
