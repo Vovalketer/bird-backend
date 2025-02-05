@@ -35,8 +35,8 @@ public class PostRelationships {
 
 	public PostRelationships(@NotNull String userId, @Nullable Long parentId, Collection<Long> mediaIds) {
 		this.user = new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.USERS.getType(), userId));
-		if (parentId == null) {
-			this.parent =
+		if (parentId != null) {
+			this.parentPost =
 				new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.POSTS.getType(), parentId));
 		}
 		this.media = new RelationshipToMany<>(ResourceType.MEDIA.getType(), mediaIds);
