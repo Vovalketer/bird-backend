@@ -1,44 +1,47 @@
 package com.gray.bird.post;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceFactory;
-import com.gray.bird.config.ObjectMapperConfig;
+import com.gray.bird.common.ResourceType;
 import com.gray.bird.post.dto.PostProjection;
+import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.utils.TestUtils;
 
-@SpringBootTest(classes = {PostResourceMapper.class, ResourceFactory.class, ObjectMapperConfig.class})
+@ExtendWith(SpringExtension.class)
 public class PostResourceMapperTest {
-	@Autowired
-	private PostResourceMapper postResourceMapper;
-
+	private PostResourceMapper postResourceMapper = new PostResourceMapper();
 	private TestUtils testUtils = new TestUtils();
 
 	@Test
 	void testToResource() {
-		PostProjection postProjection = testUtils.createReplyPostProjection(1L);
-
-		ResourceData resource = postResourceMapper.toResource(postProjection);
+		Long parentId = 101L;
+		PostProjection postProjection = testUtils.createReplyPostProjection(parentId);
+		PostResource resource = postResourceMapper.toResource(postProjection);
 
 		Assertions.assertThat(resource).isNotNull();
-		Assertions.assertThat(resource.getId()).isEqualTo(postProjection.id().toString());
-		Assertions.assertThat(resource.getType()).isEqualTo("post");
+		// id
+		Assertions.assertThat(resource.getType()).isEqualTo(ResourceType.POSTS.getType());
+		Assertions.assertThat(resource.getId()).isEqualTo(postProjection.id());
+		// attributes
 		Assertions.assertThat(resource.getAttributes()).isNotNull();
-		Assertions.assertThat(resource.getAttribute("text")).isEqualTo(postProjection.text());
-		Assertions.assertThat(resource.getAttribute("replyType").toString())
-			.isEqualTo(postProjection.replyType().name());
-		Assertions.assertThat(resource.getAttribute("createdAt").toString());
+		Assertions.assertThat(resource.getAttributes().text()).isEqualTo(postProjection.text());
+		Assertions.assertThat(resource.getAttributes().createdAt()).isEqualTo(postProjection.createdAt());
+		Assertions.assertThat(resource.getAttributes().replyType()).isEqualTo(postProjection.replyType());
+		// relationships
 		Assertions.assertThat(resource.getRelationships()).isNotNull();
-		Assertions.assertThat(resource.getRelationshipToOne("parent")).isNotEmpty();
-		Assertions.assertThat(resource.getRelationshipToOne("parent").get().getData().getId())
-			.isEqualTo(postProjection.parentPostId().toString());
-		Assertions.assertThat(resource.getRelationshipToOne("user")).isNotEmpty();
-		Assertions.assertThat(resource.getRelationshipToOne("user").get().getData().getId())
+		Assertions.assertThat(resource.getRelationships().getUser()).isNotNull();
+		Assertions.assertThat(resource.getRelationships().getUser().getData().getId())
 			.isEqualTo(postProjection.userId().toString());
+		Assertions.assertThat(resource.getRelationships().getUser().getData().getType())
+			.isEqualTo(ResourceType.USERS.getType());
+		Assertions.assertThat(resource.getRelationships().getParentPost().getData().getId())
+			.isEqualTo(postProjection.parentPostId());
+		Assertions.assertThat(resource.getRelationships().getParentPost().getData().getType())
+			.isEqualTo(ResourceType.POSTS.getType());
+		// TODO: media relationship
 	}
 }
