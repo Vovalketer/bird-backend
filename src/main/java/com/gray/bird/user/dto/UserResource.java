@@ -1,5 +1,6 @@
 package com.gray.bird.user.dto;
 
+import com.gray.bird.common.ResourceType;
 import com.gray.bird.common.json.ResourceData;
 
 public class UserResource extends ResourceData<String, UserAttributes, Void> {
@@ -8,6 +9,6 @@ public class UserResource extends ResourceData<String, UserAttributes, Void> {
 	}
 
 	public static String userType() {
-		return "users";
+		return ResourceType.USERS.getType();
 	}
 }

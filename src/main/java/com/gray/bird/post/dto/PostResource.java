@@ -1,5 +1,6 @@
 package com.gray.bird.post.dto;
 
+import com.gray.bird.common.ResourceType;
 import com.gray.bird.common.json.ResourceData;
 
 public class PostResource extends ResourceData<Long, PostAttributes, PostRelationships> {
@@ -8,6 +9,6 @@ public class PostResource extends ResourceData<Long, PostAttributes, PostRelatio
 	}
 
 	public static String type() {
-		return "posts";
+		return ResourceType.POSTS.getType();
 	}
 }
