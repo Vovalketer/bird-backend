@@ -16,19 +16,19 @@ import com.gray.bird.common.json.ResourceIdentifier;
 @Getter
 public class PostRelationships {
 	RelationshipToOne<String> user;
-	RelationshipToOne<Long> parent; // might be better off as optional, to check later
+	RelationshipToOne<Long> parentPost; // might be better off as optional, to check later
 	RelationshipToMany<Long> media;
 
 	public PostRelationships(
 		@NotNull RelationshipToOne<String> user, @Nullable RelationshipToOne<Long> parent) {
 		this.user = user;
-		this.parent = parent;
+		this.parentPost = parent;
 	}
 
 	public PostRelationships(@NotNull String userId, @Nullable Long parentId) {
 		this.user = new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.USERS.getType(), userId));
 		if (parentId != null) {
-			this.parent =
+			this.parentPost =
 				new RelationshipToOne<>(new ResourceIdentifier<>(ResourceType.POSTS.getType(), parentId));
 		}
 	}
