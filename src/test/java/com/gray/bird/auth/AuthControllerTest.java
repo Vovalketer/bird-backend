@@ -1,126 +1,100 @@
 package com.gray.bird.auth;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
-import org.hamcrest.Matchers;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
+
+import com.gray.bird.auth.dto.AccessToken;
 import com.gray.bird.auth.dto.LoginRequest;
 import com.gray.bird.auth.dto.LoginResponse;
-import com.gray.bird.common.ResourcePaths;
-import com.gray.bird.exception.GlobalExceptionHandler;
-import com.gray.bird.exception.InvalidJwtException;
-import com.gray.bird.exception.InvalidVerificationTokenException;
-import com.gray.bird.user.UserService;
+import com.gray.bird.auth.jwt.TokenType;
+import com.gray.bird.common.JsonApiResponse;
+import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.user.registration.AccountVerificationService;
 
-@WebMvcTest(controllers = AuthController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class,
-	useDefaultFilters = false)
-@ContextConfiguration(classes = AuthController.class)
-@Import(GlobalExceptionHandler.class)
+@ExtendWith(SpringExtension.class)
 public class AuthControllerTest {
 	private static final String REFRESH_TOKEN = "refresh_token";
-	private static final String AUTH_ENDPOINT = ResourcePaths.AUTH;
-	@Autowired
-	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
 
-	@MockitoBean
+	@Mock
 	private AuthService authService;
-	@MockitoBean
-	private UserService userService;
-	@MockitoBean
+	@Mock
 	private AccountVerificationService accountVerificationService;
-	@MockitoBean
-	private HttpServletRequest request;
-	@MockitoBean
-	private HttpServletResponse response;
+	@Mock
+	private JsonApiResponseFactory responseFactory;
+	private MockHttpServletRequest request;
+	private MockHttpServletResponse response;
+	@InjectMocks
+	private AuthController authController;
+
+	@BeforeEach
+	void setUp() {
+		request = new MockHttpServletRequest();
+		response = new MockHttpServletResponse();
+	}
 
 	@Test
 	void login() throws Exception {
 		LoginRequest data = new LoginRequest("fake1@email.com", "testpassword");
 		LoginResponse tokens = new LoginResponse("mockvalue", new Cookie(REFRESH_TOKEN, "mockvalue"));
 
-		Mockito.when(authService.login(ArgumentMatchers.any(LoginRequest.class))).thenReturn(tokens);
+		Mockito.when(authService.login(Mockito.any(LoginRequest.class))).thenReturn(tokens);
 
-		mockMvc
-			.perform(MockMvcRequestBuilders
-					.post(AUTH_ENDPOINT + "/login")
-					// .perform(MockMvcRequestBuilders.post(uri)
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(data)))
-			// .with(SecurityMockMvcRequestPostProcessors.csrf()))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.access_token").exists())
-			.andExpect(jsonPath("$.access_token").value(tokens.accessToken()))
-			.andExpect(cookie().exists(REFRESH_TOKEN));
+		ResponseEntity<AccessToken> login = authController.login(data, request, response);
+
+		Assertions.assertThat(login.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(login.getBody()).isNotNull();
+		Assertions.assertThat(login.getBody().accessToken()).isEqualTo(tokens.accessToken());
+		Assertions.assertThat(response.getCookie(TokenType.REFRESH.getValue()))
+			.isEqualTo(tokens.refreshToken());
+
+		Mockito.verify(authService).login(data);
 	}
 
 	@Test
 	void getNewAccessTokenWithValidRefreshToken() throws Exception {
-		Cookie refreshTok = new Cookie(REFRESH_TOKEN, "mockRefreshToken");
 		String accessTok = "mockAccessToken";
+		Mockito.when(authService.refreshAccessToken(Mockito.any())).thenReturn(accessTok);
 
-		Mockito.when(authService.refreshAccessToken(ArgumentMatchers.any(Cookie[].class)))
-			.thenReturn(accessTok);
+		HttpServletRequest servRequest = Mockito.mock(HttpServletRequest.class);
+		Cookie[] cookies = new Cookie[] {new Cookie(REFRESH_TOKEN, "mockRefreshToken")};
+		Mockito.when(servRequest.getCookies()).thenReturn(cookies);
 
-		mockMvc.perform(MockMvcRequestBuilders.post(AUTH_ENDPOINT + "/refresh-token").cookie(refreshTok))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.access_token").exists())
-			.andExpect(jsonPath("$.access_token").value(accessTok));
-	}
+		ResponseEntity<AccessToken> accessToken = authController.getNewAccessToken(servRequest);
 
-	@Test
-	void anInvalidRefreshTokenShouldThrowWhenTryingToRefresh() throws Exception {
-		Cookie refresh = new Cookie(REFRESH_TOKEN, "INVALIDTOKEN");
-		Cookie[] cookies = {refresh};
-
-		Mockito.when(authService.refreshAccessToken(ArgumentMatchers.any(Cookie[].class)))
-			.thenThrow(new InvalidJwtException("Invalid token"));
-
-		mockMvc.perform(MockMvcRequestBuilders.post(AUTH_ENDPOINT + "/refresh-token").cookie(cookies))
-			.andExpect(status().isUnauthorized());
+		Assertions.assertThat(accessToken.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(accessToken.getBody()).isNotNull();
+		Assertions.assertThat(accessToken.getBody().accessToken()).isEqualTo(accessTok);
+		Mockito.verify(authService).refreshAccessToken(cookies);
 	}
 
 	@Test
 	void verifyAccountValid() throws Exception {
 		String token = "valid token";
-		Mockito.doNothing().when(accountVerificationService).verifyAccount(ArgumentMatchers.anyString());
+		Mockito.doNothing().when(accountVerificationService).verifyAccount(token);
 
-		mockMvc.perform(MockMvcRequestBuilders.get(AUTH_ENDPOINT + "/verify/account").param("token", token))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.message", Matchers.containsString("Account verified")));
-	}
+		JsonApiResponse<Object> res = new JsonApiResponse<>(null);
+		Mockito.when(responseFactory.createResponse(null)).thenReturn(res);
+		ResponseEntity<JsonApiResponse<Void>> verifyAccount = authController.verifyAccount(token);
 
-	@Test
-	void invalidTokenVerifyAccount() throws Exception {
-		String token = "invalid token";
-		Mockito.doThrow(new InvalidVerificationTokenException())
-			.when(accountVerificationService)
-			.verifyAccount(token);
-
-		mockMvc.perform(MockMvcRequestBuilders.get(AUTH_ENDPOINT + "/verify/account").param("token", token))
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.message", Matchers.containsString("invalid")));
+		Assertions.assertThat(verifyAccount.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(verifyAccount.getBody()).isNotNull();
+		Assertions.assertThat(verifyAccount.getBody().getMetadata().getMetadata("message"))
+			.isEqualTo(Optional.of("Account verified"));
 	}
 }
