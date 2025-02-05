@@ -211,13 +211,13 @@ public class TestUtils {
 	public PostAggregate createPostAggregateWithoutMedia() {
 		PostProjection postProjection = createPostProjection();
 		PostInteractions postInteractions = createPostInteractions(postProjection.id());
-		return new PostAggregate(postProjection, null, Optional.of(postInteractions));
+		return new PostAggregate(postProjection, new ArrayList<>(), Optional.of(postInteractions));
 	}
 
 	public PostAggregate createReplyPostAggregateWithoutMedia(Long parentPostId) {
 		PostProjection replyPostProjection = createReplyPostProjection(parentPostId);
 		PostInteractions postInteractions = createPostInteractions(replyPostProjection.id());
-		return new PostAggregate(replyPostProjection, null, Optional.of(postInteractions));
+		return new PostAggregate(replyPostProjection, new ArrayList<>(), Optional.of(postInteractions));
 	}
 
 	public List<PostAggregate> createPostAggregateWithoutMedia(int count) {
