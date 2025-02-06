@@ -18,7 +18,7 @@ public class TimelineService {
 	private final TimelineRepository repository;
 
 	public Page<TimelineEntryDto> getHomeTimeline(UUID userId, Pageable pageable) {
-		return repository.findByIdUserId(userId, pageable);
+		return repository.findByUserId(userId, pageable);
 	}
 
 	@Transactional

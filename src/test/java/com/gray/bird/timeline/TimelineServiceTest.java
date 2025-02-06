@@ -51,11 +51,11 @@ public class TimelineServiceTest {
 		Pageable pageable = PageRequest.of(0, 10);
 		@SuppressWarnings("unchecked")
 		Page<TimelineEntryDto> page = Mockito.mock(Page.class);
-		Mockito.when(repository.findByIdUserId(userId, pageable)).thenReturn(page);
+		Mockito.when(repository.findByUserId(userId, pageable)).thenReturn(page);
 
 		Page<TimelineEntryDto> homeTimeline = service.getHomeTimeline(userId, pageable);
 
 		Assertions.assertThat(homeTimeline).isEqualTo(page);
-		Mockito.verify(repository).findByIdUserId(userId, pageable);
+		Mockito.verify(repository).findByUserId(userId, pageable);
 	}
 }
