@@ -30,7 +30,7 @@ import com.gray.bird.timeline.dto.TimelineEntryDto;
 import com.gray.bird.user.UserService;
 
 @RestController
-@RequestMapping(ResourcePaths.USERS_USERNAME_TIMELINES)
+@RequestMapping(ResourcePaths.FEEDS)
 @RequiredArgsConstructor
 public class TimelineController {
 	private final TimelineService timelineService;

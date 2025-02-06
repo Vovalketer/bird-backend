@@ -11,5 +11,5 @@ public class ResourcePaths {
 	public static final String AUTH = BASE + "/auth";
 	public static final String USERS = BASE + "/users";
 	public static final String USERS_USERNAME_POSTS = USERS + "/{username}/posts";
-	public static final String USERS_USERNAME_TIMELINES = USERS + "/{username}/timelines";
+	public static final String FEEDS = BASE + "/feeds";
 }

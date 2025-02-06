@@ -29,7 +29,7 @@ public class TimelineControllerIT {
 	@Autowired
 	private MockMvc mockMvc;
 
-	private String baseUrl = ResourcePaths.USERS_USERNAME_TIMELINES;
+	private String baseUrl = ResourcePaths.FEEDS;
 
 	@Nested
 	class UnauthenticatedUser {}
