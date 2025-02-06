@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.gray.bird.common.JsonApiResponse;
 import com.gray.bird.common.PaginationMetadata;
 import com.gray.bird.common.ResourcePaths;
-import com.gray.bird.common.jsonApi.ResourceCollectionAggregate;
-import com.gray.bird.common.jsonApi.ResourceData;
-import com.gray.bird.common.jsonApi.ResourceResponseFactory;
+import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataUtils;
+import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
@@ -35,8 +35,8 @@ public class TimelineController {
 	private TimelineService timelineService;
 	private PostAggregatorService postAggregatorService;
 	private UserService userService;
-	private ResourceResponseFactory responseFactory;
 	private MetadataUtils metadataUtils;
+	private JsonApiResponseFactory responseFactory;
 	private PostAggregateResourceMapper postAggregateResourceMapper;
 
 	@GetMapping("/following")
@@ -46,7 +46,7 @@ public class TimelineController {
 	}
 
 	@GetMapping("/home")
-	public ResponseEntity<ResourceCollectionAggregate> getUserTimeline(@PathVariable String username,
+	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserTimeline(@PathVariable String username,
 		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		UUID userId = userService.getUserIdByUsername(username);
@@ -54,10 +54,10 @@ public class TimelineController {
 		Page<TimelineEntryDto> homeTimeline = timelineService.getHomeTimeline(userId, pageable);
 		List<PostAggregate> posts = postAggregatorService.getPosts(
 			homeTimeline.getContent().stream().map(TimelineEntryDto::postId).collect(Collectors.toList()));
-		List<ResourceData> resources =
+		List<PostResource> resources =
 			posts.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
 
-		ResourceCollectionAggregate response = responseFactory.createResponse(resources);
+		JsonApiResponse<List<PostResource>> response = responseFactory.createResponse(resources);
 		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(homeTimeline);
 		response.addMetadata("pagination", paginationMetadata);
 		return ResponseEntity.ok(response);
