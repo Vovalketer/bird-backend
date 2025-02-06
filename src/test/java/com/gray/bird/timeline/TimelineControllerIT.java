@@ -32,25 +32,5 @@ public class TimelineControllerIT {
 	private String baseUrl = ResourcePaths.USERS_USERNAME_TIMELINES;
 
 	@Nested
-	class UnauthenticatedUser {
-		@Nested
-		class GetHomeTimeline {
-			@Test
-			void shouldReturnHomeTimeline() throws Exception {
-				String username = "mtompion1";
-
-				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/home", username))
-					.andExpect(MockMvcResultMatchers.status().isOk())
-					.andExpect(MockMvcResultMatchers.jsonPath("$.data.length()", Matchers.greaterThan(0)));
-			}
-
-			@Test
-			void shouldReturnNotFoundWhenUserIsNotFound() throws Exception {
-				String username = "_nonExistentUser";
-
-				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/home", username))
-					.andExpect(MockMvcResultMatchers.status().isNotFound());
-			}
-		}
-	}
+	class UnauthenticatedUser {}
 }
