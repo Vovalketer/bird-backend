@@ -32,12 +32,12 @@ import com.gray.bird.user.UserService;
 @RequestMapping(ResourcePaths.USERS_USERNAME_TIMELINES)
 @RequiredArgsConstructor
 public class TimelineController {
-	private TimelineService timelineService;
-	private PostAggregatorService postAggregatorService;
-	private UserService userService;
-	private MetadataUtils metadataUtils;
-	private JsonApiResponseFactory responseFactory;
-	private PostAggregateResourceMapper postAggregateResourceMapper;
+	private final TimelineService timelineService;
+	private final PostAggregatorService postAggregatorService;
+	private final UserService userService;
+	private final MetadataUtils metadataUtils;
+	private final JsonApiResponseFactory responseFactory;
+	private final PostAggregateResourceMapper postAggregateResourceMapper;
 
 	@GetMapping("/following")
 	public ResponseEntity<?> getFollowingTimeline(@RequestParam String username) {
