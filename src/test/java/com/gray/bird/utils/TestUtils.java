@@ -186,6 +186,12 @@ public class TestUtils {
 		return postMapper.toPostProjection(post);
 	}
 
+	public PostProjection createPostProjection(UUID userId, Long id) {
+		PostEntity post = createPost(userId);
+		post.setId(id);
+		return postMapper.toPostProjection(post);
+	}
+
 	public PostProjection createReplyPostProjection(Long parentPostId) {
 		PostEntity post = createPost();
 		post.setParentPostId(parentPostId);
@@ -214,13 +220,19 @@ public class TestUtils {
 		return new PostAggregate(postProjection, new ArrayList<>(), Optional.of(postInteractions));
 	}
 
+	public PostAggregate createPostAggregateWithoutMedia(UUID userId, Long id) {
+		PostProjection postProjection = createPostProjection(userId, id);
+		PostInteractions postInteractions = createPostInteractions(id);
+		return new PostAggregate(postProjection, new ArrayList<>(), Optional.of(postInteractions));
+	}
+
 	public PostAggregate createReplyPostAggregateWithoutMedia(Long parentPostId) {
 		PostProjection replyPostProjection = createReplyPostProjection(parentPostId);
 		PostInteractions postInteractions = createPostInteractions(replyPostProjection.id());
 		return new PostAggregate(replyPostProjection, new ArrayList<>(), Optional.of(postInteractions));
 	}
 
-	public List<PostAggregate> createPostAggregateWithoutMedia(int count) {
+	public List<PostAggregate> createListOfPostAggregateWithoutMedia(int count) {
 		List<PostAggregate> postAggregates = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
 			postAggregates.add(createPostAggregateWithoutMedia());
