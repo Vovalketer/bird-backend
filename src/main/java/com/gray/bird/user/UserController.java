@@ -30,8 +30,11 @@ import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataUtils;
 import com.gray.bird.post.PostService;
 import com.gray.bird.post.dto.PostResource;
+import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
+import com.gray.bird.timeline.TimelineService;
+import com.gray.bird.timeline.dto.TimelineEntryDto;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.dto.UserResource;
@@ -44,6 +47,7 @@ public class UserController {
 	private final UserService userService;
 	private final PostAggregatorService postAggregatorService;
 	private final PostService postService;
+	private final TimelineService timelineService;
 	private final FollowService followService;
 	private final PostAggregateResourceMapper postAggregateResourceMapper;
 	private final UserResourceMapper userResourceMapper;
@@ -85,6 +89,26 @@ public class UserController {
 		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(postIds);
 		response.addMetadata("pagination", paginationMetadata);
 
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/{username}/timeline")
+	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserTimeline(@PathVariable String username,
+		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		UUID userId = userService.getUserIdByUsername(username);
+		// to define whether the response is a dto or a raw Long
+		Page<TimelineEntryDto> homeTimeline = timelineService.getHomeTimeline(userId, pageable);
+		System.out.println("TIMELINE : " + homeTimeline.getContent());
+		List<PostAggregate> posts = postAggregatorService.getPosts(
+			homeTimeline.getContent().stream().map(TimelineEntryDto::postId).collect(Collectors.toList()));
+		System.out.println("POSTS: " + posts);
+		List<PostResource> resources =
+			posts.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
+		System.out.println("RESOURCES: " + resources);
+		JsonApiResponse<List<PostResource>> response = responseFactory.createResponse(resources);
+		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(homeTimeline);
+		response.addMetadata("pagination", paginationMetadata);
 		return ResponseEntity.ok(response);
 	}
 

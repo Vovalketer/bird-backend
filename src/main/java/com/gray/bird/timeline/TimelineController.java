@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,23 +44,5 @@ public class TimelineController {
 	public ResponseEntity<?> getFollowingTimeline(@RequestParam String username) {
 		// following, AUTH REQUIRED
 		return null;
-	}
-
-	@GetMapping("/home")
-	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserTimeline(@PathVariable String username,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		UUID userId = userService.getUserIdByUsername(username);
-		// to define whether the response is a dto or a raw Long
-		Page<TimelineEntryDto> homeTimeline = timelineService.getHomeTimeline(userId, pageable);
-		List<PostAggregate> posts = postAggregatorService.getPosts(
-			homeTimeline.getContent().stream().map(TimelineEntryDto::postId).collect(Collectors.toList()));
-		List<PostResource> resources =
-			posts.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
-
-		JsonApiResponse<List<PostResource>> response = responseFactory.createResponse(resources);
-		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(homeTimeline);
-		response.addMetadata("pagination", paginationMetadata);
-		return ResponseEntity.ok(response);
 	}
 }

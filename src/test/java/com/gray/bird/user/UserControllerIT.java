@@ -13,9 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +43,16 @@ import com.gray.bird.utils.TestUtils;
 @AutoConfigureMockMvc
 @Testcontainers
 @Import(TestcontainersConfig.class)
-@Sql(value = "/sql/mockaroo/roles.sql")
-@Sql(value = "/sql/mockaroo/users.sql")
+@Sql(scripts = {"/sql/mockaroo/roles.sql",
+		 "/sql/mockaroo/users.sql",
+		 "/sql/mockaroo/posts.sql",
+		 "/sql/mockaroo/timelines.sql"},
+	executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"/sql/teardown/roles.sql",
+		 "/sql/teardown/users.sql",
+		 "/sql/teardown/posts.sql",
+		 "/sql/teardown/timelines.sql"},
+	executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 public class UserControllerIT {
 	@LocalServerPort
 	private int port;
@@ -98,7 +106,6 @@ public class UserControllerIT {
 		}
 
 		@Nested
-		@Sql(scripts = "/sql/mockaroo/posts.sql")
 		class GetPosts {
 			@Test
 			void shouldRetrieveUserPosts() throws Exception {
@@ -251,6 +258,26 @@ public class UserControllerIT {
 				String username = "someUser";
 				mockMvc.perform(MockMvcRequestBuilders.delete(baseUrl + "/{username}/following", username))
 					.andExpect(MockMvcResultMatchers.status().isUnauthorized());
+			}
+		}
+
+		@Nested
+		class GetHomeTimeline {
+			@Test
+			void shouldReturnHomeTimeline() throws Exception {
+				String username = "mtompion1";
+
+				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/{username}/timeline", username))
+					.andExpect(MockMvcResultMatchers.status().isOk())
+					.andExpect(MockMvcResultMatchers.jsonPath("$.data.length()", Matchers.greaterThan(0)));
+			}
+
+			@Test
+			void shouldReturnNotFoundWhenUserIsNotFound() throws Exception {
+				String username = "_nonExistentUser";
+
+				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/{username}/timelne", username))
+					.andExpect(MockMvcResultMatchers.status().isNotFound());
 			}
 		}
 	}

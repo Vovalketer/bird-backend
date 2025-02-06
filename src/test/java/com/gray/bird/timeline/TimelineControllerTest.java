@@ -48,47 +48,4 @@ public class TimelineControllerTest {
 	private TimelineController timelineController;
 	private TestUtils testUtils = new TestUtils();
 	private TestResources testResources = new TestResources();
-
-	@Test
-	void testGetUserTimeline() {
-		String username = "testUsername";
-		int pageNumber = 0;
-		int pageSize = 10;
-
-		UUID userId = UUID.randomUUID();
-		Mockito.when(userService.getUserIdByUsername(username)).thenReturn(userId);
-
-		Page<TimelineEntryDto> homeTimeline =
-			new PageImpl<>(List.of(new TimelineEntryDto(userId, 100L), new TimelineEntryDto(userId, 101L)));
-		Mockito.when(timelineService.getHomeTimeline(Mockito.eq(userId), Mockito.any(Pageable.class)))
-			.thenReturn(homeTimeline);
-
-		List<PostAggregate> posts = List.of(testUtils.createPostAggregateWithoutMedia(userId, 100L),
-			testUtils.createPostAggregateWithoutMedia(userId, 101L));
-		Mockito.when(postAggregatorService.getPosts(Mockito.anyList())).thenReturn(posts);
-
-		List<PostResource> resources =
-			List.of(testResources.createPostResource(100L, userId.toString(), null),
-				testResources.createPostResource(101L, userId.toString(), null));
-		int resourceCount = 0;
-		Mockito.when(postAggregateResourceMapper.toResource(Mockito.any(PostAggregate.class)))
-			.thenReturn(resources.get(resourceCount++));
-
-		JsonApiResponse<List<PostResource>> response = new JsonApiResponse<>(resources);
-		// type hint to avoid issues with generics, otherwise it'll demand for a List<Object> as return type
-		Mockito.<JsonApiResponse<List<PostResource>>>when(responseFactory.createResponse(Mockito.anyList()))
-			.thenReturn(response);
-
-		PaginationMetadata paginationMetadata = PaginationMetadata.fromPage(homeTimeline);
-		Mockito.when(metadataUtils.extractPaginationMetadata(homeTimeline)).thenReturn(paginationMetadata);
-
-		ResponseEntity<JsonApiResponse<List<PostResource>>> userTimeline =
-			timelineController.getUserTimeline(username, pageNumber, pageSize);
-
-		Assertions.assertThat(userTimeline.getStatusCode()).isEqualTo(HttpStatus.OK);
-		Assertions.assertThat(userTimeline.getBody()).isNotNull();
-		Assertions.assertThat(userTimeline.getBody().getData()).isNotNull();
-		Assertions.assertThat(userTimeline.getBody().getData().size()).isEqualTo(2);
-		Assertions.assertThat(userTimeline.getBody().getMetadata()).isNotNull();
-	}
 }
