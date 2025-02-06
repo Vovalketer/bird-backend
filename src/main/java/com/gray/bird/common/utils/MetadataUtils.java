@@ -8,7 +8,7 @@ import com.gray.bird.common.PaginationMetadata;
 
 @Component
 public class MetadataUtils {
-	public <T> PaginationMetadata extractPaginationMetadata(Page<T> page) {
+	public PaginationMetadata extractPaginationMetadata(Page<?> page) {
 		int numberOfElements = page.getNumberOfElements();
 		Pageable pageable = page.getPageable();
 		long totalElements = page.getTotalElements();
