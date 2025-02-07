@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.gray.bird.user.UserService;
@@ -20,9 +21,37 @@ public class FollowService {
 		repo.save(followEntity);
 	}
 
+	public void followUser(UUID currentUser, UUID userToFollow) {
+		FollowEntity followEntity = new FollowEntity(currentUser, userToFollow);
+		repo.save(followEntity);
+	}
+
 	public void unfollowUser(UUID currentUser, String usernameToUnfollow) {
 		UUID userToUnfollow = userService.getUserIdByUsername(usernameToUnfollow);
 		FollowEntity followEntity = new FollowEntity(currentUser, userToUnfollow);
 		repo.delete(followEntity);
+	}
+
+	public boolean isFollowing(UUID currentUser, String userToCheck) {
+		UUID userToCheckId = userService.getUserIdByUsername(userToCheck);
+		return repo.existsByFollowingAndFollowedId(currentUser, userToCheckId);
+	}
+
+	public List<UUID> getFollowing(UUID user) {
+		return repo.findFollowing(user);
+	}
+
+	public List<UUID> getFollowing(String username) {
+		UUID userId = userService.getUserIdByUsername(username);
+		return repo.findFollowing(userId);
+	}
+
+	public List<UUID> getFollowers(UUID user) {
+		return repo.findFollowed(user);
+	}
+
+	public List<UUID> getFollowers(String username) {
+		UUID userId = userService.getUserIdByUsername(username);
+		return repo.findFollowing(userId);
 	}
 }
