@@ -21,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "follows")
 @EntityListeners(AuditingEntityListener.class)
-public class FollowEntity {
+class FollowEntity {
 	@EmbeddedId
 	private FollowId id;
 

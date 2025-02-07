@@ -35,8 +35,7 @@ import com.gray.bird.auth.jwt.JwtService;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.testConfig.TestcontainersConfig;
 import com.gray.bird.user.dto.UserCreationRequest;
-import com.gray.bird.user.follow.FollowEntity;
-import com.gray.bird.user.follow.FollowRepository;
+import com.gray.bird.user.follow.FollowService;
 import com.gray.bird.utils.TestUtils;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -292,7 +291,7 @@ public class UserControllerIT {
 		@Autowired
 		private UserRepository userRepository;
 		@Autowired
-		private FollowRepository followRepository;
+		private FollowService followService;
 
 		@BeforeEach
 		void setUp() {
@@ -325,7 +324,7 @@ public class UserControllerIT {
 			@Rollback
 			void shouldUnfollowAnotherUser() throws Exception {
 				String username = randomUser.getUsername();
-				followRepository.save(new FollowEntity(userId, randomUser.getUuid()));
+				followService.followUser(userId, randomUser.getUuid());
 				mockMvc
 					.perform(MockMvcRequestBuilders.delete(baseUrl + "/{username}/following", username)
 							.header(HttpHeaders.AUTHORIZATION, accessToken))
