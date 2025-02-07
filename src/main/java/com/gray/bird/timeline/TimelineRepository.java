@@ -12,7 +12,12 @@ import com.gray.bird.timeline.dto.TimelineEntryDto;
 
 interface TimelineRepository extends JpaRepository<TimelineEntity, TimelineId> {
 	@Query("SELECT new com.gray.bird.timeline.dto.TimelineEntryDto(t.id.userId, t.id.postId) FROM "
-		   + "TimelineEntity t WHERE t.id.userId = :userId")
+		+ "TimelineEntity t WHERE t.id.userId = :userId")
 	Page<TimelineEntryDto>
 	findByUserId(@Param("userId") UUID userId, Pageable pageable);
+
+	@Query("SELECT new com.gray.bird.timeline.dto.TimelineEntryDto(t.id.userId, t.id.postId) FROM "
+		+ "TimelineEntity t WHERE t.id.userId IN :userIds")
+	Page<TimelineEntryDto>
+	findByUserIdsIn(Iterable<UUID> userIds, Pageable pageable);
 }
