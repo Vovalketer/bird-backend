@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.UUID;
 
-public interface FollowRepository extends JpaRepository<FollowEntity, FollowId> {
+interface FollowRepository extends JpaRepository<FollowEntity, FollowId> {
 	@Query("SELECT CASE WHEN COUNT(f)>0 THEN true ELSE false END "
 		+ "FROM FollowEntity f WHERE f.id.followingUser = :followingUser "
 		+ "AND f.id.followedUser = :followedUser")
