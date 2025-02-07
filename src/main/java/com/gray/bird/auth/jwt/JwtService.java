@@ -60,12 +60,6 @@ public class JwtService {
 		return true;
 	}
 
-	public TokenData getDataFromToken(String token) {
-		Claims claims = claimsFunction.apply(token);
-		String roleString = (String) claims.get(RoleConstants.ROLE);
-		return new TokenData(claims.getSubject(), claims.getAudience(), RoleType.getType(roleString));
-	}
-
 	public Authentication getAuthenticationFromAccessToken(String token) {
 		Claims claims = claimsFunction.apply(token);
 		// WARNING

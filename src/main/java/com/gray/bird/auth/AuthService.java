@@ -6,8 +6,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -158,14 +156,5 @@ public class AuthService {
 			return true;
 		}
 		throw new InvalidJwtException();
-	}
-
-	public String getPrincipalUsername() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String principal = (String) authentication.getPrincipal();
-		if (principal != null && principal.length() > 0) {
-			return principal;
-		}
-		throw new UnauthorizedException();
 	}
 }
