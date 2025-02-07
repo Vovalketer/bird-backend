@@ -162,7 +162,6 @@ public class UserControllerIT {
 					.perform(MockMvcRequestBuilders.post(baseUrl + "/register")
 							.content(objectMapper.writeValueAsString(userCreationRequest))
 							.contentType(MediaType.APPLICATION_JSON))
-					.andDo(MockMvcResultHandlers.print())
 					.andExpect(MockMvcResultMatchers.status().isBadRequest())
 					.andExpect(MockMvcResultMatchers.jsonPath("$.errors.size()").value(4));
 			}

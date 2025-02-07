@@ -13,7 +13,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,7 +110,6 @@ public class PostControllerIT {
 							.header(HttpHeaders.AUTHORIZATION, accessToken)
 							.contentType(MediaType.APPLICATION_JSON)
 							.content(objectMapper.writeValueAsString(req)))
-					.andDo(MockMvcResultHandlers.print())
 					.andExpect(MockMvcResultMatchers.status().isCreated())
 					.andExpect(MockMvcResultMatchers.jsonPath("$.data.id").exists())
 					.andExpect(

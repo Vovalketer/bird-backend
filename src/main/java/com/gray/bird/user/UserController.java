@@ -99,13 +99,10 @@ public class UserController {
 		UUID userId = userService.getUserIdByUsername(username);
 		// to define whether the response is a dto or a raw Long
 		Page<TimelineEntryDto> homeTimeline = timelineService.getHomeTimeline(userId, pageable);
-		System.out.println("TIMELINE : " + homeTimeline.getContent());
 		List<PostAggregate> posts = postAggregatorService.getPosts(
 			homeTimeline.getContent().stream().map(TimelineEntryDto::postId).collect(Collectors.toList()));
-		System.out.println("POSTS: " + posts);
 		List<PostResource> resources =
 			posts.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
-		System.out.println("RESOURCES: " + resources);
 		JsonApiResponse<List<PostResource>> response = responseFactory.createResponse(resources);
 		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(homeTimeline);
 		response.addMetadata("pagination", paginationMetadata);

@@ -33,7 +33,6 @@ public class LikeController {
 
 	@PostMapping
 	public ResponseEntity<?> likePost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		// TODO: make sure the.userId is the same as the one in the JWT
 		likeService.likePost(userId, postId);
 
 		return ResponseEntity.ok(null);
