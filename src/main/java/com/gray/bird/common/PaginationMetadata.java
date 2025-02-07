@@ -13,12 +13,12 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 public class PaginationMetadata implements Serializable {
-	long totalElements;
-	int numberOfElements;
-	boolean first;
-	boolean last;
-	boolean empty;
-	Pageable pageable;
+	private long totalElements;
+	private int numberOfElements;
+	private boolean first;
+	private boolean last;
+	private boolean empty;
+	private Pageable pageable;
 
 	// coupled with Spring boot
 	public static PaginationMetadata fromPage(Page<?> page) {
