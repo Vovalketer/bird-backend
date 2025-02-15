@@ -306,6 +306,24 @@ public class UserControllerIT {
 		}
 
 		@Nested
+		class GetUser {
+			@Test
+			void shouldReturnUserProfileOfTheCurrentUser() throws Exception {
+				mockMvc
+					.perform(
+						MockMvcRequestBuilders.get(baseUrl).header(HttpHeaders.AUTHORIZATION, accessToken))
+					.andExpect(MockMvcResultMatchers.status().isOk())
+					.andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(user.getUuid().toString()));
+			}
+
+			@Test
+			void shouldReturnUnauthorizedWhenNotLoggedIn() throws Exception {
+				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl))
+					.andExpect(MockMvcResultMatchers.status().isNotFound());
+			}
+		}
+
+		@Nested
 		class Following {
 			@Test
 			@Transactional
