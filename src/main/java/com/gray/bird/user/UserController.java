@@ -122,6 +122,16 @@ public class UserController {
 		return ResponseEntity.ok(null);
 	}
 
+	@GetMapping
+	public ResponseEntity<JsonApiResponse<UserResource>> getCurrentUser(
+		@AuthenticationPrincipal UUID userId) {
+		UserProjection user = userService.getUserById(userId);
+		JsonApiResponse<UserResource> response =
+			responseFactory.createResponse(userResourceMapper.toResource(user));
+
+		return ResponseEntity.ok(response);
+	}
+
 	// TODO: consider making an URI factory/provider
 	private URI getUri(String username) {
 		return URI.create(ResourcePaths.USERS + "/" + username);

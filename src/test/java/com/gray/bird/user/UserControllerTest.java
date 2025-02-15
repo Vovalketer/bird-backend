@@ -30,8 +30,10 @@ import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
 import com.gray.bird.timeline.TimelineService;
 import com.gray.bird.timeline.dto.TimelineEntryDto;
+import com.gray.bird.user.dto.UserAttributes;
 import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
+import com.gray.bird.user.dto.UserRelationships;
 import com.gray.bird.user.dto.UserResource;
 import com.gray.bird.user.follow.FollowService;
 import com.gray.bird.utils.TestResources;
@@ -226,5 +228,31 @@ public class UserControllerTest {
 		Assertions.assertThat(userTimeline.getBody().getData()).isNotNull();
 		Assertions.assertThat(userTimeline.getBody().getData().size()).isEqualTo(2);
 		Assertions.assertThat(userTimeline.getBody().getMetadata()).isNotNull();
+	}
+
+	@Test
+	void testGetCurrentUser() {
+		UUID userId = UUID.randomUUID();
+		UserProjection user = testUtils.createUserProjection(userId);
+		Mockito.when(userService.getUserById(userId)).thenReturn(user);
+
+		UserResource userResource = new UserResource(user.uuid().toString(),
+			UserAttributes.builder()
+				.username(user.username())
+				.handle(user.handle())
+				.dateOfBirth(user.dateOfBirth())
+				.build(),
+			new UserRelationships());
+		Mockito.when(userResourceMapper.toResource(user)).thenReturn(userResource);
+
+		JsonApiResponse<UserResource> response = new JsonApiResponse<>(userResource);
+		Mockito.when(responseFactory.createResponse(userResource)).thenReturn(response);
+
+		ResponseEntity<JsonApiResponse<UserResource>> currentUser = userController.getCurrentUser(userId);
+
+		Assertions.assertThat(currentUser.getStatusCode()).isEqualTo(HttpStatus.OK);
+		Assertions.assertThat(currentUser.getBody()).isNotNull();
+		Assertions.assertThat(currentUser.getBody().getData()).isNotNull();
+		Assertions.assertThat(currentUser.getBody().getData()).isEqualTo(userResource);
 	}
 }
