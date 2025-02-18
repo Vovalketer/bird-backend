@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -21,6 +22,7 @@ public class Metadata {
 		metadata = new HashMap<>();
 	}
 
+	@JsonAnyGetter
 	public Map<String, Object> getMetadata() {
 		return metadata;
 	}
