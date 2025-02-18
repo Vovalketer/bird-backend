@@ -20,21 +20,21 @@ import com.gray.bird.repost.dto.RepostsCount;
 @Service
 @RequiredArgsConstructor
 public class PostInteractionsService {
-	private final LikeService likesQueryService;
-	private final RepostService repostQueryService;
+	private final LikeService likesService;
+	private final RepostService repostService;
 	private final PostService postService;
 
 	public PostInteractions getInteractionsById(Long id) {
-		Long likesCount = likesQueryService.getLikesCountByPostId(id).likesCount();
-		Long repostCount = repostQueryService.getRepostCountByPostId(id).repostsCount();
+		Long likesCount = likesService.getLikesCountByPostId(id).likesCount();
+		Long repostCount = repostService.getRepostCountByPostId(id).repostsCount();
 		Long repliesCount = postService.getRepliesCountByPostId(id).repliesCount();
 
 		return new PostInteractions(id, repliesCount, likesCount, repostCount);
 	}
 
 	public List<PostInteractions> getAllInteractionsByIds(Collection<Long> postIds) {
-		List<LikesCount> likeCounts = likesQueryService.getLikesCountByPostIds(postIds);
-		List<RepostsCount> repostCounts = repostQueryService.getRepostCountByPostIds(postIds);
+		List<LikesCount> likeCounts = likesService.getLikesCountByPostIds(postIds);
+		List<RepostsCount> repostCounts = repostService.getRepostCountByPostIds(postIds);
 		List<RepliesCount> replyCounts = postService.getRepliesCountByPostIds(postIds);
 
 		// not the prettiest solution, but it works
