@@ -18,9 +18,7 @@ public class PostAggregateResourceMapper implements ResourceMapper<PostAggregate
 	public PostResource toResource(PostAggregate data) {
 		PostResource resource = new PostResource(data.post().id(), toAttributes(data), toRelationship(data));
 
-		if (data.interactions().isPresent()) {
-			resource.addMetadata(INTERACTIONS, data.interactions().get());
-		}
+		resource.addMetadata(INTERACTIONS, data.engagement());
 
 		return resource;
 	}
