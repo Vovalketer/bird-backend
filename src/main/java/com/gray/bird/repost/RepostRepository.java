@@ -32,4 +32,10 @@ public interface RepostRepository extends JpaRepository<RepostEntity, RepostId> 
 		+ "GROUP BY r.id.postId ")
 	List<RepostsCount>
 	countByPostIdsIn(@Param("postId") Iterable<Long> postIds);
+
+	@Query("SELECT r FROM RepostEntity r WHERE r.id.postId = :postId")
+	List<RepostEntity> findByPostId(@Param("postId") Long postId);
+
+	@Query("SELECT r FROM RepostEntity r WHERE r.id.postId IN :postId")
+	List<RepostEntity> findByPostIdsIn(@Param("postIds") Iterable<Long> postIds);
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.gray.bird.like.dto.LikeSummary;
 import com.gray.bird.like.dto.LikesCount;
 
 @Repository
@@ -32,4 +33,10 @@ public interface LikeRepository extends JpaRepository<LikeEntity, LikeId> {
 		+ "GROUP BY l.id.postId ")
 	List<LikesCount>
 	countByPostIdsIn(@Param("postIds") Iterable<Long> postIds);
+
+	@Query("SELECT l FROM LikeEntity l WHERE l.id.postId = :postId")
+	List<LikeEntity> findByPostId(@Param("postId") Long postId);
+
+	@Query("SELECT l FROM LikeEntity l WHERE l.id.postId IN :postId")
+	List<LikeEntity> findByPostIdsIn(@Param("postId") Iterable<Long> postId);
 }
