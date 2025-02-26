@@ -1,6 +1,7 @@
 package com.gray.bird.timeline;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import java.util.UUID;
 @Getter
 @Table(name = "timelines")
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 class TimelineEntity {
 	@EmbeddedId
 	private TimelineId id;
