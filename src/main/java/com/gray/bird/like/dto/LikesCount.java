@@ -1,4 +1,4 @@
 package com.gray.bird.like.dto;
 
-public record LikesCount(Long postId, Long likesCount) {
+public record LikesCount(Long postId, long likesCount) {
 }

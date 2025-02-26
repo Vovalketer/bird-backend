@@ -1,4 +1,4 @@
 package com.gray.bird.post.dto;
 
-public record RepliesCount(Long postId, Long repliesCount) {
+public record RepliesCount(Long postId, long repliesCount) {
 }
