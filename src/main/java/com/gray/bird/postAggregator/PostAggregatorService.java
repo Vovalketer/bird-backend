@@ -10,13 +10,14 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.gray.bird.media.MediaQueryService;
 import com.gray.bird.media.dto.MediaProjection;
 import com.gray.bird.post.PostService;
 import com.gray.bird.post.dto.PostProjection;
-import com.gray.bird.postAggregator.dto.PostInteractions;
+import com.gray.bird.postAggregator.dto.PostEngagement;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +33,11 @@ public class PostAggregatorService {
 		if (post.hasMedia()) {
 			media.addAll(mediaQueryService.getMediaByPostId(id));
 		}
-		PostInteractions interactions = interactionsQueryService.getInteractionsById(id);
-		PostAggregate aggregate = new PostAggregate(post, media, Optional.of(interactions));
+		PostEngagement engagement = interactionsQueryService.getInteractionsById(id);
+		PostAggregate aggregate = new PostAggregate(post, media, engagement);
+
+		return aggregate;
+	}
 
 		return aggregate;
 	}
@@ -41,20 +45,20 @@ public class PostAggregatorService {
 	public List<PostAggregate> getPosts(Collection<Long> ids) {
 		List<PostProjection> posts = postService.getAllPostsById(ids);
 		List<MediaProjection> media = mediaQueryService.getAllMediaByPostId(ids);
-		List<PostInteractions> interactions = interactionsQueryService.getAllInteractionsByIds(ids);
-		List<PostAggregate> packagedPosts = packagePosts(posts, media, interactions);
+		List<PostEngagement> engagement = interactionsQueryService.getAllInteractionsByIds(ids);
+		List<PostAggregate> packagedPosts = packagePosts(posts, media, engagement);
 		return packagedPosts;
 	}
 
 	private List<PostAggregate> packagePosts(
-		List<PostProjection> posts, List<MediaProjection> media, Collection<PostInteractions> interactions) {
+		List<PostProjection> posts, List<MediaProjection> media, Collection<PostEngagement> interactions) {
 		List<PostAggregate> res = new LinkedList<>();
 		for (PostProjection post : posts) {
 			List<MediaProjection> postMedia =
 				media.stream().filter(m -> m.postId() == post.id()).collect(Collectors.toList());
-			Optional<PostInteractions> postInteractions =
+			Optional<PostEngagement> postInteractions =
 				interactions.stream().filter(i -> i.postId() == post.id()).findFirst();
-			res.add(new PostAggregate(post, postMedia, postInteractions));
+			res.add(new PostAggregate(post, postMedia, postInteractions.get()));
 		}
 		return res;
 	}

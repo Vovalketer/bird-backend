@@ -15,7 +15,9 @@ import com.gray.bird.like.dto.LikeSummary;
 import com.gray.bird.like.dto.LikesCount;
 import com.gray.bird.post.PostService;
 import com.gray.bird.post.dto.RepliesCount;
-import com.gray.bird.postAggregator.dto.PostInteractions;
+import com.gray.bird.postAggregator.dto.PostEngagement;
+import com.gray.bird.postAggregator.dto.PostMetrics;
+import com.gray.bird.postAggregator.dto.UserPostInteractions;
 import com.gray.bird.repost.RepostService;
 import com.gray.bird.repost.dto.RepostSummary;
 import com.gray.bird.repost.dto.RepostsCount;
@@ -27,15 +29,16 @@ public class PostInteractionsService {
 	private final RepostService repostService;
 	private final PostService postService;
 
-	public PostInteractions getInteractionsById(Long id) {
+	public PostEngagement getInteractionsById(Long id) {
 		Long likesCount = likesService.getLikeSummary(id).likesCount();
 		Long repostCount = repostService.getRepostSummary(id).repostsCount();
 		Long repliesCount = postService.getRepliesCountByPostId(id).repliesCount();
 
-		return new PostInteractions(id, repliesCount, likesCount, repostCount);
+		var metrics = new PostMetrics(repliesCount, likesCount, repostCount);
+		return new PostEngagement(id, metrics);
 	}
 
-	public List<PostInteractions> getAllInteractionsByIds(Collection<Long> postIds) {
+	public List<PostEngagement> getAllInteractionsByIds(Collection<Long> postIds) {
 		List<LikesCount> likeCounts = likesService.getLikesCountByPostIds(postIds);
 		List<RepostsCount> repostCounts = repostService.getRepostCountByPostIds(postIds);
 		List<RepliesCount> replyCounts = postService.getRepliesCountByPostIds(postIds);
@@ -49,33 +52,31 @@ public class PostInteractionsService {
 		Map<Long, Long> replyCountsMap =
 			replyCounts.stream().collect(Collectors.toMap(RepliesCount::postId, RepliesCount::repliesCount));
 
-		List<PostInteractions> collect = postIds.stream()
-											 .map(postId
-												 -> new PostInteractions(postId,
-													 replyCountsMap.getOrDefault(postId, 0L),
-													 likeCountsMap.getOrDefault(postId, 0L),
-													 repostCountsMap.getOrDefault(postId, 0L)))
-											 .collect(Collectors.toList());
+		List<PostEngagement> collect = postIds.stream()
+										   .map(postId
+											   -> new PostEngagement(postId,
+												   new PostMetrics(replyCountsMap.getOrDefault(postId, 0L),
+													   likeCountsMap.getOrDefault(postId, 0L),
+													   repostCountsMap.getOrDefault(postId, 0L))))
+										   .collect(Collectors.toList());
 
 		return collect;
 	}
 
-	public PostInteractions getInteractionsById(Long id, UUID userId) {
+	public PostEngagement getInteractionsById(Long id, UUID userId) {
 		RepliesCount repliesCount = postService.getRepliesCountByPostId(id);
 		LikeSummary likeSummary = likesService.getLikeSummary(userId, id);
 		RepostSummary repostSummary = repostService.getRepostSummary(userId, id);
-		System.out.println("LikeSummary: " + likeSummary);
-		return new PostInteractions(id,
-			repliesCount.repliesCount(),
-			likeSummary.likesCount(),
-			repostSummary.repostsCount(),
+		var metrics = new PostMetrics(
+			repliesCount.repliesCount(), likeSummary.likesCount(), repostSummary.repostsCount());
+		var userInteractions = new UserPostInteractions(likeSummary.isLiked(),
+			repostSummary.createdAt(),
 			likeSummary.isLiked(),
-			repostSummary.isReposted(),
-			likeSummary.createdAt(),
 			repostSummary.createdAt());
+		return new PostEngagement(id, metrics, userInteractions);
 	}
 
-	public List<PostInteractions> getAllInteractionsByIds(Collection<Long> postIds, UUID userId) {
+	public List<PostEngagement> getAllInteractionsByIds(Collection<Long> postIds, UUID userId) {
 		List<LikeSummary> likes = likesService.getLikeSummaryByPostIds(userId, postIds);
 		List<RepostSummary> reposts = repostService.getRepostSummaryByPostIds(userId, postIds);
 		List<RepliesCount> replies = postService.getRepliesCountByPostIds(postIds);
@@ -86,17 +87,17 @@ public class PostInteractionsService {
 		Map<Long, Long> repliesMap =
 			replies.stream().collect(Collectors.toMap(r -> r.postId(), r -> r.repliesCount()));
 
-		List<PostInteractions> collect = postIds.stream()
-											 .map(postId
-												 -> new PostInteractions(postId,
-													 repliesMap.get(postId),
-													 likesMap.get(postId).likesCount(),
-													 repostsMap.get(postId).repostsCount(),
-													 likesMap.get(postId).isLiked(),
-													 repostsMap.get(postId).isReposted(),
-													 likesMap.get(postId).createdAt(),
-													 repostsMap.get(postId).createdAt()))
-											 .collect(Collectors.toList());
+		List<PostEngagement> collect = postIds.stream()
+										   .map(postId
+											   -> new PostEngagement(postId,
+												   new PostMetrics(repliesMap.get(postId),
+													   likesMap.get(postId).likesCount(),
+													   repostsMap.get(postId).repostsCount()),
+												   new UserPostInteractions(likesMap.get(postId).isLiked(),
+													   likesMap.get(postId).createdAt(),
+													   repostsMap.get(postId).isReposted(),
+													   repostsMap.get(postId).createdAt())))
+										   .collect(Collectors.toList());
 		return collect;
 	}
 }
