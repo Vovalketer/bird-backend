@@ -6,8 +6,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.UUID;
@@ -25,7 +26,8 @@ import com.gray.bird.user.dto.UserCreationRequest;
 @SpringBootTest
 @Testcontainers
 @Import(TestcontainersConfig.class)
-@Sql(scripts = "/sql/mockaroo/roles.sql")
+@Sql(scripts = "/sql/mockaroo/roles.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PostInteractionsServiceIT {
 	@Autowired
 	private PostInteractionsService postInteractionsService;
@@ -41,10 +43,10 @@ public class PostInteractionsServiceIT {
 	private UUID userId;
 	private Long testPostId;
 
-	@BeforeEach
+	@BeforeAll
 	void setUp() {
-		var user = userService.createUser(
-			new UserCreationRequest("testUsername", "test@testemail.com", "testPassword", "testHandle"));
+		var user = userService.createUser(new UserCreationRequest(
+			"testInstanceUsername", "test@testInstanceEmail.com", "testPassword", "testHandle"));
 		userId = user.uuid();
 		var post =
 			postService.createPost(new PostCreationRequest("testPost", null, ReplyType.EVERYONE), userId);
@@ -65,7 +67,8 @@ public class PostInteractionsServiceIT {
 
 	@Test
 	void shouldReturnInteractionsWithNullUserInteractions() {
-		PostEngagement engagement = postInteractionsService.getInteractionsById(testPostId);
+		UUID nullUserId = null;
+		PostEngagement engagement = postInteractionsService.getInteractionsById(testPostId, nullUserId);
 		Assertions.assertThat(engagement.userInteractions()).isNull();
 	}
 }
