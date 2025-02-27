@@ -85,29 +85,31 @@ public class PostControllerTest {
 
 	@Test
 	void shouldReturnPostWhenItsRequested() {
+		UUID nullUserId = null;
 		PostAggregate post = testUtils.createPostAggregateWithoutMedia();
 		Long postId = post.post().id();
-		UUID userId = post.post().userId();
+		UUID postUserId = post.post().userId();
 		PostResource postResource = Mockito.mock(PostResource.class);
-		Mockito.when(postAggregatorService.getPost(postId)).thenReturn(post);
+		Mockito.when(postAggregatorService.getPost(postId, nullUserId)).thenReturn(post);
 		Mockito.when(postAggregateResourceMapper.toResource(post)).thenReturn(postResource);
 
-		UserProjection userProjection = testUtils.createUserProjection(userId);
+		UserProjection userProjection = testUtils.createUserProjection(postUserId);
 		UserResource userResource = Mockito.mock(UserResource.class);
-		Mockito.when(userService.getUserById(userId)).thenReturn(userProjection);
+		Mockito.when(userService.getUserById(postUserId)).thenReturn(userProjection);
 		Mockito.when(userResourceMapper.toResource(userProjection)).thenReturn(userResource);
 
 		@SuppressWarnings("unchecked")
 		JsonApiResponse<PostResource> response = Mockito.mock(JsonApiResponse.class);
 		Mockito.when(responseFactory.createResponse(postResource)).thenReturn(response);
 
-		ResponseEntity<JsonApiResponse<PostResource>> postResponse = postController.getPost(postId);
+		ResponseEntity<JsonApiResponse<PostResource>> postResponse =
+			postController.getPost(postId, nullUserId);
 
 		Assertions.assertThat(postResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(postResponse.getBody()).isEqualTo(response);
-		Mockito.verify(postAggregatorService).getPost(postId);
+		Mockito.verify(postAggregatorService).getPost(postId, nullUserId);
 		Mockito.verify(postAggregateResourceMapper).toResource(post);
-		Mockito.verify(userService).getUserById(userId);
+		Mockito.verify(userService).getUserById(postUserId);
 		Mockito.verify(userResourceMapper).toResource(userProjection);
 		Mockito.verify(responseFactory).createResponse(postResource);
 	}
@@ -115,6 +117,7 @@ public class PostControllerTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	void shouldReturnRepliesWhenTheyAreRequested() {
+		UUID userId = UUID.randomUUID();
 		Long postId = 1L;
 		int pageNumber = 0;
 		int pageSize = 10;
@@ -128,7 +131,8 @@ public class PostControllerTest {
 
 		Mockito.when(postService.getReplyIds(Mockito.eq(postId), Mockito.any(Pageable.class)))
 			.thenReturn(replyIds);
-		Mockito.when(postAggregatorService.getPosts(Mockito.any(Collection.class))).thenReturn(replies);
+		Mockito.when(postAggregatorService.getPosts(Mockito.any(Collection.class), Mockito.eq(userId)))
+			.thenReturn(replies);
 		PostResource replyResource = Mockito.mock(PostResource.class);
 		Mockito.when(postAggregateResourceMapper.toResource(Mockito.any(PostAggregate.class)))
 			.thenReturn(replyResource);
@@ -146,7 +150,7 @@ public class PostControllerTest {
 		Mockito.when(responseFactory.createResponse(Mockito.anyList())).thenReturn(response);
 
 		ResponseEntity<JsonApiResponse<List<PostResource>>> repliesResponse =
-			postController.getReplies(postId, pageNumber, pageSize);
+			postController.getReplies(postId, pageNumber, pageSize, userId);
 
 		Assertions.assertThat(repliesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(repliesResponse.getBody()).isEqualTo(response);

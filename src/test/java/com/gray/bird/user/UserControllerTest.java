@@ -88,7 +88,7 @@ public class UserControllerTest {
 			.thenReturn(postIds);
 
 		PostAggregate postAggregate = Mockito.mock(PostAggregate.class);
-		Mockito.when(postAggregatorService.getPosts(Mockito.anyCollection()))
+		Mockito.when(postAggregatorService.getPosts(Mockito.anyCollection(), Mockito.eq(userId)))
 			.thenReturn(List.of(postAggregate));
 
 		List<PostResource> postResources = List.of(Mockito.mock(PostResource.class));
@@ -109,7 +109,7 @@ public class UserControllerTest {
 		Assertions.assertThat(userPosts.getBody()).isEqualTo(response);
 
 		Mockito.verify(postService).getPostIdsByUserId(userId, PageRequest.of(pageNumber, pageSize));
-		Mockito.verify(postAggregatorService).getPosts(postIds.getContent());
+		Mockito.verify(postAggregatorService).getPosts(postIds.getContent(), userId);
 		Mockito.verify(postAggregateResourceMapper).toResource(postAggregate);
 		Mockito.verify(responseFactory).createResponse(postResources);
 		Mockito.verify(metadataUtils).extractPaginationMetadata(postIds);
@@ -203,7 +203,7 @@ public class UserControllerTest {
 
 		List<PostAggregate> posts = List.of(testUtils.createPostAggregateWithoutMedia(userId, 100L),
 			testUtils.createPostAggregateWithoutMedia(userId, 101L));
-		Mockito.when(postAggregatorService.getPosts(Mockito.anyList())).thenReturn(posts);
+		Mockito.when(postAggregatorService.getPosts(Mockito.anyList(), Mockito.eq(userId))).thenReturn(posts);
 
 		List<PostResource> resources =
 			List.of(testResources.createPostResource(100L, userId.toString(), null),

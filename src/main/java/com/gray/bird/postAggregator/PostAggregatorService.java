@@ -27,25 +27,22 @@ public class PostAggregatorService {
 	private final MediaQueryService mediaQueryService;
 	private final PostInteractionsService interactionsQueryService;
 
-	public PostAggregate getPost(Long id) {
+	public PostAggregate getPost(Long id, UUID userId) {
 		PostProjection post = postService.getPostById(id);
 		List<MediaProjection> media = new ArrayList<>();
 		if (post.hasMedia()) {
 			media.addAll(mediaQueryService.getMediaByPostId(id));
 		}
-		PostEngagement engagement = interactionsQueryService.getInteractionsById(id);
+		PostEngagement engagement = interactionsQueryService.getInteractionsById(id, userId);
 		PostAggregate aggregate = new PostAggregate(post, media, engagement);
 
 		return aggregate;
 	}
 
-		return aggregate;
-	}
-
-	public List<PostAggregate> getPosts(Collection<Long> ids) {
+	public List<PostAggregate> getPosts(Collection<Long> ids, UUID userId) {
 		List<PostProjection> posts = postService.getAllPostsById(ids);
 		List<MediaProjection> media = mediaQueryService.getAllMediaByPostId(ids);
-		List<PostEngagement> engagement = interactionsQueryService.getAllInteractionsByIds(ids);
+		List<PostEngagement> engagement = interactionsQueryService.getAllInteractionsByIds(ids, userId);
 		List<PostAggregate> packagedPosts = packagePosts(posts, media, engagement);
 		return packagedPosts;
 	}
