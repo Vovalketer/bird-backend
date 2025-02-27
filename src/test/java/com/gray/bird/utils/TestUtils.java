@@ -1,6 +1,5 @@
 package com.gray.bird.utils;
 
-import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -22,7 +20,8 @@ import com.gray.bird.post.PostMapperImpl;
 import com.gray.bird.post.ReplyType;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.postAggregator.PostAggregate;
-import com.gray.bird.postAggregator.dto.PostInteractions;
+import com.gray.bird.postAggregator.dto.PostEngagement;
+import com.gray.bird.postAggregator.dto.PostMetrics;
 import com.gray.bird.role.RoleEntity;
 import com.gray.bird.role.RoleType;
 import com.gray.bird.security.SecurityConstants;
@@ -198,10 +197,10 @@ public class TestUtils {
 		return postMapper.toPostProjection(post);
 	}
 
-	public PostInteractions createPostInteractions(Long postId) {
-		PostInteractions postInteractions =
-			new PostInteractions(postId, randomInt(), randomInt(), randomInt());
-		return postInteractions;
+	public PostEngagement createPostEngagement(Long postId) {
+		PostMetrics postInteractions = new PostMetrics(randomInt(), randomInt(), randomInt());
+		PostEngagement postEngagement = new PostEngagement(postId, postInteractions);
+		return postEngagement;
 	}
 
 	public UserProjection createUserProjection() {
@@ -216,20 +215,20 @@ public class TestUtils {
 
 	public PostAggregate createPostAggregateWithoutMedia() {
 		PostProjection postProjection = createPostProjection();
-		PostInteractions postInteractions = createPostInteractions(postProjection.id());
-		return new PostAggregate(postProjection, new ArrayList<>(), Optional.of(postInteractions));
+		PostEngagement postInteractions = createPostEngagement(postProjection.id());
+		return new PostAggregate(postProjection, new ArrayList<>(), postInteractions);
 	}
 
 	public PostAggregate createPostAggregateWithoutMedia(UUID userId, Long id) {
 		PostProjection postProjection = createPostProjection(userId, id);
-		PostInteractions postInteractions = createPostInteractions(id);
-		return new PostAggregate(postProjection, new ArrayList<>(), Optional.of(postInteractions));
+		PostEngagement postInteractions = createPostEngagement(id);
+		return new PostAggregate(postProjection, new ArrayList<>(), postInteractions);
 	}
 
 	public PostAggregate createReplyPostAggregateWithoutMedia(Long parentPostId) {
 		PostProjection replyPostProjection = createReplyPostProjection(parentPostId);
-		PostInteractions postInteractions = createPostInteractions(replyPostProjection.id());
-		return new PostAggregate(replyPostProjection, new ArrayList<>(), Optional.of(postInteractions));
+		PostEngagement postInteractions = createPostEngagement(replyPostProjection.id());
+		return new PostAggregate(replyPostProjection, new ArrayList<>(), postInteractions);
 	}
 
 	public List<PostAggregate> createListOfPostAggregateWithoutMedia(int count) {
