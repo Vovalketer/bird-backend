@@ -6,7 +6,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import com.gray.bird.post.ReplyType;
+import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostResource;
+import com.gray.bird.postAggregator.dto.PostEngagement;
+import com.gray.bird.postAggregator.dto.PostMetrics;
+import com.gray.bird.postAggregator.dto.UserPostInteractions;
 import com.gray.bird.utils.TestUtils;
 
 @ExtendWith(SpringExtension.class)
@@ -16,7 +24,15 @@ public class PostAggregateResourceMapperTest {
 
 	@Test
 	void testToResource() {
-		PostAggregate postAggregate = testUtils.createReplyPostAggregateWithoutMedia(101L);
+		UUID userId = UUID.randomUUID();
+		long postId = 101L;
+		PostAggregate postAggregate = new PostAggregate(
+			new PostProjection(
+				postId, userId, "text", false, false, ReplyType.EVERYONE, 102L, LocalDateTime.now()),
+			null,
+			new PostEngagement(postId,
+				new PostMetrics(100L, 100L, 100L),
+				new UserPostInteractions(true, LocalDateTime.now(), true, LocalDateTime.now())));
 		PostResource resource = mapper.toResource(postAggregate);
 
 		Assertions.assertThat(resource.getId()).isEqualTo(postAggregate.post().id());
@@ -29,7 +45,8 @@ public class PostAggregateResourceMapperTest {
 			.isEqualTo(postAggregate.post().userId().toString());
 		Assertions.assertThat(resource.getRelationships().getParentPost().getData().getId())
 			.isEqualTo(postAggregate.post().parentPostId());
-		Assertions.assertThat(resource.getMetadata().getMetadata("interactions").get()).isNotNull();
+		Assertions.assertThat(resource.getMetadata().getMetadata("metrics").get()).isNotNull();
+		Assertions.assertThat(resource.getMetadata().getMetadata("userInteractions").get()).isNotNull();
 		// TODO: media
 	}
 }

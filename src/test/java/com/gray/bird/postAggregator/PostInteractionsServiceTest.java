@@ -16,11 +16,13 @@ import java.util.UUID;
 
 import com.gray.bird.like.LikeService;
 import com.gray.bird.like.dto.LikeSummary;
+import com.gray.bird.like.dto.LikeUserInteractions;
 import com.gray.bird.post.PostService;
 import com.gray.bird.post.dto.RepliesCount;
 import com.gray.bird.postAggregator.dto.PostEngagement;
 import com.gray.bird.repost.RepostService;
 import com.gray.bird.repost.dto.RepostSummary;
+import com.gray.bird.repost.dto.RepostUserInteractions;
 
 @ExtendWith(SpringExtension.class)
 public class PostInteractionsServiceTest {
@@ -35,6 +37,7 @@ public class PostInteractionsServiceTest {
 	private PostInteractionsService postInteractionsService;
 
 	private UUID userId = UUID.randomUUID();
+	private UUID nullUserId = null;
 	private Long interactedPostId = 1L;
 	private Long notInteractedPostId = 2L;
 	private List<Long> postIds = List.of(interactedPostId, notInteractedPostId);
@@ -55,10 +58,12 @@ public class PostInteractionsServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		likedSummary = new LikeSummary(interactedPostId, 5L, true, LocalDateTime.now());
-		notLikedSummary = new LikeSummary(notInteractedPostId, 10L, false, null);
-		repostedSummary = new RepostSummary(interactedPostId, 5L, true, LocalDateTime.now());
-		notRepostSummary = new RepostSummary(notInteractedPostId, 10L, false, null);
+		likedSummary =
+			new LikeSummary(interactedPostId, 5L, new LikeUserInteractions(true, LocalDateTime.now()));
+		notLikedSummary = new LikeSummary(notInteractedPostId, 10L);
+		repostedSummary =
+			new RepostSummary(interactedPostId, 5L, new RepostUserInteractions(true, LocalDateTime.now()));
+		notRepostSummary = new RepostSummary(notInteractedPostId, 10L);
 		interactedRepliesCount = new RepliesCount(interactedPostId, 2L);
 		notInteractedRepliesCount = new RepliesCount(notInteractedPostId, 4L);
 
@@ -72,7 +77,7 @@ public class PostInteractionsServiceTest {
 		Mockito.when(likesService.getLikeSummaryByPostIds(userId, postIds)).thenReturn(likeSummaries);
 		Mockito.when(repostService.getRepostSummaryByPostIds(userId, postIds)).thenReturn(repostSummaries);
 		Mockito.when(postService.getRepliesCountByPostIds(postIds)).thenReturn(repliesCounts);
-		List<PostEngagement> engagement = postInteractionsService.getAllInteractionsByIds(postIds);
+		List<PostEngagement> engagement = postInteractionsService.getAllInteractionsByIds(postIds, userId);
 
 		Assertions.assertThat(engagement).hasSize(postIds.size());
 	}
@@ -90,11 +95,14 @@ public class PostInteractionsServiceTest {
 
 	@Test
 	void testGetInteractionsById() {
-		Mockito.when(likesService.getLikeSummary(notInteractedPostId)).thenReturn(notLikedSummary);
-		Mockito.when(repostService.getRepostSummary(notInteractedPostId)).thenReturn(notRepostSummary);
+		Mockito.when(likesService.getLikeSummary(nullUserId, notInteractedPostId))
+			.thenReturn(notLikedSummary);
+		Mockito.when(repostService.getRepostSummary(nullUserId, notInteractedPostId))
+			.thenReturn(notRepostSummary);
 		Mockito.when(postService.getRepliesCountByPostId(notInteractedPostId))
 			.thenReturn(notInteractedRepliesCount);
-		PostEngagement interactions = postInteractionsService.getInteractionsById(notInteractedPostId);
+		PostEngagement interactions =
+			postInteractionsService.getInteractionsById(notInteractedPostId, nullUserId);
 
 		Assertions.assertThat(interactions).isNotNull();
 		Assertions.assertThat(interactions.postId()).isEqualTo(notInteractedPostId);
