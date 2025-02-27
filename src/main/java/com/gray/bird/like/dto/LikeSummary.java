@@ -1,9 +1,12 @@
 package com.gray.bird.like.dto;
 
-import org.springframework.lang.Nullable;
+import java.util.Optional;
 
-import java.time.LocalDateTime;
-
-// createdAt will be null if isLiked is false
-public record LikeSummary(long postId, long likesCount, Boolean isLiked, @Nullable LocalDateTime createdAt) {
+public record LikeSummary(long postId, long likesCount, Optional<LikeUserInteractions> userInteractions) {
+	public LikeSummary(Long postId, long likesCount, LikeUserInteractions userInteractions) {
+		this(postId, likesCount, Optional.of(userInteractions));
+	}
+	public LikeSummary(Long postId, long likesCount) {
+		this(postId, likesCount, Optional.ofNullable(null));
+	}
 }
