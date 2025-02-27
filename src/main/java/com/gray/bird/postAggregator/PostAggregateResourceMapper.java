@@ -12,13 +12,17 @@ import com.gray.bird.post.dto.PostResource;
 
 @Component
 public class PostAggregateResourceMapper implements ResourceMapper<PostAggregate, PostResource> {
-	private static final String INTERACTIONS = "interactions";
+	private static final String METRICS = "metrics";
+	private static final String USER_INTERACTIONS = "userInteractions";
 
 	@Override
 	public PostResource toResource(PostAggregate data) {
 		PostResource resource = new PostResource(data.post().id(), toAttributes(data), toRelationship(data));
 
-		resource.addMetadata(INTERACTIONS, data.engagement());
+		resource.addMetadata(METRICS, data.engagement().metrics());
+		if (data.engagement().userInteractions() != null) {
+			resource.addMetadata(USER_INTERACTIONS, data.engagement().userInteractions());
+		}
 
 		return resource;
 	}
