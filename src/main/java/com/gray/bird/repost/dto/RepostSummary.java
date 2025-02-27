@@ -1,9 +1,13 @@
 package com.gray.bird.repost.dto;
 
-import org.springframework.lang.Nullable;
-
-import java.time.LocalDateTime;
+import java.util.Optional;
 
 public record RepostSummary(
-	Long postId, long repostsCount, Boolean isReposted, @Nullable LocalDateTime createdAt) {
+	Long postId, long repostsCount, Optional<RepostUserInteractions> userInteractions) {
+	public RepostSummary(Long postId, long repostsCount, RepostUserInteractions userInteractions) {
+		this(postId, repostsCount, Optional.of(userInteractions));
+	}
+	public RepostSummary(Long postId, long repostsCount) {
+		this(postId, repostsCount, Optional.ofNullable(null));
+	}
 }
