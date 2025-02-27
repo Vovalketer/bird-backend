@@ -48,9 +48,10 @@ public class TimelineController {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<TimelineEntryDto> followingTimeline = timelineService.getFollowingTimeline(userId, pageable);
 		List<PostAggregate> posts = postAggregatorService.getPosts(followingTimeline.getContent()
-				.stream()
-				.map(TimelineEntryDto::postId)
-				.collect(Collectors.toList()));
+																	   .stream()
+																	   .map(TimelineEntryDto::postId)
+																	   .collect(Collectors.toList()),
+			userId);
 		List<PostResource> resources =
 			posts.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
 		JsonApiResponse<List<PostResource>> response = responseFactory.createResponse(resources);

@@ -81,7 +81,7 @@ public class UserController {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		UUID userId = userService.getUserIdByUsername(username);
 		Page<Long> postIds = postService.getPostIdsByUserId(userId, pageable);
-		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent())
+		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent(), userId)
 										   .stream()
 										   .map(postAggregateResourceMapper::toResource)
 										   .collect(Collectors.toList());
@@ -100,7 +100,8 @@ public class UserController {
 		// to define whether the response is a dto or a raw Long
 		Page<TimelineEntryDto> homeTimeline = timelineService.getHomeTimeline(userId, pageable);
 		List<PostAggregate> posts = postAggregatorService.getPosts(
-			homeTimeline.getContent().stream().map(TimelineEntryDto::postId).collect(Collectors.toList()));
+			homeTimeline.getContent().stream().map(TimelineEntryDto::postId).collect(Collectors.toList()),
+			userId);
 		List<PostResource> resources =
 			posts.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
 		JsonApiResponse<List<PostResource>> response = responseFactory.createResponse(resources);

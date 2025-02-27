@@ -66,8 +66,9 @@ public class PostController {
 	}
 
 	@GetMapping("/{postId}")
-	public ResponseEntity<JsonApiResponse<PostResource>> getPost(@PathVariable Long postId) {
-		PostAggregate postAggregate = postAggregatorService.getPost(postId);
+	public ResponseEntity<JsonApiResponse<PostResource>> getPost(
+		@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
+		PostAggregate postAggregate = postAggregatorService.getPost(postId, userId);
 		PostResource postResource = postAggregateResourceMapper.toResource(postAggregate);
 
 		UserProjection user = userService.getUserById(postAggregate.post().userId());
@@ -81,12 +82,15 @@ public class PostController {
 
 	@GetMapping("/{postId}/replies")
 	public ResponseEntity<JsonApiResponse<List<PostResource>>> getReplies(@PathVariable Long postId,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
+		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize,
+		@AuthenticationPrincipal UUID userId) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
 		// get replies
 		Page<Long> replyIds = postService.getReplyIds(postId, pageable);
-		List<PostAggregate> replies = postAggregatorService.getPosts(replyIds.getContent());
+
+		List<PostAggregate> replies = postAggregatorService.getPosts(replyIds.getContent(), userId);
+
 		List<PostResource> repliesResource =
 			replies.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
 
