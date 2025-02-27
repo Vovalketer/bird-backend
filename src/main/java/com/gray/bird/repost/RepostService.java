@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.gray.bird.repost.dto.RepostSummary;
+import com.gray.bird.repost.dto.RepostUserInteractions;
 import com.gray.bird.repost.dto.RepostsCount;
 
 @Service
@@ -55,16 +55,9 @@ public class RepostService {
 
 	public RepostSummary getRepostSummary(UUID userId, Long postId) {
 		List<RepostEntity> reposts = repo.findByPostId(postId);
-		Optional<RepostEntity> repost =
-			reposts.stream().filter(l -> l.getId().getUserId().equals(userId)).findAny();
+		Optional<RepostUserInteractions> userInteractions = getUserInteractions(reposts, userId);
 
-		return new RepostSummary(
-			postId, reposts.size(), repost.isPresent(), repost.map(l -> l.getCreatedAt()).orElse(null));
-	}
-
-	public RepostSummary getRepostSummary(Long postId) {
-		RepostsCount reposts = getRepostCountByPostId(postId);
-		return new RepostSummary(postId, reposts.repostsCount(), false, null);
+		return new RepostSummary(postId, reposts.size(), userInteractions);
 	}
 
 	public List<RepostSummary> getRepostSummaryByPostIds(UUID userId, Collection<Long> postIds) {
@@ -77,32 +70,24 @@ public class RepostService {
 				.map(postId -> {
 					List<RepostEntity> reposts = repostsByPostId.getOrDefault(postId, new ArrayList<>());
 					int repostsCount = reposts.size();
-					Optional<RepostEntity> userRepost =
-						reposts.stream().filter(like -> like.getId().getUserId().equals(userId)).findAny();
-					boolean isReposted = userRepost.isPresent();
-					LocalDateTime repostedAt = userRepost.map(RepostEntity::getCreatedAt).orElse(null);
+					Optional<RepostUserInteractions> userInteractions = getUserInteractions(reposts, userId);
 
-					return new RepostSummary(postId, repostsCount, isReposted, repostedAt);
+					return new RepostSummary(postId, repostsCount, userInteractions);
 				})
 				.collect(Collectors.toList());
 
 		return collect;
 	}
 
-	public List<RepostSummary> getRepostSummaryByPostIds(Collection<Long> postIds) {
-		List<RepostEntity> allReposts = repo.findByPostIdsIn(postIds);
-		Map<Long, List<RepostEntity>> repostsByPostId =
-			allReposts.stream().collect(Collectors.groupingBy(like -> like.getId().getPostId()));
-
-		List<RepostSummary> collect = postIds.stream()
-										  .map(postId -> {
-											  List<RepostEntity> likes =
-												  repostsByPostId.getOrDefault(postId, new ArrayList<>());
-											  int repostsCount = likes.size();
-											  return new RepostSummary(postId, repostsCount, false, null);
-										  })
-										  .collect(Collectors.toList());
-
-		return collect;
+	private Optional<RepostUserInteractions> getUserInteractions(List<RepostEntity> reposts, UUID userId) {
+		if (userId == null) {
+			return Optional.empty();
+		}
+		Optional<RepostEntity> repost =
+			reposts.stream().filter(r -> r.getId().getUserId().equals(userId)).findAny();
+		RepostUserInteractions interactions =
+			repost.map(r -> new RepostUserInteractions(true, r.getCreatedAt()))
+				.orElse(new RepostUserInteractions(false, null));
+		return Optional.of(interactions);
 	}
 }
