@@ -48,7 +48,7 @@ public class PostAggregatorService {
 	}
 
 	private List<PostAggregate> packagePosts(
-		List<PostProjection> posts, List<MediaProjection> media, Collection<PostEngagement> interactions) {
+		List<PostProjection> posts, List<MediaProjection> media, List<PostEngagement> interactions) {
 		List<PostAggregate> res = new LinkedList<>();
 		for (PostProjection post : posts) {
 			List<MediaProjection> postMedia =
