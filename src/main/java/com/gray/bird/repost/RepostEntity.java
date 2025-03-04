@@ -13,14 +13,12 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.gray.bird.common.entity.TimestampedEntity;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @Entity
 @Table(name = "reposts")
-public class RepostEntity extends TimestampedEntity {
+public class RepostEntity {
 	@EmbeddedId
 	private RepostId id;
 
