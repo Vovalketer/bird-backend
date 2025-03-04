@@ -52,7 +52,9 @@ public class PostInteractionsService {
 			postIds.stream()
 				.map(postId
 					-> new PostEngagement(postId,
-						handleMetrics(repliesMap.get(postId), likesMap.get(postId), repostsMap.get(postId)),
+						handleMetrics(repliesMap.getOrDefault(postId, new RepliesCount(postId, 0L)),
+							likesMap.getOrDefault(postId, new LikeSummary(postId, 0L)),
+							repostsMap.getOrDefault(postId, new RepostSummary(postId, 0L))),
 						handleUserInteractions(likesMap.get(postId), repostsMap.get(postId))))
 				.collect(Collectors.toList());
 		return collect;
