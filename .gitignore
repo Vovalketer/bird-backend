@@ -1,3 +1,9 @@
+# dev config
+application-dev.yml
+
+#Environment
+*.env
+
 # Compiled class file
 *.class
 
