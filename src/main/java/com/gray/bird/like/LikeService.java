@@ -83,7 +83,7 @@ public class LikeService {
 		}
 		Optional<LikeEntity> like =
 			likes.stream().filter(_like -> _like.getId().getUserId().equals(userId)).findAny();
-		LikeUserInteractions interactions = like.map(l -> new LikeUserInteractions(true, l.getCreatedAt()))
+		LikeUserInteractions interactions = like.map(l -> new LikeUserInteractions(true, l.getLikedAt()))
 												.orElse(new LikeUserInteractions(false, null));
 		return Optional.of(interactions);
 	}

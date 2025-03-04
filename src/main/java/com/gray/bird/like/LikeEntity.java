@@ -26,7 +26,7 @@ public class LikeEntity {
 
 	@CreatedDate
 	@Column(nullable = false, updatable = false)
-	private LocalDateTime createdAt;
+	private LocalDateTime likedAt;
 
 	public LikeEntity(UUID userId, Long postId) {
 		this.id = new LikeId(userId, postId);
