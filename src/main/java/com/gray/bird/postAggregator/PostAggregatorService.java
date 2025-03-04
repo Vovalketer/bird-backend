@@ -52,9 +52,9 @@ public class PostAggregatorService {
 		List<PostAggregate> res = new LinkedList<>();
 		for (PostProjection post : posts) {
 			List<MediaProjection> postMedia =
-				media.stream().filter(m -> m.postId() == post.id()).collect(Collectors.toList());
+				media.stream().filter(m -> m.postId().equals(post.id())).collect(Collectors.toList());
 			Optional<PostEngagement> postInteractions =
-				interactions.stream().filter(i -> i.postId() == post.id()).findFirst();
+				interactions.stream().filter(i -> i.postId().equals(post.id())).findAny();
 			res.add(new PostAggregate(post, postMedia, postInteractions.get()));
 		}
 		return res;
