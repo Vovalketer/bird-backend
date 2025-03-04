@@ -86,7 +86,7 @@ public class RepostService {
 		Optional<RepostEntity> repost =
 			reposts.stream().filter(r -> r.getId().getUserId().equals(userId)).findAny();
 		RepostUserInteractions interactions =
-			repost.map(r -> new RepostUserInteractions(true, r.getCreatedAt()))
+			repost.map(r -> new RepostUserInteractions(true, r.getRepostedAt()))
 				.orElse(new RepostUserInteractions(false, null));
 		return Optional.of(interactions);
 	}
