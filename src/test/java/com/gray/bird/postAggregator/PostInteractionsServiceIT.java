@@ -50,7 +50,7 @@ public class PostInteractionsServiceIT {
 		userId = user.uuid();
 		var post =
 			postService.createPost(new PostCreationRequest("testPost", null, ReplyType.EVERYONE), userId);
-		likeService.likePost(userId, post.id());
+		likeService.likePost(post.id(), userId);
 		testPostId = post.id();
 
 		repostService.repost(userId, post.id());

@@ -74,7 +74,7 @@ public class PostInteractionsServiceTest {
 
 	@Test
 	void testGetAllInteractionsByIds() {
-		Mockito.when(likesService.getLikeSummaryByPostIds(userId, postIds)).thenReturn(likeSummaries);
+		Mockito.when(likesService.getLikeSummaryByPostIds(postIds, userId)).thenReturn(likeSummaries);
 		Mockito.when(repostService.getRepostSummaryByPostIds(userId, postIds)).thenReturn(repostSummaries);
 		Mockito.when(postService.getRepliesCountByPostIds(postIds)).thenReturn(repliesCounts);
 		List<PostEngagement> engagement = postInteractionsService.getAllInteractionsByIds(postIds, userId);
@@ -84,7 +84,7 @@ public class PostInteractionsServiceTest {
 
 	@Test
 	void testGetAllInteractionsByIdsWithUser() {
-		Mockito.when(likesService.getLikeSummaryByPostIds(userId, postIds)).thenReturn(likeSummaries);
+		Mockito.when(likesService.getLikeSummaryByPostIds(postIds, userId)).thenReturn(likeSummaries);
 		Mockito.when(repostService.getRepostSummaryByPostIds(userId, postIds)).thenReturn(repostSummaries);
 		Mockito.when(postService.getRepliesCountByPostIds(postIds)).thenReturn(repliesCounts);
 
@@ -95,7 +95,7 @@ public class PostInteractionsServiceTest {
 
 	@Test
 	void testGetInteractionsById() {
-		Mockito.when(likesService.getLikeSummary(nullUserId, notInteractedPostId))
+		Mockito.when(likesService.getLikeSummary(notInteractedPostId, nullUserId))
 			.thenReturn(notLikedSummary);
 		Mockito.when(repostService.getRepostSummary(nullUserId, notInteractedPostId))
 			.thenReturn(notRepostSummary);
@@ -116,7 +116,7 @@ public class PostInteractionsServiceTest {
 
 	@Test
 	void testGetInteractionsByIdWithUser() {
-		Mockito.when(likesService.getLikeSummary(userId, interactedPostId)).thenReturn(likedSummary);
+		Mockito.when(likesService.getLikeSummary(interactedPostId, userId)).thenReturn(likedSummary);
 		Mockito.when(repostService.getRepostSummary(userId, interactedPostId)).thenReturn(repostedSummary);
 		Mockito.when(postService.getRepliesCountByPostId(interactedPostId))
 			.thenReturn(interactedRepliesCount);

@@ -26,13 +26,13 @@ public class LikeService {
 	private final LikeRepository repo;
 
 	@Transactional
-	public void likePost(UUID userId, Long postId) {
+	public void likePost(Long postId, UUID userId) {
 		LikeEntity like = new LikeEntity(userId, postId);
 		repo.save(like);
 	}
 
 	@Transactional
-	public void unlikePost(UUID userId, Long postId) {
+	public void unlikePost(Long postId, UUID userId) {
 		LikeId likeId = new LikeId(userId, postId);
 		repo.deleteById(likeId);
 	}
@@ -53,13 +53,13 @@ public class LikeService {
 		return repo.countByPostIdsIn(postids);
 	}
 
-	public LikeSummary getLikeSummary(UUID userId, Long postId) {
+	public LikeSummary getLikeSummary(Long postId, UUID userId) {
 		List<LikeEntity> likes = repo.findByPostId(postId);
 		Optional<LikeUserInteractions> userInteractions = getUserInteractions(likes, userId);
 		return new LikeSummary(postId, likes.size(), userInteractions);
 	}
 
-	public List<LikeSummary> getLikeSummaryByPostIds(UUID userId, Collection<Long> postIds) {
+	public List<LikeSummary> getLikeSummaryByPostIds(Collection<Long> postIds, UUID userId) {
 		List<LikeEntity> allLikes = repo.findByPostIdsIn(postIds);
 		Map<Long, List<LikeEntity>> likesByPostId =
 			allLikes.stream().collect(Collectors.groupingBy(like -> like.getId().getPostId()));

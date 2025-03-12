@@ -33,14 +33,14 @@ public class LikeController {
 
 	@PostMapping
 	public ResponseEntity<?> likePost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		likeService.likePost(userId, postId);
+		likeService.likePost(postId, userId);
 
 		return ResponseEntity.ok(null);
 	}
 
 	@DeleteMapping
 	public ResponseEntity<?> unlikePost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		likeService.unlikePost(userId, postId);
+		likeService.unlikePost(postId, userId);
 
 		return ResponseEntity.ok(null);
 	}

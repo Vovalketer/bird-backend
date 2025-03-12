@@ -32,7 +32,7 @@ public class LikeServiceTest {
 
 		Mockito.when(likeRepository.findByPostId(postId)).thenReturn(likes);
 
-		LikeSummary likeSummary = likeService.getLikeSummary(userId, postId);
+		LikeSummary likeSummary = likeService.getLikeSummary(postId, userId);
 		Assertions.assertThat(likeSummary.postId()).isEqualTo(postId);
 		Assertions.assertThat(likeSummary.likesCount()).isEqualTo(2);
 		Assertions.assertThat(likeSummary.userInteractions()).isPresent();
@@ -49,7 +49,7 @@ public class LikeServiceTest {
 
 		Mockito.when(likeRepository.findByPostId(postId)).thenReturn(likes);
 
-		LikeSummary likeSummary = likeService.getLikeSummary(userId, postId);
+		LikeSummary likeSummary = likeService.getLikeSummary(postId, userId);
 
 		Assertions.assertThat(likeSummary.postId()).isEqualTo(postId);
 		Assertions.assertThat(likeSummary.likesCount()).isEqualTo(2);
@@ -69,7 +69,7 @@ public class LikeServiceTest {
 
 		Mockito.when(likeRepository.findByPostIdsIn(postIds)).thenReturn(likes);
 
-		List<LikeSummary> likeSummaryList = likeService.getLikeSummaryByPostIds(userId, postIds);
+		List<LikeSummary> likeSummaryList = likeService.getLikeSummaryByPostIds(postIds, userId);
 		Assertions.assertThat(likeSummaryList).hasSize(postIds.size());
 		Assertions.assertThat(likeSummaryList.stream().filter(l -> l.userInteractions().isPresent()).count())
 			.isEqualTo(postIds.size());
@@ -96,7 +96,7 @@ public class LikeServiceTest {
 
 		Mockito.when(likeRepository.findByPostIdsIn(postIds)).thenReturn(likes);
 
-		List<LikeSummary> likeSummaryList = likeService.getLikeSummaryByPostIds(userId, postIds);
+		List<LikeSummary> likeSummaryList = likeService.getLikeSummaryByPostIds(postIds, userId);
 
 		Assertions.assertThat(likeSummaryList).hasSize(postIds.size());
 		Assertions.assertThat(likeSummaryList.stream().filter(l -> l.userInteractions().isPresent()).count())
