@@ -30,16 +30,16 @@ public class PostInteractionsService {
 	public PostEngagement getInteractionsById(Long id, UUID userId) {
 		RepliesCount repliesCount = postService.getRepliesCountByPostId(id);
 		LikeSummary likeSummary = likesService.getLikeSummary(id, userId);
-		RepostSummary repostSummary = repostService.getRepostSummary(userId, id);
 		var metrics = new PostMetrics(
 			repliesCount.repliesCount(), likeSummary.likesCount(), repostSummary.repostsCount());
+		RepostSummary repostSummary = repostService.getRepostSummary(id, userId);
 		UserPostInteractions userInteractions = handleUserInteractions(likeSummary, repostSummary);
 		return new PostEngagement(id, metrics, userInteractions);
 	}
 
 	public List<PostEngagement> getAllInteractionsByIds(Collection<Long> postIds, UUID userId) {
 		List<LikeSummary> likes = likesService.getLikeSummaryByPostIds(postIds, userId);
-		List<RepostSummary> reposts = repostService.getRepostSummaryByPostIds(userId, postIds);
+		List<RepostSummary> reposts = repostService.getRepostSummaryByPostIds(postIds, userId);
 		List<RepliesCount> replies = postService.getRepliesCountByPostIds(postIds);
 
 		Map<Long, LikeSummary> likesMap = likes.stream().collect(Collectors.toMap(l -> l.postId(), l -> l));

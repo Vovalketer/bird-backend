@@ -26,13 +26,13 @@ public class RepostService {
 	private final RepostRepository repo;
 
 	@Transactional
-	public void repost(UUID userId, Long postId) {
+	public void repost(Long postId, UUID userId) {
 		RepostEntity repost = new RepostEntity(userId, postId);
 		repo.save(repost);
 	}
 
 	@Transactional
-	public void unrepost(UUID userId, Long postId) {
+	public void unrepost(Long postId, UUID userId) {
 		RepostEntity repost = new RepostEntity(userId, postId);
 		repo.delete(repost);
 	}
@@ -53,14 +53,14 @@ public class RepostService {
 		return repo.countByPostIdsIn(ids);
 	}
 
-	public RepostSummary getRepostSummary(UUID userId, Long postId) {
+	public RepostSummary getRepostSummary(Long postId, UUID userId) {
 		List<RepostEntity> reposts = repo.findByPostId(postId);
 		Optional<RepostUserInteractions> userInteractions = getUserInteractions(reposts, userId);
 
 		return new RepostSummary(postId, reposts.size(), userInteractions);
 	}
 
-	public List<RepostSummary> getRepostSummaryByPostIds(UUID userId, Collection<Long> postIds) {
+	public List<RepostSummary> getRepostSummaryByPostIds(Collection<Long> postIds, UUID userId) {
 		List<RepostEntity> allReposts = repo.findByPostIdsIn(postIds);
 		Map<Long, List<RepostEntity>> repostsByPostId =
 			allReposts.stream().collect(Collectors.groupingBy(like -> like.getId().getPostId()));

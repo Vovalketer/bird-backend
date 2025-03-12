@@ -32,7 +32,7 @@ public class RepostServiceTest {
 
 		Mockito.when(repostRepository.findByPostId(postId)).thenReturn(reposts);
 
-		RepostSummary repostSummary = repostService.getRepostSummary(userId, postId);
+		RepostSummary repostSummary = repostService.getRepostSummary(postId, userId);
 
 		Assertions.assertThat(repostSummary.postId()).isEqualTo(postId);
 		Assertions.assertThat(repostSummary.repostsCount()).isEqualTo(2);
@@ -50,7 +50,7 @@ public class RepostServiceTest {
 
 		Mockito.when(repostRepository.findByPostId(postId)).thenReturn(reposts);
 
-		RepostSummary repostSummary = repostService.getRepostSummary(nullUserId, postId);
+		RepostSummary repostSummary = repostService.getRepostSummary(postId, nullUserId);
 
 		Assertions.assertThat(repostSummary.postId()).isEqualTo(postId);
 		Assertions.assertThat(repostSummary.repostsCount()).isEqualTo(2);
@@ -70,7 +70,7 @@ public class RepostServiceTest {
 
 		Mockito.when(repostRepository.findByPostIdsIn(postIds)).thenReturn(reposts);
 
-		List<RepostSummary> repostSummaryList = repostService.getRepostSummaryByPostIds(userId, postIds);
+		List<RepostSummary> repostSummaryList = repostService.getRepostSummaryByPostIds(postIds, userId);
 
 		Assertions.assertThat(repostSummaryList).hasSize(postIds.size());
 		Assertions
@@ -99,7 +99,7 @@ public class RepostServiceTest {
 
 		Mockito.when(repostRepository.findByPostIdsIn(postIds)).thenReturn(reposts);
 
-		List<RepostSummary> repostSummaryList = repostService.getRepostSummaryByPostIds(nullUserId, postIds);
+		List<RepostSummary> repostSummaryList = repostService.getRepostSummaryByPostIds(postIds, nullUserId);
 
 		Assertions.assertThat(repostSummaryList).hasSize(postIds.size());
 		Assertions

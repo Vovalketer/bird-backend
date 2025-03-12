@@ -30,14 +30,14 @@ public class RepostController {
 
 	@PostMapping
 	public ResponseEntity<?> repostPost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		repostService.repost(userId, postId);
+		repostService.repost(postId, userId);
 
 		return ResponseEntity.ok(null);
 	}
 
 	@DeleteMapping
 	public ResponseEntity<?> unrepostPost(@PathVariable Long postId, @AuthenticationPrincipal UUID userId) {
-		repostService.unrepost(userId, postId);
+		repostService.unrepost(postId, userId);
 
 		return ResponseEntity.ok(null);
 	}
