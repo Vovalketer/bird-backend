@@ -324,6 +324,26 @@ public class UserControllerIT {
 		}
 
 		@Nested
+		class GetPosts {
+			@Test
+			void shouldReturnUserPosts() throws Exception {
+				String username = "mtompion1";
+
+				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/{username}/posts", username))
+					.andExpect(MockMvcResultMatchers.status().isOk())
+					.andExpect(MockMvcResultMatchers.jsonPath("$.data.length()", Matchers.greaterThan(0)));
+			}
+
+			@Test
+			void shouldReturnNotFoundWhenUserIsNotFound() throws Exception {
+				String username = "_nonExistentUser";
+
+				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/{username}/posts", username))
+					.andExpect(MockMvcResultMatchers.status().isNotFound());
+			}
+		}
+
+		@Nested
 		class Following {
 			@Test
 			@Transactional
