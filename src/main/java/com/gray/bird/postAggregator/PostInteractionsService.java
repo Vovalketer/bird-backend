@@ -30,9 +30,8 @@ public class PostInteractionsService {
 	public PostEngagement getInteractionsById(Long id, UUID userId) {
 		RepliesCount repliesCount = postService.getRepliesCountByPostId(id);
 		LikeSummary likeSummary = likesService.getLikeSummary(id, userId);
-		var metrics = new PostMetrics(
-			repliesCount.repliesCount(), likeSummary.likesCount(), repostSummary.repostsCount());
 		RepostSummary repostSummary = repostService.getRepostSummary(id, userId);
+		PostMetrics metrics = handleMetrics(repliesCount, likeSummary, repostSummary);
 		UserPostInteractions userInteractions = handleUserInteractions(likeSummary, repostSummary);
 		return new PostEngagement(id, metrics, userInteractions);
 	}
