@@ -76,12 +76,13 @@ public class UserController {
 
 	@GetMapping("/{username}/posts")
 	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserPosts(@PathVariable String username,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
+		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize,
+		@AuthenticationPrincipal UUID authUserId) {
 		// just the user posts and its replies, no reposts
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		UUID userId = userService.getUserIdByUsername(username);
 		Page<Long> postIds = postService.getPostIdsByUserId(userId, pageable);
-		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent(), userId)
+		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent(), authUserId)
 										   .stream()
 										   .map(postAggregateResourceMapper::toResource)
 										   .collect(Collectors.toList());

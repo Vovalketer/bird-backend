@@ -103,7 +103,7 @@ public class UserControllerTest {
 		Mockito.when(metadataUtils.extractPaginationMetadata(postIds)).thenReturn(paginationMetadata);
 
 		ResponseEntity<JsonApiResponse<List<PostResource>>> userPosts =
-			userController.getUserPosts(username, pageNumber, pageSize);
+			userController.getUserPosts(username, pageNumber, pageSize, userId);
 
 		Assertions.assertThat(userPosts.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(userPosts.getBody()).isEqualTo(response);
