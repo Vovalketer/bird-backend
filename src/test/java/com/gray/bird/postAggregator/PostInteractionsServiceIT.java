@@ -14,14 +14,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.UUID;
 
 import com.gray.bird.like.LikeService;
-import com.gray.bird.post.PostService;
-import com.gray.bird.post.ReplyType;
-import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.postAggregator.dto.PostEngagement;
 import com.gray.bird.repost.RepostService;
 import com.gray.bird.testConfig.TestcontainersConfig;
-import com.gray.bird.user.UserService;
-import com.gray.bird.user.dto.UserCreationRequest;
 
 @SpringBootTest
 @Testcontainers
@@ -35,32 +30,28 @@ public class PostInteractionsServiceIT {
 	private LikeService likeService;
 	@Autowired
 	private RepostService repostService;
-	@Autowired
-	private PostService postService;
-	@Autowired
-	private UserService userService;
 
 	private UUID userId;
 	private Long testPostId;
 
 	@BeforeAll
 	void setUp() {
-		var user = userService.createUser(new UserCreationRequest(
-			"testInstanceUsername", "test@testInstanceEmail.com", "testPassword", "testHandle"));
-		userId = user.uuid();
-		var post =
-			postService.createPost(new PostCreationRequest("testPost", null, ReplyType.EVERYONE), userId);
-		likeService.likePost(post.id(), userId);
-		testPostId = post.id();
+		userId = UUID.randomUUID();
+		testPostId = 2500L;
+		likeService.likePost(testPostId, userId);
+		likeService.likePost(testPostId, UUID.randomUUID());
+		likeService.likePost(testPostId, UUID.randomUUID());
 
-		repostService.repost(userId, post.id());
+		repostService.repost(testPostId, userId);
+		repostService.repost(testPostId, UUID.randomUUID());
+		repostService.repost(testPostId, UUID.randomUUID());
 	}
 
 	@Test
 	void shouldReturnInteractionsWithLikedAndReposted() {
 		PostEngagement engagement = postInteractionsService.getInteractionsById(testPostId, userId);
-		Assertions.assertThat(engagement.metrics().likesCount()).isEqualTo(1);
-		Assertions.assertThat(engagement.metrics().repostsCount()).isEqualTo(1);
+		Assertions.assertThat(engagement.metrics().likesCount()).isEqualTo(3);
+		Assertions.assertThat(engagement.metrics().repostsCount()).isEqualTo(3);
 		Assertions.assertThat(engagement.userInteractions().isLiked()).isTrue();
 		Assertions.assertThat(engagement.userInteractions().isReposted()).isTrue();
 	}

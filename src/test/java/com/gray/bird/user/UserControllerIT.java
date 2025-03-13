@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -45,13 +44,8 @@ import com.gray.bird.utils.TestUtils;
 @Sql(scripts = {"/sql/mockaroo/roles.sql",
 		 "/sql/mockaroo/users.sql",
 		 "/sql/mockaroo/posts.sql",
-		 "/sql/mockaroo/timelines.sql"},
-	executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = {"/sql/teardown/roles.sql",
-		 "/sql/teardown/users.sql",
-		 "/sql/teardown/posts.sql",
-		 "/sql/teardown/timelines.sql"},
-	executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+		 "/sql/mockaroo/replies.sql",
+		 "/sql/mockaroo/timelines.sql"})
 public class UserControllerIT {
 	@LocalServerPort
 	private int port;
