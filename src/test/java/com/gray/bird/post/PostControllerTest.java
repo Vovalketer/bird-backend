@@ -119,14 +119,14 @@ public class PostControllerTest {
 	void shouldReturnRepliesWhenTheyAreRequested() {
 		UUID userId = UUID.randomUUID();
 		Long postId = 1L;
-		int pageNumber = 0;
-		int pageSize = 10;
+		int page = 0;
+		int limit = 10;
 		List<PostAggregate> replies = testUtils.createReplyPostAggregateWithoutMedia(postId, 3);
 
 		// create page based on the replies we have
 		Page<Long> replyIds =
 			new PageImpl<>(replies.stream().map(p -> p.post().id()).collect(Collectors.toList()),
-				PageRequest.of(pageNumber, pageSize),
+				PageRequest.of(page, limit),
 				replies.size());
 
 		Mockito.when(postService.getReplyIds(Mockito.eq(postId), Mockito.any(Pageable.class)))
@@ -150,12 +150,12 @@ public class PostControllerTest {
 		Mockito.when(responseFactory.createResponse(Mockito.anyList())).thenReturn(response);
 
 		ResponseEntity<JsonApiResponse<List<PostResource>>> repliesResponse =
-			postController.getReplies(postId, pageNumber, pageSize, userId);
+			postController.getReplies(postId, page, limit, userId);
 
 		Assertions.assertThat(repliesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(repliesResponse.getBody()).isEqualTo(response);
 
-		Mockito.verify(postService).getReplyIds(postId, PageRequest.of(pageNumber, pageSize));
+		Mockito.verify(postService).getReplyIds(postId, PageRequest.of(page, limit));
 		Mockito.verify(postAggregateResourceMapper, Mockito.times(replies.size()))
 			.toResource(Mockito.any(PostAggregate.class));
 		Mockito.verify(userResourceMapper, Mockito.times(users.size()))

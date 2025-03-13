@@ -78,8 +78,8 @@ public class UserControllerTest {
 	void getUserPostsShouldReturnPaginatedResponse() {
 		String username = "testUser";
 		UUID userId = UUID.randomUUID();
-		int pageNumber = 0;
-		int pageSize = 10;
+		int page = 0;
+		int limit = 10;
 		Mockito.when(userService.getUserIdByUsername(username)).thenReturn(userId);
 
 		@SuppressWarnings("unchecked")
@@ -93,7 +93,7 @@ public class UserControllerTest {
 
 		List<PostResource> postResources = List.of(Mockito.mock(PostResource.class));
 		Mockito.when(postAggregateResourceMapper.toResource(postAggregate))
-			.thenReturn(postResources.get(pageNumber));
+			.thenReturn(postResources.get(page));
 
 		@SuppressWarnings("unchecked")
 		JsonApiResponse<List<PostResource>> response = Mockito.mock(JsonApiResponse.class);
@@ -103,12 +103,12 @@ public class UserControllerTest {
 		Mockito.when(metadataUtils.extractPaginationMetadata(postIds)).thenReturn(paginationMetadata);
 
 		ResponseEntity<JsonApiResponse<List<PostResource>>> userPosts =
-			userController.getUserPosts(username, pageNumber, pageSize, userId);
+			userController.getUserPosts(username, page, limit, userId);
 
 		Assertions.assertThat(userPosts.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(userPosts.getBody()).isEqualTo(response);
 
-		Mockito.verify(postService).getPostIdsByUserId(userId, PageRequest.of(pageNumber, pageSize));
+		Mockito.verify(postService).getPostIdsByUserId(userId, PageRequest.of(page, limit));
 		Mockito.verify(postAggregatorService).getPosts(postIds.getContent(), userId);
 		Mockito.verify(postAggregateResourceMapper).toResource(postAggregate);
 		Mockito.verify(responseFactory).createResponse(postResources);
@@ -190,8 +190,8 @@ public class UserControllerTest {
 	@Test
 	void testGetUserTimeline() {
 		String username = "testUsername";
-		int pageNumber = 0;
-		int pageSize = 10;
+		int page = 0;
+		int limit = 10;
 
 		UUID userId = UUID.randomUUID();
 		Mockito.when(userService.getUserIdByUsername(username)).thenReturn(userId);
@@ -221,7 +221,7 @@ public class UserControllerTest {
 		Mockito.when(metadataUtils.extractPaginationMetadata(homeTimeline)).thenReturn(paginationMetadata);
 
 		ResponseEntity<JsonApiResponse<List<PostResource>>> userTimeline =
-			userController.getUserTimeline(username, pageNumber, pageSize);
+			userController.getUserTimeline(username, page, limit);
 
 		Assertions.assertThat(userTimeline.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(userTimeline.getBody()).isNotNull();

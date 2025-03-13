@@ -82,9 +82,9 @@ public class PostController {
 
 	@GetMapping("/{postId}/replies")
 	public ResponseEntity<JsonApiResponse<List<PostResource>>> getReplies(@PathVariable Long postId,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize,
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit,
 		@AuthenticationPrincipal UUID userId) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Pageable pageable = PageRequest.of(page, limit);
 
 		// get replies
 		Page<Long> replyIds = postService.getReplyIds(postId, pageable);

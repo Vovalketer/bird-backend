@@ -76,10 +76,10 @@ public class UserController {
 
 	@GetMapping("/{username}/posts")
 	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserPosts(@PathVariable String username,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize,
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit,
 		@AuthenticationPrincipal UUID authUserId) {
 		// just the user posts and its replies, no reposts
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Pageable pageable = PageRequest.of(page, limit);
 		UUID userId = userService.getUserIdByUsername(username);
 		Page<Long> postIds = postService.getPostIdsByUserId(userId, pageable);
 		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent(), authUserId)
@@ -98,8 +98,8 @@ public class UserController {
 
 	@GetMapping("/{username}/timeline")
 	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserTimeline(@PathVariable String username,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+		Pageable pageable = PageRequest.of(page, limit);
 		UUID userId = userService.getUserIdByUsername(username);
 		// to define whether the response is a dto or a raw Long
 		Page<TimelineEntryDto> homeTimeline = timelineService.getHomeTimeline(userId, pageable);

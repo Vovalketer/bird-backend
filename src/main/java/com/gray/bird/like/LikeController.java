@@ -26,8 +26,8 @@ public class LikeController {
 
 	@GetMapping
 	public ResponseEntity<?> getLikingUsers(@PathVariable Long postId,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+		Pageable pageable = PageRequest.of(page, limit);
 		return ResponseEntity.ok(null);
 	}
 

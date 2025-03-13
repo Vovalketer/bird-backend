@@ -24,7 +24,7 @@ public class RepostController {
 
 	@GetMapping
 	public ResponseEntity<?> getRepostedByUsers(@PathVariable Long postId,
-		@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize) {
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
 		return null;
 	}
 
