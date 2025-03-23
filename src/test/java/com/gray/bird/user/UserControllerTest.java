@@ -205,9 +205,8 @@ public class UserControllerTest {
 			testUtils.createPostAggregateWithoutMedia(userId, 101L));
 		Mockito.when(postAggregatorService.getPosts(Mockito.anyList(), Mockito.eq(userId))).thenReturn(posts);
 
-		List<PostResource> resources =
-			List.of(testResources.createPostResource(100L, userId.toString(), null),
-				testResources.createPostResource(101L, userId.toString(), null));
+		List<PostResource> resources = List.of(testResources.createPostResource(100L, userId, null),
+			testResources.createPostResource(101L, userId, null));
 		int resourceCount = 0;
 		Mockito.when(postAggregateResourceMapper.toResource(Mockito.any(PostAggregate.class)))
 			.thenReturn(resources.get(resourceCount++));

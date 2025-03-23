@@ -38,6 +38,6 @@ public class PostAggregateResourceMapper implements ResourceMapper<PostAggregate
 		if (data.media() != null) {
 			mediaIds.addAll(data.media().stream().map(media -> media.id()).toList());
 		}
-		return new PostRelationships(data.post().userId().toString(), data.post().parentPostId(), mediaIds);
+		return new PostRelationships(data.post().userId(), data.post().parentPostId(), mediaIds);
 	}
 }

@@ -13,8 +13,7 @@ public class PostResourceMapper implements ResourceMapper<PostProjection, PostRe
 	@Override
 	public PostResource toResource(PostProjection data) {
 		PostAttributes postAttributes = getPostAttributes(data);
-		PostRelationships relationships =
-			new PostRelationships(data.userId().toString(), data.parentPostId());
+		PostRelationships relationships = new PostRelationships(data.userId(), data.parentPostId());
 		PostResource resource = new PostResource(data.id(), postAttributes, relationships);
 
 		return resource;
