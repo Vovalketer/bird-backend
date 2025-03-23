@@ -28,6 +28,7 @@ import com.gray.bird.common.PaginationMetadata;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataUtils;
+import com.gray.bird.like.LikeService;
 import com.gray.bird.post.PostService;
 import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.postAggregator.PostAggregate;
@@ -49,6 +50,7 @@ public class UserController {
 	private final PostService postService;
 	private final TimelineService timelineService;
 	private final FollowService followService;
+	private final LikeService likeService;
 	private final PostAggregateResourceMapper postAggregateResourceMapper;
 	private final UserResourceMapper userResourceMapper;
 	private final JsonApiResponseFactory responseFactory;
@@ -125,6 +127,26 @@ public class UserController {
 		@PathVariable String username, @AuthenticationPrincipal UUID userId) {
 		followService.unfollowUser(userId, username);
 		return ResponseEntity.ok(null);
+	}
+
+	@GetMapping("/{username}/likes")
+	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserLikes(@PathVariable String username,
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+		Pageable pageable = PageRequest.of(page, limit);
+		UUID userId = userService.getUserIdByUsername(username);
+		Page<Long> postIds = likeService.getLikedPostIdsByUserId(userId, pageable);
+		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent(), userId)
+										   .stream()
+										   .map(postAggregateResourceMapper::toResource)
+										   .collect(Collectors.toList());
+		var response = responseFactory.createResponse(resources);
+		UserProjection user = userService.getUserByUsername(username);
+		UserResource userResource = userResourceMapper.toResource(user);
+		response.includeUser(userResource);
+		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(postIds);
+		response.addMetadata("pagination", paginationMetadata);
+
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping

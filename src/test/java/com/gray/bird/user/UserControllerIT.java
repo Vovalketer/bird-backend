@@ -45,6 +45,7 @@ import com.gray.bird.utils.TestUtils;
 		 "/sql/mockaroo/users.sql",
 		 "/sql/mockaroo/posts.sql",
 		 "/sql/mockaroo/replies.sql",
+		 "/sql/mockaroo/likes.sql",
 		 "/sql/mockaroo/timelines.sql"})
 public class UserControllerIT {
 	@LocalServerPort
@@ -269,6 +270,26 @@ public class UserControllerIT {
 				String username = "_nonExistentUser";
 
 				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/{username}/timelne", username))
+					.andExpect(MockMvcResultMatchers.status().isNotFound());
+			}
+		}
+
+		@Nested
+		class GetLikes {
+			@Test
+			void shouldReturnLikes() throws Exception {
+				String username = "mtompion1";
+
+				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/{username}/likes", username))
+					.andExpect(MockMvcResultMatchers.status().isOk())
+					.andExpect(MockMvcResultMatchers.jsonPath("$.data.length()", Matchers.greaterThan(0)));
+			}
+
+			@Test
+			void shouldReturnNotFoundWhenUserIsNotFound() throws Exception {
+				String username = "_nonExistentUser";
+
+				mockMvc.perform(MockMvcRequestBuilders.get(baseUrl + "/{username}/likes", username))
 					.andExpect(MockMvcResultMatchers.status().isNotFound());
 			}
 		}
