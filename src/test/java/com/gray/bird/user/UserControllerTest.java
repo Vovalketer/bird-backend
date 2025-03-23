@@ -190,6 +190,7 @@ public class UserControllerTest {
 	@Test
 	void testGetUserTimeline() {
 		String username = "testUsername";
+		UUID authUserId = UUID.randomUUID();
 		int page = 0;
 		int limit = 10;
 
@@ -220,7 +221,7 @@ public class UserControllerTest {
 		Mockito.when(metadataUtils.extractPaginationMetadata(homeTimeline)).thenReturn(paginationMetadata);
 
 		ResponseEntity<JsonApiResponse<List<PostResource>>> userTimeline =
-			userController.getUserTimeline(username, page, limit);
+			userController.getUserTimeline(username, page, limit, authUserId);
 
 		Assertions.assertThat(userTimeline.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(userTimeline.getBody()).isNotNull();

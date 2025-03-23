@@ -103,14 +103,15 @@ public class UserController {
 
 	@GetMapping("/{username}/timeline")
 	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserTimeline(@PathVariable String username,
-		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit,
+		@AuthenticationPrincipal UUID authUserId) {
 		Pageable pageable = PageRequest.of(page, limit);
 		UUID userId = userService.getUserIdByUsername(username);
 		// to define whether the response is a dto or a raw Long
 		Page<TimelineEntryDto> homeTimeline = timelineService.getHomeTimeline(userId, pageable);
 		List<PostAggregate> posts = postAggregatorService.getPosts(
 			homeTimeline.getContent().stream().map(TimelineEntryDto::postId).collect(Collectors.toList()),
-			userId);
+			authUserId);
 		List<PostResource> resources =
 			posts.stream().map(postAggregateResourceMapper::toResource).collect(Collectors.toList());
 		JsonApiResponse<List<PostResource>> response = responseFactory.createResponse(resources);
@@ -134,11 +135,12 @@ public class UserController {
 
 	@GetMapping("/{username}/likes")
 	public ResponseEntity<JsonApiResponse<List<PostResource>>> getUserLikes(@PathVariable String username,
-		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+		@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit,
+		@AuthenticationPrincipal UUID authUserId) {
 		Pageable pageable = PageRequest.of(page, limit);
 		UUID userId = userService.getUserIdByUsername(username);
 		Page<Long> postIds = likeService.getLikedPostIdsByUserId(userId, pageable);
-		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent(), userId)
+		List<PostResource> resources = postAggregatorService.getPosts(postIds.getContent(), authUserId)
 										   .stream()
 										   .map(postAggregateResourceMapper::toResource)
 										   .collect(Collectors.toList());
