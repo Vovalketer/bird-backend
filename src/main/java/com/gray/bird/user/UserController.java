@@ -140,9 +140,14 @@ public class UserController {
 										   .map(postAggregateResourceMapper::toResource)
 										   .collect(Collectors.toList());
 		var response = responseFactory.createResponse(resources);
-		UserProjection user = userService.getUserByUsername(username);
-		UserResource userResource = userResourceMapper.toResource(user);
-		response.includeUser(userResource);
+		List<UUID> userIds = resources.stream()
+								 .map(p -> p.getRelationships().getUser().getData().getId())
+								 .collect(Collectors.toList());
+		List<UserResource> users = userService.getAllUsersById(userIds)
+									   .stream()
+									   .map(userResourceMapper::toResource)
+									   .collect(Collectors.toList());
+		response.includeAllUsers(users);
 		PaginationMetadata paginationMetadata = metadataUtils.extractPaginationMetadata(postIds);
 		response.addMetadata("pagination", paginationMetadata);
 
