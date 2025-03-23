@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.gray.bird.user.UserService;
+import com.gray.bird.user.follow.dto.FollowCounts;
 
 @Service
 @RequiredArgsConstructor
@@ -53,5 +54,11 @@ public class FollowService {
 	public List<UUID> getFollowers(String username) {
 		UUID userId = userService.getUserIdByUsername(username);
 		return repo.findFollowing(userId);
+	}
+
+	public FollowCounts getFollowCounts(UUID userId) {
+		List<FollowEntity> following = repo.findByFollowingUserId(userId);
+		List<FollowEntity> followers = repo.findByFollowedUserId(userId);
+		return new FollowCounts(userId, following.size(), followers.size());
 	}
 }

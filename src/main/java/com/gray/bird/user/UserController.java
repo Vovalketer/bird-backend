@@ -40,6 +40,7 @@ import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.dto.UserResource;
 import com.gray.bird.user.follow.FollowService;
+import com.gray.bird.user.follow.dto.FollowCounts;
 
 @RestController
 @RequestMapping(path = ResourcePaths.USERS)
@@ -72,6 +73,8 @@ public class UserController {
 	public ResponseEntity<JsonApiResponse<UserResource>> getUserProfile(@PathVariable String username) {
 		UserProjection userProfile = userService.getUserByUsername(username);
 		UserResource resource = userResourceMapper.toResource(userProfile);
+		FollowCounts followCounts = followService.getFollowCounts(userProfile.uuid());
+		resource.addMetadata("followCounts", followCounts);
 		var response = responseFactory.createResponse(resource);
 		return ResponseEntity.ok(response);
 	}
