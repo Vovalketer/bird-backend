@@ -31,4 +31,8 @@ class FollowEntity {
 	public FollowEntity(UUID followingUser, UUID followedUser) {
 		this.id = new FollowId(followingUser, followedUser);
 	}
+	public boolean equals(UUID followingUser, UUID followedUser) {
+		return this.id.getFollowingUser().equals(followingUser)
+			&& this.id.getFollowedUser().equals(followedUser);
+	}
 }
