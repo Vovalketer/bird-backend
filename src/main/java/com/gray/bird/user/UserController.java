@@ -70,7 +70,8 @@ public class UserController {
 	}
 
 	@GetMapping("/{username}")
-	public ResponseEntity<JsonApiResponse<UserResource>> getUserProfile(@PathVariable String username) {
+	public ResponseEntity<JsonApiResponse<UserResource>> getUserProfile(
+		@PathVariable String username, @AuthenticationPrincipal UUID userId) {
 		UserProjection userProfile = userService.getUserByUsername(username);
 		UserResource resource = userResourceMapper.toResource(userProfile);
 		FollowCounts followCounts = followService.getFollowCounts(userProfile.uuid());

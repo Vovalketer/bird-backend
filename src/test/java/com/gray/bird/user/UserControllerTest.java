@@ -141,6 +141,7 @@ public class UserControllerTest {
 
 	@Test
 	void shouldReturnUserProfile() throws Exception {
+		UUID authUserId = UUID.randomUUID();
 		String username = "testUser";
 
 		UserProjection user = Mockito.mock(UserProjection.class);
@@ -154,7 +155,7 @@ public class UserControllerTest {
 		Mockito.when(responseFactory.createResponse(userResource)).thenReturn(response);
 
 		ResponseEntity<JsonApiResponse<UserResource>> userProfileResponse =
-			userController.getUserProfile(username);
+			userController.getUserProfile(username, authUserId);
 
 		Assertions.assertThat(userProfileResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(userProfileResponse.getBody()).isEqualTo(response);
