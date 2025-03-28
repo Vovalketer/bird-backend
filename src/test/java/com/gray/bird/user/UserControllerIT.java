@@ -87,7 +87,13 @@ public class UserControllerIT {
 							.value(user.getProfileImage()))
 					.andExpect(MockMvcResultMatchers.jsonPath("$.data.attributes.bio").value(user.getBio()))
 					.andExpect(MockMvcResultMatchers.jsonPath("$.data.attributes.location")
-							.value(user.getLocation()));
+							.value(user.getLocation()))
+					.andExpect(
+						MockMvcResultMatchers.jsonPath("$.data.metadata.followCounts.followers").exists())
+					.andExpect(
+						MockMvcResultMatchers.jsonPath("$.data.metadata.followCounts.following").exists())
+					.andExpect(
+						MockMvcResultMatchers.jsonPath("$.data.metadata.userInteractions").doesNotExist());
 			}
 
 			@Test

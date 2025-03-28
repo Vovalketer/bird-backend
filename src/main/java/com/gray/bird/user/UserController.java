@@ -40,7 +40,7 @@ import com.gray.bird.user.dto.UserCreationRequest;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.dto.UserResource;
 import com.gray.bird.user.follow.FollowService;
-import com.gray.bird.user.follow.dto.FollowCounts;
+import com.gray.bird.user.follow.dto.FollowSummary;
 
 @RestController
 @RequestMapping(path = ResourcePaths.USERS)
@@ -74,8 +74,9 @@ public class UserController {
 		@PathVariable String username, @AuthenticationPrincipal UUID userId) {
 		UserProjection userProfile = userService.getUserByUsername(username);
 		UserResource resource = userResourceMapper.toResource(userProfile);
-		FollowCounts followCounts = followService.getFollowCounts(userProfile.uuid());
-		resource.addMetadata("followCounts", followCounts);
+		FollowSummary followSummary = followService.getFollowSummary(userProfile.uuid(), userId);
+		resource.addMetadata("followCounts", followSummary.followCounts());
+		resource.addMetadata("userInteractions", followSummary.userInteractions());
 		var response = responseFactory.createResponse(resource);
 		return ResponseEntity.ok(response);
 	}

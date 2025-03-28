@@ -25,4 +25,9 @@ interface FollowRepository extends JpaRepository<FollowEntity, FollowId> {
 	List<FollowEntity> findByFollowingUserId(@Param("userId") UUID userId);
 	@Query("SELECT f FROM FollowEntity f WHERE f.id.followedUser = :userId")
 	List<FollowEntity> findByFollowedUserId(@Param("userId") UUID userId);
+
+	@Query("SELECT f FROM FollowEntity f WHERE f.id.followingUser IN :userIds")
+	List<FollowEntity> findByFollowingUserIdsIn(List<UUID> userIds);
+	@Query("SELECT f FROM FollowEntity f WHERE f.id.followedUser IN :userIds")
+	List<FollowEntity> findByFollowedUserIdsIn(List<UUID> userIds);
 }
