@@ -94,20 +94,6 @@ public class FollowServiceTest {
 	}
 
 	@Test
-	void testIsFollowing() {
-		UUID currentUser = UUID.randomUUID();
-		String usernameToCheck = "testUsername";
-		UUID userToCheck = UUID.randomUUID();
-		Mockito.when(userService.getUserIdByUsername(usernameToCheck)).thenReturn(userToCheck);
-		Mockito.when(repo.existsByFollowingAndFollowedId(currentUser, userToCheck)).thenReturn(true);
-
-		boolean following = followService.isFollowing(currentUser, usernameToCheck);
-		Assertions.assertThat(following).isTrue();
-		Mockito.verify(userService).getUserIdByUsername(usernameToCheck);
-		Mockito.verify(repo).existsByFollowingAndFollowedId(currentUser, userToCheck);
-	}
-
-	@Test
 	void testUnfollowUserByUsername() {
 		UUID currentUser = UUID.randomUUID();
 		String usernameToUnfollow = "testUsername";

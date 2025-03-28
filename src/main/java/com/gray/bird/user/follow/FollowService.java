@@ -33,11 +33,6 @@ public class FollowService {
 		repo.delete(followEntity);
 	}
 
-	public boolean isFollowing(UUID currentUser, String userToCheck) {
-		UUID userToCheckId = userService.getUserIdByUsername(userToCheck);
-		return repo.existsByFollowingAndFollowedId(currentUser, userToCheckId);
-	}
-
 	public List<UUID> getFollowing(UUID user) {
 		return repo.findFollowing(user);
 	}
