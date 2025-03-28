@@ -4,5 +4,5 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public record FollowCounts(@JsonIgnore UUID userId, int following, int followers) {
+public record FollowCounts(@JsonIgnore UUID userId, long following, long followers) {
 }
