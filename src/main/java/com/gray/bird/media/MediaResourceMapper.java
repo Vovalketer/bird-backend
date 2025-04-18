@@ -23,12 +23,7 @@ public class MediaResourceMapper implements ResourceMapper<MediaProjection, Medi
 	}
 
 	private MediaAttributes getMediaAttributes(MediaProjection data) {
-		return new MediaAttributes(data.url(),
-			data.description(),
-			data.width(),
-			data.height(),
-			data.fileSize(),
-			data.duration(),
-			data.format());
+		return new MediaAttributes(
+			data.url(), data.alt(), data.width(), data.height(), data.size(), data.duration(), data.type());
 	}
 }

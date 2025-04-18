@@ -1,5 +1,7 @@
 package com.gray.bird.media.dto;
 
+import org.springframework.http.MediaType;
+
 public record MediaAttributes(
-	String url, String description, int width, int height, long fileSize, long duration, String format) {
+	String url, String alt, int width, int height, long size, long duration, MediaType type) {
 }

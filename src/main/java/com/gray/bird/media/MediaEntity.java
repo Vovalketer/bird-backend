@@ -1,5 +1,7 @@
 package com.gray.bird.media;
 
+import org.springframework.http.MediaType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +13,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+
+import java.util.UUID;
 
 import com.gray.bird.common.entity.TimestampedEntity;
 
@@ -25,11 +29,12 @@ public class MediaEntity extends TimestampedEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private Long postId;
+	private UUID userId;
 	private String url;
-	private String description;
-	private Integer width;
-	private Integer height;
-	private long fileSize;
-	private Long duration;
-	private String format;
+	private String alt;
+	private int width;
+	private int height;
+	private long size;
+	private Integer duration;
+	private MediaType type;
 }
