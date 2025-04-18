@@ -78,7 +78,7 @@ public class FollowService {
 	}
 
 	public FollowSummary getFollowSummary(UUID userId, UUID authUserId) {
-		List<FollowEntity> follows = repo.findByFollowingUserId(userId);
+		List<FollowEntity> follows = repo.findAllByUserId(userId);
 		return new FollowSummary(
 			userId, getFollowCounts(userId, follows), getUserInteractions(userId, authUserId, follows));
 	}

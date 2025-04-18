@@ -142,15 +142,15 @@ public class FollowServiceTest {
 		UUID someOtherUser = UUID.randomUUID();
 		List<FollowEntity> follows =
 			List.of(new FollowEntity(someUser, UUID.randomUUID()), new FollowEntity(someUser, someOtherUser));
-		Mockito.when(repo.findByFollowingUserId(someUser)).thenReturn(follows);
+		Mockito.when(repo.findAllByUserId(someUser)).thenReturn(follows);
 
 		FollowSummary followSummary = followService.getFollowSummary(someUser, authUserId);
+		Mockito.verify(repo).findAllByUserId(someUser);
 		Assertions.assertThat(followSummary.userId()).isEqualTo(someUser);
 		Assertions.assertThat(followSummary.userInteractions().isFollowing()).isFalse();
 		Assertions.assertThat(followSummary.userInteractions().followedAt()).isNull();
 		Assertions.assertThat(followSummary.userInteractions().isFollowedBy()).isFalse();
 		Assertions.assertThat(followSummary.userInteractions().followedByAt()).isNull();
-		Mockito.verify(repo).findByFollowingUserId(someUser);
 	}
 
 	@Test
@@ -159,15 +159,15 @@ public class FollowServiceTest {
 		UUID followedUser = UUID.randomUUID();
 		List<FollowEntity> follows = List.of(new FollowEntity(authUserId, followedUser, LocalDateTime.now()),
 			new FollowEntity(followedUser, UUID.randomUUID(), LocalDateTime.now()));
-		Mockito.when(repo.findByFollowingUserId(followedUser)).thenReturn(follows);
+		Mockito.when(repo.findAllByUserId(followedUser)).thenReturn(follows);
 
 		FollowSummary followSummary = followService.getFollowSummary(followedUser, authUserId);
+		Mockito.verify(repo).findAllByUserId(followedUser);
 		Assertions.assertThat(followSummary.userId()).isEqualTo(followedUser);
 		Assertions.assertThat(followSummary.userInteractions().isFollowing()).isTrue();
 		Assertions.assertThat(followSummary.userInteractions().followedAt()).isNotNull();
 		Assertions.assertThat(followSummary.userInteractions().isFollowedBy()).isFalse();
 		Assertions.assertThat(followSummary.userInteractions().followedByAt()).isNull();
-		Mockito.verify(repo).findByFollowingUserId(followedUser);
 	}
 
 	@Test
@@ -176,15 +176,15 @@ public class FollowServiceTest {
 		UUID followingUser = UUID.randomUUID();
 		List<FollowEntity> follows = List.of(new FollowEntity(followingUser, authUserId, LocalDateTime.now()),
 			new FollowEntity(UUID.randomUUID(), followingUser, LocalDateTime.now()));
-		Mockito.when(repo.findByFollowingUserId(followingUser)).thenReturn(follows);
+		Mockito.when(repo.findAllByUserId(followingUser)).thenReturn(follows);
 
 		FollowSummary followSummary = followService.getFollowSummary(followingUser, authUserId);
+		Mockito.verify(repo).findAllByUserId(followingUser);
 		Assertions.assertThat(followSummary.userId()).isEqualTo(followingUser);
 		Assertions.assertThat(followSummary.userInteractions().isFollowing()).isFalse();
 		Assertions.assertThat(followSummary.userInteractions().followedAt()).isNull();
 		Assertions.assertThat(followSummary.userInteractions().isFollowedBy()).isTrue();
 		Assertions.assertThat(followSummary.userInteractions().followedByAt()).isNotNull();
-		Mockito.verify(repo).findByFollowingUserId(followingUser);
 	}
 
 	@Test
@@ -193,26 +193,26 @@ public class FollowServiceTest {
 		UUID followingUser = UUID.randomUUID();
 		List<FollowEntity> follows = List.of(new FollowEntity(followingUser, authUserId, LocalDateTime.now()),
 			new FollowEntity(authUserId, followingUser, LocalDateTime.now()));
-		Mockito.when(repo.findByFollowingUserId(followingUser)).thenReturn(follows);
+		Mockito.when(repo.findAllByUserId(followingUser)).thenReturn(follows);
 
 		FollowSummary followSummary = followService.getFollowSummary(followingUser, authUserId);
+		Mockito.verify(repo).findAllByUserId(followingUser);
 		Assertions.assertThat(followSummary.userId()).isEqualTo(followingUser);
 		Assertions.assertThat(followSummary.userInteractions().isFollowing()).isTrue();
 		Assertions.assertThat(followSummary.userInteractions().followedAt()).isNotNull();
 		Assertions.assertThat(followSummary.userInteractions().isFollowedBy()).isTrue();
 		Assertions.assertThat(followSummary.userInteractions().followedByAt()).isNotNull();
-		Mockito.verify(repo).findByFollowingUserId(followingUser);
 
 		// commutative test
 
-		Mockito.when(repo.findByFollowingUserId(authUserId)).thenReturn(follows);
+		Mockito.when(repo.findAllByUserId(authUserId)).thenReturn(follows);
 		FollowSummary followSummary2 = followService.getFollowSummary(authUserId, followingUser);
+		Mockito.verify(repo).findAllByUserId(authUserId);
 		Assertions.assertThat(followSummary2.userId()).isEqualTo(authUserId);
 		Assertions.assertThat(followSummary2.userInteractions().isFollowing()).isTrue();
 		Assertions.assertThat(followSummary2.userInteractions().followedAt()).isNotNull();
 		Assertions.assertThat(followSummary2.userInteractions().isFollowedBy()).isTrue();
 		Assertions.assertThat(followSummary2.userInteractions().followedByAt()).isNotNull();
-		Mockito.verify(repo).findByFollowingUserId(authUserId);
 	}
 
 	@Test
@@ -222,11 +222,11 @@ public class FollowServiceTest {
 		UUID someOtherUser = UUID.randomUUID();
 		List<FollowEntity> follows = List.of(new FollowEntity(someUser, someOtherUser, LocalDateTime.now()),
 			new FollowEntity(someOtherUser, someUser, LocalDateTime.now()));
-		Mockito.when(repo.findByFollowingUserId(someUser)).thenReturn(follows);
+		Mockito.when(repo.findAllByUserId(someUser)).thenReturn(follows);
 
 		FollowSummary followSummary = followService.getFollowSummary(someUser, unauthenticatedUser);
+		Mockito.verify(repo).findAllByUserId(someUser);
 		Assertions.assertThat(followSummary.userId()).isEqualTo(someUser);
 		Assertions.assertThat(followSummary.userInteractions()).isNull();
-		Mockito.verify(repo).findByFollowingUserId(someUser);
 	}
 }
