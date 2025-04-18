@@ -12,7 +12,7 @@ import java.util.UUID;
 
 import com.gray.bird.exception.InvalidPostException;
 import com.gray.bird.exception.ResourceNotFoundException;
-import com.gray.bird.media.MediaCommandService;
+import com.gray.bird.media.MediaService;
 import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.RepliesCount;
@@ -23,7 +23,7 @@ import com.gray.bird.post.event.PostEventPublisher;
 @Transactional(rollbackFor = Exception.class, readOnly = true)
 public class PostService {
 	private final PostRepository postRepository;
-	private final MediaCommandService mediaService;
+	private final MediaService mediaService;
 	private final PostMapper postMapper;
 	private final PostEventPublisher postEventPublisher;
 
