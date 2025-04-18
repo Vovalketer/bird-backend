@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -26,6 +27,7 @@ class FollowEntity {
 	private FollowId id;
 
 	@CreatedDate
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
 	public FollowEntity(UUID followingUser, UUID followedUser) {
