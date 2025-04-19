@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Set;
 
-import com.gray.bird.media.dto.MediaRequest;
+import com.gray.bird.media.dto.request.MediaRequest;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
