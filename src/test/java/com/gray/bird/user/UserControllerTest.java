@@ -36,6 +36,8 @@ import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.dto.UserRelationships;
 import com.gray.bird.user.dto.UserResource;
 import com.gray.bird.user.follow.FollowService;
+import com.gray.bird.user.follow.dto.FollowCounts;
+import com.gray.bird.user.follow.dto.FollowSummary;
 import com.gray.bird.utils.TestResources;
 import com.gray.bird.utils.TestUtils;
 
@@ -144,11 +146,16 @@ public class UserControllerTest {
 		UUID authUserId = UUID.randomUUID();
 		String username = "testUser";
 
-		UserProjection user = Mockito.mock(UserProjection.class);
+		UserProjection user = testUtils.createUserProjection();
 		Mockito.when(userService.getUserByUsername(Mockito.anyString())).thenReturn(user);
 
 		UserResource userResource = Mockito.mock(UserResource.class);
 		Mockito.when(userResourceMapper.toResource(user)).thenReturn(userResource);
+
+		FollowSummary followSummary =
+			new FollowSummary(user.uuid(), new FollowCounts(user.uuid(), 10, 11), null);
+		Mockito.when(followService.getFollowSummary(Mockito.any(UUID.class), Mockito.any(UUID.class)))
+			.thenReturn(followSummary);
 
 		@SuppressWarnings("unchecked")
 		JsonApiResponse<UserResource> response = Mockito.mock(JsonApiResponse.class);
@@ -163,6 +170,7 @@ public class UserControllerTest {
 		Mockito.verify(userService).getUserByUsername(username);
 		Mockito.verify(userResourceMapper).toResource(user);
 		Mockito.verify(responseFactory).createResponse(userResource);
+		Mockito.verify(followService).getFollowSummary(user.uuid(), authUserId);
 	}
 
 	@Test
