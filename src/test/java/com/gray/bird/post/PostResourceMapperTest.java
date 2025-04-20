@@ -35,7 +35,7 @@ public class PostResourceMapperTest {
 		Assertions.assertThat(resource.getRelationships()).isNotNull();
 		Assertions.assertThat(resource.getRelationships().getUser()).isNotNull();
 		Assertions.assertThat(resource.getRelationships().getUser().getData().getId())
-			.isEqualTo(postProjection.userId().toString());
+			.isEqualTo(postProjection.userId());
 		Assertions.assertThat(resource.getRelationships().getUser().getData().getType())
 			.isEqualTo(ResourceType.USERS.getType());
 		Assertions.assertThat(resource.getRelationships().getParentPost().getData().getId())

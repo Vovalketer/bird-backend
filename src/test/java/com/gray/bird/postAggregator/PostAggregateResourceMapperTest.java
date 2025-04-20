@@ -42,7 +42,7 @@ public class PostAggregateResourceMapperTest {
 		Assertions.assertThat(resource.getAttributes().createdAt())
 			.isEqualTo(postAggregate.post().createdAt());
 		Assertions.assertThat(resource.getRelationships().getUser().getData().getId())
-			.isEqualTo(postAggregate.post().userId().toString());
+			.isEqualTo(postAggregate.post().userId());
 		Assertions.assertThat(resource.getRelationships().getParentPost().getData().getId())
 			.isEqualTo(postAggregate.post().parentPostId());
 		Assertions.assertThat(resource.getMetadata().getMetadata("metrics").get()).isNotNull();
