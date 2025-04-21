@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.Rollback;
@@ -30,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gray.bird.auth.jwt.JwtService;
 import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.ResourceType;
-import com.gray.bird.post.dto.PostCreationRequest;
+import com.gray.bird.post.dto.request.PostContentRequest;
 import com.gray.bird.testConfig.TestcontainersConfig;
 
 @SpringBootTest
@@ -103,13 +104,16 @@ public class PostControllerIT {
 			@Transactional
 			@Rollback
 			void shouldCreatePostWithValidDataAndReturnIt() throws JsonProcessingException, Exception {
-				PostCreationRequest req = new PostCreationRequest("testText", null, ReplyType.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyType.EVERYONE);
+				MockMultipartFile content = new MockMultipartFile("content",
+					"",
+					MediaType.APPLICATION_JSON.toString(),
+					objectMapper.writeValueAsBytes(req));
 
 				mockMvc
-					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT)
-							.header(HttpHeaders.AUTHORIZATION, accessToken)
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(req)))
+					.perform(MockMvcRequestBuilders.multipart(POSTS_ENDPOINT)
+							.file(content)
+							.header(HttpHeaders.AUTHORIZATION, accessToken))
 					.andExpect(MockMvcResultMatchers.status().isCreated())
 					.andExpect(MockMvcResultMatchers.jsonPath("$.data.id").exists())
 					.andExpect(
@@ -124,7 +128,7 @@ public class PostControllerIT {
 
 			@Test
 			void shouldReturnBadRequestWithInvalidData() throws JsonProcessingException, Exception {
-				PostCreationRequest req = new PostCreationRequest(null, null, ReplyType.EVERYONE);
+				PostContentRequest req = new PostContentRequest(null, ReplyType.EVERYONE);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT)
@@ -167,13 +171,16 @@ public class PostControllerIT {
 			@Rollback
 			void shouldCreateReplyWithValidDataAndReturnIt() throws Exception {
 				Long postId = 1L;
-				PostCreationRequest req = new PostCreationRequest("testText", null, ReplyType.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyType.EVERYONE);
+				MockMultipartFile content = new MockMultipartFile("content",
+					"",
+					MediaType.APPLICATION_JSON.toString(),
+					objectMapper.writeValueAsBytes(req));
 
 				mockMvc
-					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT + "/{postId}/replies", postId)
-							.header(HttpHeaders.AUTHORIZATION, accessToken)
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(req)))
+					.perform(MockMvcRequestBuilders.multipart(POSTS_ENDPOINT + "/{postId}/replies", postId)
+							.file(content)
+							.header(HttpHeaders.AUTHORIZATION, accessToken))
 					.andExpect(MockMvcResultMatchers.status().isCreated())
 					.andExpect(MockMvcResultMatchers.jsonPath("$.data.id").exists())
 					.andExpect(
@@ -188,7 +195,7 @@ public class PostControllerIT {
 			@Test
 			void shouldReturnBadRequestWithInvalidData() throws Exception {
 				Long postId = 1L;
-				PostCreationRequest req = new PostCreationRequest(null, null, ReplyType.EVERYONE);
+				PostContentRequest req = new PostContentRequest(null, ReplyType.EVERYONE);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT + "/{postId}/replies", postId)
@@ -232,7 +239,7 @@ public class PostControllerIT {
 		class CreatePost {
 			@Test
 			void shouldReturnUnauthorizedWhenNotAuthenticated() throws JsonProcessingException, Exception {
-				PostCreationRequest req = new PostCreationRequest("testText", null, ReplyType.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyType.EVERYONE);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT)
@@ -266,7 +273,7 @@ public class PostControllerIT {
 			@Test
 			void shouldReturnUnauthorizedWhenNotAuthenticated() throws JsonProcessingException, Exception {
 				Long postId = 1L;
-				PostCreationRequest req = new PostCreationRequest("testText", null, ReplyType.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyType.EVERYONE);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT + "/{postId}/replies", postId)

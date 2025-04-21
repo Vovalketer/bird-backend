@@ -8,10 +8,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,9 +29,12 @@ import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataType;
 import com.gray.bird.common.utils.MetadataUtils;
-import com.gray.bird.post.dto.PostCreationRequest;
+import com.gray.bird.media.dto.request.MediaMetadataRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostResource;
+import com.gray.bird.post.dto.request.PostContentRequest;
+import com.gray.bird.post.dto.request.PostRequest;
+import com.gray.bird.post.mapper.PostRequestMapper;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
@@ -48,6 +53,7 @@ public class PostController {
 	private final PostAggregateResourceMapper postAggregateResourceMapper;
 	private final PostResourceMapper postResourceMapper;
 	private final UserResourceMapper userResourceMapper;
+	private final PostRequestMapper postCreationRequestMapper;
 	private final MetadataUtils metadataUtils;
 	private final JsonApiResponseFactory responseFactory;
 
@@ -56,13 +62,18 @@ public class PostController {
 
 	@PostMapping
 	public ResponseEntity<JsonApiResponse<PostResource>> createPost(
-		@RequestBody @Valid PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
-		PostProjection post = postService.createPost(postRequest, userId);
-		PostResource resource = postResourceMapper.toResource(post);
+		@RequestPart("content") @Valid PostContentRequest content,
+		@RequestPart(name = "media", required = false) List<MultipartFile> files,
+		@RequestPart(name = "metadata", required = false) Map<Integer, MediaMetadataRequest> metadata,
+		@AuthenticationPrincipal UUID userId) {
+		PostRequest request = postCreationRequestMapper.toPostCreationRequest(content, files, metadata);
+		PostProjection postProjection = postService.createPost(request, userId);
+		PostResource resource = postResourceMapper.toResource(postProjection);
 
 		var response = responseFactory.createResponse(resource);
 
-		return ResponseEntity.created(URI.create(ResourcePaths.POSTS + "/" + post.id())).body(response);
+		return ResponseEntity.created(URI.create(ResourcePaths.POSTS + "/" + response.getData().getId()))
+			.body(response);
 	}
 
 	@GetMapping("/{postId}")
@@ -110,14 +121,19 @@ public class PostController {
 	}
 
 	@PostMapping("/{postId}/replies")
-	public ResponseEntity<JsonApiResponse<PostResource>> postReply(@PathVariable Long postId,
-		@RequestBody PostCreationRequest postRequest, @AuthenticationPrincipal UUID userId) {
-		PostProjection reply = postService.createReply(postRequest, postId, userId);
+	public ResponseEntity<JsonApiResponse<PostResource>> createReply(@PathVariable Long postId,
+		@RequestPart("content") @Valid PostContentRequest content,
+		@RequestPart(name = "media", required = false) List<MultipartFile> files,
+		@RequestPart(name = "metadata", required = false) Map<Integer, MediaMetadataRequest> metadata,
+		@AuthenticationPrincipal UUID userId) {
+		PostRequest request = postCreationRequestMapper.toPostCreationRequest(content, files, metadata);
+		PostProjection reply = postService.createReply(request, postId, userId);
 		PostResource resource = postResourceMapper.toResource(reply);
 
 		var response = responseFactory.createResponse(resource);
 
-		return ResponseEntity.created(URI.create(ResourcePaths.POSTS + "/" + reply.id())).body(response);
+		return ResponseEntity.created(URI.create(ResourcePaths.POSTS + "/" + response.getData().getId()))
+			.body(response);
 	}
 
 	// TODO: latest posts on /posts, no filters

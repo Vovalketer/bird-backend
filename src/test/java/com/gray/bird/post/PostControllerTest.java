@@ -15,17 +15,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.gray.bird.common.JsonApiResponse;
+import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataUtils;
-import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostResource;
+import com.gray.bird.post.dto.request.PostContentRequest;
+import com.gray.bird.post.dto.request.PostRequest;
+import com.gray.bird.post.mapper.PostRequestMapper;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.PostAggregateResourceMapper;
 import com.gray.bird.postAggregator.PostAggregatorService;
@@ -33,6 +37,7 @@ import com.gray.bird.user.UserResourceMapper;
 import com.gray.bird.user.UserService;
 import com.gray.bird.user.dto.UserProjection;
 import com.gray.bird.user.dto.UserResource;
+import com.gray.bird.utils.TestPostFactory;
 import com.gray.bird.utils.TestUtils;
 
 @ExtendWith(SpringExtension.class)
@@ -50,6 +55,8 @@ public class PostControllerTest {
 	@Mock
 	UserResourceMapper userResourceMapper;
 	@Mock
+	PostRequestMapper postCreationRequestMapper;
+	@Mock
 	JsonApiResponseFactory responseFactory;
 	@Mock
 	MetadataUtils metadataUtils;
@@ -61,26 +68,35 @@ public class PostControllerTest {
 
 	@Test
 	void shouldReturnCreatedPostWhenPostIsSubmitted() {
-		PostCreationRequest req = Mockito.mock(PostCreationRequest.class);
 		UUID userId = UUID.randomUUID();
+		Long newPostId = 1L;
+		PostContentRequest contentReq = TestPostFactory.postContentRequest();
 
-		PostProjection postProjection = Mockito.mock(PostProjection.class);
-		PostResource postResource = Mockito.mock(PostResource.class);
-		@SuppressWarnings("unchecked")
-		JsonApiResponse<PostResource> response = Mockito.mock(JsonApiResponse.class);
+		PostRequest request = TestPostFactory.postCreationRequestWithoutMedia();
+		Mockito.when(postCreationRequestMapper.toPostCreationRequest(contentReq, null, null))
+			.thenReturn(request);
 
-		Mockito.when(postService.createPost(req, userId)).thenReturn(postProjection);
+		PostProjection postProjection = TestPostFactory.postProjection(newPostId, userId);
+		Mockito.when(postService.createPost(request, userId)).thenReturn(postProjection);
+
+		PostResource postResource = TestPostFactory.postResource(newPostId, userId);
 		Mockito.when(postResourceMapper.toResource(postProjection)).thenReturn(postResource);
+
+		JsonApiResponse<PostResource> response = new JsonApiResponse<PostResource>(postResource);
 		Mockito.when(responseFactory.createResponse(postResource)).thenReturn(response);
 
-		ResponseEntity<JsonApiResponse<PostResource>> postResponse = postController.createPost(req, userId);
+		ResponseEntity<JsonApiResponse<PostResource>> postResponse =
+			postController.createPost(contentReq, null, null, userId);
 
+		Mockito.verify(postCreationRequestMapper).toPostCreationRequest(contentReq, null, null);
+		Mockito.verify(postService).createPost(request, userId);
+		Mockito.verify(postResourceMapper).toResource(postProjection);
+		Mockito.verify(responseFactory).createResponse(postResource);
 		Assertions.assertThat(postResponse.getStatusCode())
 			.isEqualTo(ResponseEntity.status(201).build().getStatusCode());
 		Assertions.assertThat(postResponse.getBody()).isEqualTo(response);
-		Mockito.verify(postService).createPost(req, userId);
-		Mockito.verify(postResourceMapper).toResource(postProjection);
-		Mockito.verify(responseFactory).createResponse(postResource);
+		Assertions.assertThat(postResponse.getHeaders().getLocation())
+			.isEqualTo(URI.create(ResourcePaths.POSTS + "/" + response.getData().getId()));
 	}
 
 	@Test
@@ -165,24 +181,33 @@ public class PostControllerTest {
 
 	@Test
 	void shouldReturnCreatedReplyWhenReplyIsSubmitted() {
-		Long postId = 1L;
+		Long replyingToPostId = 1L;
+		Long newPostId = 2L;
 		UUID userId = UUID.randomUUID();
-		PostCreationRequest req = Mockito.mock(PostCreationRequest.class);
-		PostProjection reply = testUtils.createReplyPostProjection(postId);
-		PostResource replyResource = Mockito.mock(PostResource.class);
-		@SuppressWarnings("unchecked")
-		JsonApiResponse<PostResource> response = Mockito.mock(JsonApiResponse.class);
+		PostContentRequest content = TestPostFactory.postContentRequest();
 
-		Mockito.when(postService.createReply(req, postId, userId)).thenReturn(reply);
+		PostRequest request = TestPostFactory.postCreationRequestWithoutMedia();
+		Mockito.when(postCreationRequestMapper.toPostCreationRequest(content, null, null))
+			.thenReturn(request);
+
+		PostProjection reply = TestPostFactory.postProjection(newPostId, userId);
+		Mockito.when(postService.createReply(request, replyingToPostId, userId)).thenReturn(reply);
+
+		PostResource replyResource = TestPostFactory.postResource(newPostId, userId);
 		Mockito.when(postResourceMapper.toResource(reply)).thenReturn(replyResource);
+
+		JsonApiResponse<PostResource> response = new JsonApiResponse<PostResource>(replyResource);
 		Mockito.when(responseFactory.createResponse(replyResource)).thenReturn(response);
 
 		ResponseEntity<JsonApiResponse<PostResource>> replyResponse =
-			postController.postReply(postId, req, userId);
+			postController.createReply(replyingToPostId, content, null, null, userId);
 
-		Assertions.assertThat(replyResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		Assertions.assertThat(replyResponse.getBody()).isEqualTo(response);
+		Mockito.verify(postCreationRequestMapper).toPostCreationRequest(content, null, null);
 		Mockito.verify(postResourceMapper).toResource(reply);
 		Mockito.verify(responseFactory).createResponse(replyResource);
+		Assertions.assertThat(replyResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		Assertions.assertThat(replyResponse.getBody()).isEqualTo(response);
+		Assertions.assertThat(replyResponse.getHeaders().getLocation())
+			.isEqualTo(URI.create(ResourcePaths.POSTS + "/" + response.getData().getId()));
 	}
 }
