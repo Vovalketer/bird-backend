@@ -13,9 +13,9 @@ import java.util.UUID;
 import com.gray.bird.exception.InvalidPostException;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.media.MediaService;
-import com.gray.bird.post.dto.PostCreationRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.RepliesCount;
+import com.gray.bird.post.dto.request.PostRequest;
 import com.gray.bird.post.event.PostEventPublisher;
 
 @Service
@@ -37,7 +37,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostProjection createPost(PostCreationRequest postRequest, UUID userId) {
+	public PostProjection createPost(PostRequest postRequest, UUID userId) {
 		if (isPostEmpty(postRequest)) {
 			throw new InvalidPostException();
 		}
@@ -53,7 +53,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostProjection createReply(PostCreationRequest postRequest, Long parentPostId, UUID userId) {
+	public PostProjection createReply(PostRequest postRequest, Long parentPostId, UUID userId) {
 		if (isPostEmpty(postRequest)) {
 			throw new InvalidPostException();
 		}
@@ -69,35 +69,34 @@ public class PostService {
 		return postMapper.toPostProjection(savedPost);
 	}
 
-	private PostEntity createPostEntity(PostCreationRequest post, UUID userId, boolean hasMedia) {
+	private PostEntity createPostEntity(PostRequest post, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
-			.text(post.text())
-			.replyType(post.replyType())
+			.text(post.content().text())
+			.replyType(post.content().replyType())
 			.userId(userId)
 			.hasMedia(hasMedia)
 			.build();
 	}
 
-	private PostEntity createPostEntity(
-		PostCreationRequest post, PostEntity parent, UUID userId, boolean hasMedia) {
+	private PostEntity createPostEntity(PostRequest post, PostEntity parent, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
-			.text(post.text())
-			.replyType(post.replyType())
+			.text(post.content().text())
+			.replyType(post.content().replyType())
 			.userId(userId)
 			.parentPost(parent)
 			.hasMedia(hasMedia)
 			.build();
 	}
 
-	private boolean hasMedia(PostCreationRequest postRequest) {
-		return postRequest.media() != null;
+	private boolean hasMedia(PostRequest postRequest) {
+		return postRequest.media() != null && !postRequest.media().files().isEmpty();
 	}
 
-	private boolean hasText(PostCreationRequest postRequest) {
-		return postRequest.text() != null && !postRequest.text().isBlank();
+	private boolean hasText(PostRequest postRequest) {
+		return postRequest.content().text() != null && !postRequest.content().text().isBlank();
 	}
 
-	private boolean isPostEmpty(PostCreationRequest postRequest) {
+	private boolean isPostEmpty(PostRequest postRequest) {
 		return !hasText(postRequest) && !hasMedia(postRequest);
 	}
 

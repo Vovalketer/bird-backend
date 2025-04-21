@@ -16,7 +16,7 @@ import com.gray.bird.exception.GlobalExceptionHandler;
 import com.gray.bird.exception.ResourceNotFoundException;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.request.PostContentRequest;
-import com.gray.bird.post.dto.request.PostCreationRequest;
+import com.gray.bird.post.dto.request.PostRequest;
 import com.gray.bird.post.event.PostEventPublisher;
 import com.gray.bird.utils.TestUtils;
 import com.gray.bird.utils.TestUtilsFactory;
@@ -37,8 +37,7 @@ public class PostServiceTest {
 	@Test
 	void createValidPostWithoutMedia() {
 		PostEntity post = testUtils.createPost();
-		PostCreationRequest req =
-			new PostCreationRequest(new PostContentRequest(post.getText(), post.getReplyType()));
+		PostRequest req = new PostRequest(new PostContentRequest(post.getText(), post.getReplyType()));
 		PostProjection projection = new PostProjection(post.getId(),
 			post.getUserId(),
 			post.getText(),
@@ -74,8 +73,7 @@ public class PostServiceTest {
 	@Test
 	void createValidReplyWithoutMedia() {
 		PostEntity post = testUtils.createReply();
-		PostCreationRequest req =
-			new PostCreationRequest(new PostContentRequest(post.getText(), post.getReplyType()));
+		PostRequest req = new PostRequest(new PostContentRequest(post.getText(), post.getReplyType()));
 		PostProjection projection = new PostProjection(post.getId(),
 			post.getUserId(),
 			post.getText(),
