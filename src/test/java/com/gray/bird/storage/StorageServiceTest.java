@@ -15,8 +15,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.List;
 
+import com.gray.bird.storage.dto.StorageRequest;
 import com.gray.bird.storage.exception.BulkSaveOperationException;
 import com.gray.bird.storage.exception.DirectoryCreationException;
 import com.gray.bird.storage.exception.EmptyFileException;
@@ -50,44 +51,68 @@ public class StorageServiceTest {
 		}
 
 		@Test
-		void shouldThrowWhenAttemptingToSaveAnEmptyFile() {
+		void shouldThrowWhenAttemptingToSaveAnEmptyFile() throws IOException {
 			MockMultipartFile file = new MockMultipartFile("file", "empty.png", "image/png", new byte[0]);
-			Assertions.assertThatThrownBy(() -> { storageService.save("EmptyFile.png", file); })
+			StorageRequest request = StorageRequest.builder()
+										 .fileStream(file.getInputStream())
+										 .originalFilename(file.getOriginalFilename())
+										 .targetFilename(file.getName())
+										 .fileSize(file.getSize())
+										 .build();
+			Assertions.assertThatThrownBy(() -> { storageService.save(request); })
 				.isInstanceOf(EmptyFileException.class);
 		}
 
 		@Test
-		void shouldThrowWhenAttemptingToSaveFileWithEmptyFilename() {
+		void shouldThrowWhenAttemptingToSaveFileWithEmptyFilename() throws IOException {
 			MockMultipartFile file =
 				new MockMultipartFile("file", "empty.png", "image/png", "testcontent".getBytes());
-			Assertions.assertThatThrownBy(() -> { storageService.save("", file); })
+			StorageRequest request = StorageRequest.builder()
+										 .fileStream(file.getInputStream())
+										 .originalFilename(file.getOriginalFilename())
+										 .targetFilename("")
+										 .fileSize(file.getSize())
+										 .build();
+			Assertions.assertThatThrownBy(() -> { storageService.save(request); })
 				.isInstanceOf(EmptyFilenameException.class);
 		}
 
 		@Test
-		void shouldThrowWhenAttemptingToSaveFileWithNullFilename() {
+		void shouldThrowWhenAttemptingToSaveFileWithNullFilename() throws IOException {
 			MockMultipartFile file =
 				new MockMultipartFile("file", "empty.png", "image/png", "testcontent".getBytes());
-			Assertions.assertThatThrownBy(() -> { storageService.save(null, file); })
+			StorageRequest request = StorageRequest.builder()
+										 .fileStream(file.getInputStream())
+										 .originalFilename(file.getOriginalFilename())
+										 .targetFilename(null)
+										 .fileSize(file.getSize())
+										 .build();
+			Assertions.assertThatThrownBy(() -> { storageService.save(request); })
 				.isInstanceOf(EmptyFilenameException.class);
 		}
 
 		@Test
-		void shouldThrowWhenFileFailsToBeStored() {
+		void shouldThrowWhenFileFailsToBeStored() throws IOException {
 			try (var files = Mockito.mockStatic(Files.class)) {
 				files.when(() -> Files.copy(Mockito.any(InputStream.class), Mockito.any(Path.class)))
 					.thenThrow(IOException.class);
 
 				MockMultipartFile file =
 					new MockMultipartFile("file", "someFile.png", "image/png", "testcontent".getBytes());
+				StorageRequest request = StorageRequest.builder()
+											 .fileStream(file.getInputStream())
+											 .originalFilename(file.getOriginalFilename())
+											 .targetFilename(file.getName())
+											 .fileSize(file.getSize())
+											 .build();
 
-				Assertions.assertThatThrownBy(() -> { storageService.save("SomeFile.png", file); })
+				Assertions.assertThatThrownBy(() -> { storageService.save(request); })
 					.isInstanceOf(FileSaveException.class);
 			}
 		}
 
 		@Test
-		void shouldThrowWhenBulkSaveFailsToStoreFiles() {
+		void shouldThrowWhenBulkSaveFailsToStoreFiles() throws IOException {
 			try (var files = Mockito.mockStatic(Files.class)) {
 				files.when(() -> Files.copy(Mockito.any(InputStream.class), Mockito.any(Path.class)))
 					.thenThrow(IOException.class);
@@ -98,12 +123,26 @@ public class StorageServiceTest {
 					new MockMultipartFile("file", "someFile2.png", "image/png", "testcontent".getBytes());
 				MockMultipartFile file3 =
 					new MockMultipartFile("file", "someFile3.png", "image/png", "testcontent".getBytes());
+				List<StorageRequest> requests = List.of(StorageRequest.builder()
+															.fileStream(file1.getInputStream())
+															.originalFilename(file1.getOriginalFilename())
+															.targetFilename(file1.getName())
+															.fileSize(file1.getSize())
+															.build(),
+					StorageRequest.builder()
+						.fileStream(file2.getInputStream())
+						.originalFilename(file2.getOriginalFilename())
+						.targetFilename(file2.getName())
+						.fileSize(file2.getSize())
+						.build(),
+					StorageRequest.builder()
+						.fileStream(file3.getInputStream())
+						.originalFilename(file3.getOriginalFilename())
+						.targetFilename(file3.getName())
+						.fileSize(file3.getSize())
+						.build());
 
-				Assertions
-					.assertThatThrownBy(() -> {
-						storageService.saveAll(
-							Map.of("someFile.png", file1, "someFile2.png", file2, "someFile3.png", file3));
-					})
+				Assertions.assertThatThrownBy(() -> { storageService.saveAll(requests); })
 					.isInstanceOf(BulkSaveOperationException.class);
 			}
 		}
@@ -133,7 +172,7 @@ public class StorageServiceTest {
 		@Test
 		void shouldThrowWhenAttemptingToGetFileThatDoesNotExist() {
 			try (var files = Mockito.mockStatic(Files.class)) {
-				files.when(() -> Files.exists(Mockito.any(Path.class))).thenReturn(false);
+				files.when(() -> Files.isRegularFile(Mockito.any(Path.class))).thenReturn(false);
 
 				Assertions
 					.assertThatThrownBy(() -> { storageService.getFileAsResource("nonExistentFile.png"); })

@@ -11,21 +11,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mockito;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.imageio.ImageIO;
 
+import com.gray.bird.storage.dto.StorageRequest;
+import com.gray.bird.storage.dto.StorageResult;
 import com.gray.bird.storage.exception.BulkSaveOperationException;
 import com.gray.bird.storage.exception.FileNotFoundException;
 import com.gray.bird.storage.exception.FileSaveException;
@@ -43,18 +43,41 @@ public class StorageServiceIT {
 		storageService = new StorageService(tempDir);
 	}
 
+	class FailingInputStream extends InputStream {
+		private int failAfterBytes;
+		private int readCount = 0;
+
+		public FailingInputStream(int failAfterBytes) {
+			this.failAfterBytes = failAfterBytes;
+		}
+
+		@Override
+		public int read() throws IOException {
+			if (readCount++ >= failAfterBytes) {
+				throw new IOException("Simulated disk error");
+			}
+			return 'x';
+		}
+	}
+
 	@Nested
 	class SaveFile {
 		@Test
 		void shouldSaveFileWhenFileIsProvidedAndReadIt() throws Exception {
 			MultipartFile file = TestStorageFactory.imageFile("red", "png", Color.RED);
+			StorageRequest request = StorageRequest.builder()
+										 .fileStream(file.getInputStream())
+										 .originalFilename(file.getOriginalFilename())
+										 .targetFilename("red.png")
+										 .fileSize(file.getSize())
+										 .build();
 
-			Path saved = storageService.save("red.png", file);
-
-			assertThat(Files.exists(saved)).isTrue();
+			StorageResult saved = storageService.save(request);
 
 			// read file and verify dimensions & color
-			BufferedImage readBack = ImageIO.read(saved.toFile());
+			File file2 = saved.fileResource().getFile();
+			assertThat(file2).isNotNull();
+			BufferedImage readBack = ImageIO.read(file2);
 			assertThat(readBack.getWidth()).isEqualTo(50);
 			assertThat(readBack.getHeight()).isEqualTo(50);
 			// Check top-left pixel is red
@@ -66,20 +89,34 @@ public class StorageServiceIT {
 			MultipartFile redFile = TestStorageFactory.imageFile("red", "png", Color.RED);
 			MultipartFile blueFile = TestStorageFactory.imageFile("blue", "png", Color.BLUE);
 			MultipartFile greenFile = TestStorageFactory.imageFile("green", "png", Color.GREEN);
+			List<StorageRequest> requests = List.of(StorageRequest.builder()
+														.fileStream(redFile.getInputStream())
+														.originalFilename(redFile.getOriginalFilename())
+														.targetFilename(redFile.getName())
+														.fileSize(redFile.getSize())
+														.build(),
+				StorageRequest.builder()
+					.fileStream(blueFile.getInputStream())
+					.originalFilename(blueFile.getOriginalFilename())
+					.targetFilename(blueFile.getName())
+					.fileSize(blueFile.getSize())
+					.build(),
+				StorageRequest.builder()
+					.fileStream(greenFile.getInputStream())
+					.originalFilename(greenFile.getOriginalFilename())
+					.targetFilename(greenFile.getName())
+					.fileSize(greenFile.getSize())
+					.build());
 
-			List<Path> saved = storageService.saveAll(
-				Map.of("red.png", redFile, "blue.png", blueFile, "green.png", greenFile));
+			List<StorageResult> saved = storageService.saveAll(requests);
 
 			assertThat(saved).hasSize(3);
-			assertThat(Files.exists(saved.get(0))).isTrue();
-			assertThat(Files.exists(saved.get(1))).isTrue();
-			assertThat(Files.exists(saved.get(2))).isTrue();
 
 			// read files and verify dimensions & color, avoiding to depend on the output order
 
 			List<BufferedImage> readBack = new ArrayList<>();
-			for (Path p : saved) {
-				readBack.add(ImageIO.read(p.toFile()));
+			for (StorageResult p : saved) {
+				readBack.add(ImageIO.read(p.fileResource().getFile()));
 			}
 
 			Optional<BufferedImage> redOptional =
@@ -113,7 +150,13 @@ public class StorageServiceIT {
 
 			TestStorageFactory.writeFileToDisk(imageFile, "red.png", tempDir);
 
-			assertThatThrownBy(() -> storageService.save("red.png", imageFile))
+			StorageRequest request = StorageRequest.builder()
+										 .fileStream(imageFile.getInputStream())
+										 .originalFilename(imageFile.getOriginalFilename())
+										 .targetFilename("red.png")
+										 .fileSize(imageFile.getSize())
+										 .build();
+			assertThatThrownBy(() -> storageService.save(request))
 				.isInstanceOf(FilenameAlreadyExistsException.class);
 		}
 
@@ -121,18 +164,35 @@ public class StorageServiceIT {
 		void shouldRollBackWhenBulkSaveFailsToStoreAFile() throws IOException {
 			MultipartFile file = TestStorageFactory.imageFile("red", "png", Color.RED);
 			MultipartFile file2 = TestStorageFactory.imageFile("blue", "png", Color.BLUE);
-			MultipartFile invalidFile = Mockito.mock(MultipartFile.class);
-			Mockito.when(invalidFile.isEmpty()).thenReturn(false);
-			Mockito.when(invalidFile.getSize()).thenReturn(10L);
-			Mockito.when(invalidFile.getOriginalFilename()).thenReturn("green.png");
-			Mockito.when(invalidFile.getInputStream()).thenThrow(new IOException("Simulated disk error"));
-			// use linked hash map to preserve order
-			Map<String, MultipartFile> filesMap = new LinkedHashMap<>();
-			filesMap.put("red.png", file);
-			filesMap.put("blue.png", file2);
-			filesMap.put("green.png", invalidFile);
+			MultipartFile invalidFile = TestStorageFactory.imageFile("green", "png", Color.GREEN);
+			// InputStream invalidStream = Mockito.mock(InputStream.class);
+			InputStream inputStream = new FailingInputStream(10);
+			StorageRequest invalidRequest = StorageRequest.builder()
+												.fileStream(inputStream)
+												.originalFilename(invalidFile.getOriginalFilename())
+												.targetFilename(invalidFile.getName())
+												.fileSize(invalidFile.getSize())
+												.build();
+			// Mockito.when(invalidStream.read()).thenThrow(new IOException("Simulated disk error"));
 
-			assertThatThrownBy(() -> { storageService.saveAll(filesMap); })
+			List<StorageRequest> requests = List.of(StorageRequest.builder()
+														.fileStream(file.getInputStream())
+														.originalFilename(file.getOriginalFilename())
+														.targetFilename(file.getName())
+														.fileSize(file.getSize())
+														.build(),
+				StorageRequest.builder()
+					.fileStream(file2.getInputStream())
+					.originalFilename(file2.getOriginalFilename())
+					.targetFilename(file2.getName())
+					.fileSize(file2.getSize())
+					.build(),
+				invalidRequest);
+			// spaghetti
+			// choices are testing the rollback feature in a unit test, mocking the files class or making a
+			// helper class for the verification methods
+
+			assertThatThrownBy(() -> { storageService.saveAll(requests); })
 				.isInstanceOf(BulkSaveOperationException.class)
 				.hasCauseInstanceOf(FileSaveException.class);
 
@@ -146,18 +206,18 @@ public class StorageServiceIT {
 	@Nested
 	class DeleteFile {
 		@Test
-		void shouldDeleteFileWhenPathIsProvided() throws Exception {
+		void shouldDeleteFileWhenRelativePathIsProvided() throws Exception {
 			MultipartFile redFile = TestStorageFactory.imageFile("red", "png", Color.RED);
 
 			Path redPath = TestStorageFactory.writeFileToDisk(redFile, "red.png", tempDir);
 			assertThat(Files.exists(redPath)).isTrue();
 
-			storageService.delete(redPath);
+			storageService.delete("./red.png");
 			assertThat(Files.exists(redPath)).isFalse();
 		}
 
 		@Test
-		void shouldDeleteFileWhenFilenameIsProvided() throws Exception {
+		void shouldDeleteFileWhenProvidedRelativePathIsTheFilename() throws Exception {
 			MultipartFile file = TestStorageFactory.imageFile("red", "png", Color.RED);
 
 			Path saved = TestStorageFactory.writeFileToDisk(file, "red.png", tempDir);
@@ -168,7 +228,7 @@ public class StorageServiceIT {
 		}
 
 		@Test
-		void shouldDeleteFilesByPathWhenPathListIsProvided() throws Exception {
+		void shouldDeleteFilesWhenRelativePathListIsProvided() throws Exception {
 			MultipartFile redFile = TestStorageFactory.imageFile("red", "png", Color.RED);
 			MultipartFile blueFile = TestStorageFactory.imageFile("blue", "png", Color.BLUE);
 			MultipartFile greenFile = TestStorageFactory.imageFile("green", "png", Color.GREEN);
@@ -184,14 +244,14 @@ public class StorageServiceIT {
 			Path greenPath = TestStorageFactory.writeFileToDisk(greenFile, "green.png", tempDir);
 			assertThat(Files.exists(greenPath)).isTrue();
 
-			storageService.deleteAllByPath(List.of(redPath, bluePath, greenPath));
+			storageService.deleteAll(List.of("./red.png", "./blue.png", "./green.png"));
 			assertThat(Files.exists(redPath)).isFalse();
 			assertThat(Files.exists(bluePath)).isFalse();
 			assertThat(Files.exists(greenPath)).isFalse();
 		}
 
 		@Test
-		void shouldDeleteFilesByFilenameWhenFilenameListIsProvided() throws Exception {
+		void shouldDeleteFilesWhenRelativePathListProvidedAreFilenames() throws Exception {
 			MultipartFile redFile = TestStorageFactory.imageFile("red", "png", Color.RED);
 			MultipartFile blueFile = TestStorageFactory.imageFile("blue", "png", Color.BLUE);
 			MultipartFile greenFile = TestStorageFactory.imageFile("green", "png", Color.GREEN);
@@ -207,7 +267,7 @@ public class StorageServiceIT {
 			Path greenPath = TestStorageFactory.writeFileToDisk(greenFile, "green.png", tempDir);
 			assertThat(Files.exists(greenPath)).isTrue();
 
-			storageService.deleteAllByFilename(List.of("red.png", "blue.png", "green.png"));
+			storageService.deleteAll(List.of("red.png", "blue.png", "green.png"));
 			assertThat(Files.exists(redPath)).isFalse();
 			assertThat(Files.exists(bluePath)).isFalse();
 			assertThat(Files.exists(greenPath)).isFalse();

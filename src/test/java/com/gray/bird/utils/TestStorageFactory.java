@@ -16,7 +16,7 @@ import javax.imageio.ImageIO;
 
 public class TestStorageFactory {
 	public static MultipartFile imageFile(String filename, String extension, Color color) throws IOException {
-		// create a 50×50 red BufferedImage
+		// create a 50×50 BufferedImage
 		BufferedImage img = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = img.createGraphics();
 		g.setColor(color);

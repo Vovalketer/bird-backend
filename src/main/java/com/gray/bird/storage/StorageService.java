@@ -2,8 +2,8 @@ package com.gray.bird.storage;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -12,8 +12,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
+import com.gray.bird.storage.dto.StorageRequest;
+import com.gray.bird.storage.dto.StorageResult;
 import com.gray.bird.storage.exception.BulkSaveOperationException;
 import com.gray.bird.storage.exception.DirectoryCreationException;
 import com.gray.bird.storage.exception.EmptyFileException;
@@ -37,101 +38,169 @@ public class StorageService {
 		}
 	}
 
-	public Path getPath(String path) {
-		try {
-			Path target = basePath.resolve(path).normalize();
-			if (!target.startsWith(basePath)) {
-				throw new InvalidPathException(path);
-			}
-			return target;
-		} catch (java.nio.file.InvalidPathException e) {
-			throw new InvalidPathException(path);
-		}
+	public Path getPath(String relativePath) {
+		return resolve(relativePath);
 	}
 
-	public Resource getFileAsResource(String path) {
-		Path resolvedPath = getPath(path);
+	public Resource getFileAsResource(String relativePath) {
+		Path resolvedPath = resolve(relativePath);
 		// isRegularFile also performs an existence check
 		if (!Files.isRegularFile(resolvedPath)) {
-			throw new FileNotFoundException(path);
+			throw new FileNotFoundException(relativePath);
 		}
 		return new FileSystemResource(resolvedPath.toFile());
 	}
 
-	public List<Resource> getFilesAsResources(Collection<String> paths) {
-		return paths.stream().map(this::getFileAsResource).toList();
+	public List<Resource> getFilesAsResources(Collection<String> relativePaths) {
+		return relativePaths.stream().map(this::getFileAsResource).toList();
 	}
 
-	public Path save(String path, MultipartFile file) throws FileSaveException {
-		if (file.isEmpty()) {
-			throw new EmptyFileException(path);
+	public StorageResult save(StorageRequest request) throws FileSaveException {
+		if (request.originalFilename() == null || request.originalFilename().isEmpty()) {
+			throw new EmptyFilenameException();
 		}
-		if (path == null || path.isEmpty()) {
+		if (request.targetFilename() == null || request.targetFilename().isEmpty()) {
 			throw new EmptyFilenameException();
 		}
 
-		Path targetLocation = getPath(path);
-		try (InputStream inputStream = file.getInputStream()) {
-			Files.copy(inputStream, targetLocation);
-		} catch (FileAlreadyExistsException e) {
-			throw new FilenameAlreadyExistsException(path);
-		} catch (IOException e) {
-			throw new FileSaveException(path, e);
-		}
+		try (BufferedInputStream bufferedStream = getBufferedInputStream(request.fileStream())) {
+			if (isStreamEmpty(bufferedStream)) {
+				throw new EmptyFileException(request.targetFilename());
+			}
 
-		return targetLocation;
+			Path targetLocation = buildPath(request.targetFilename(), request.directory());
+
+			Files.copy(bufferedStream, targetLocation);
+
+			return StorageResult.builder()
+				.storageFilename(request.targetFilename())
+				.originalFilename(request.originalFilename())
+				.extension(extractExtension(targetLocation))
+				.fileSize(request.fileSize())
+				.relativePath(relativize(targetLocation))
+				.fileResource(new FileSystemResource(targetLocation.toAbsolutePath().toString()))
+				.build();
+		} catch (FileAlreadyExistsException e) {
+			throw new FilenameAlreadyExistsException(request.targetFilename());
+		} catch (IOException e) {
+			throw new FileSaveException(request.targetFilename(), e);
+		}
 	}
 
 	/**
-	 * Saves all files in a path/file map.
-	 * if a file fails to save, the operation is rolled back and the files that have been saved so far are
-	 * deleted and an exception is thrown
-	 * @param files - a path/file map
-	 * @return a list of paths
+	 * If a file fails to save, the operation is rolled back and the files that have been saved so far are
+	 * deleted. An exception is thrown.
+	 * @param request - a colllection of requests containing an input stream, original filename, target
+	 *     filename, directory, and file size
+	 * @return a list containing a resource, relative path and associated metadata
 	 * @throws FileSaveException
 	 */
-	public List<Path> saveAll(Map<String, MultipartFile> files) throws FileSaveException {
-		List<Path> savedFiles = new ArrayList<>();
-		for (Map.Entry<String, MultipartFile> entry : files.entrySet()) {
-			String filename = entry.getKey();
-			MultipartFile file = entry.getValue();
+	public List<StorageResult> saveAll(Collection<StorageRequest> request) throws FileSaveException {
+		List<StorageResult> results = new ArrayList<>();
+		request.forEach(r -> {
 			try {
-				Path saved = save(filename, file);
-				savedFiles.add(saved);
+				StorageResult saved = save(r);
+				results.add(saved);
 			} catch (StorageException e) {
-				for (Path p : savedFiles) {
+				for (StorageResult d : results) {
 					try {
-						delete(p);
+						delete(d.relativePath());
 					} catch (FileDeleteException ignored) {
 					}
 				}
 				throw new BulkSaveOperationException(e);
 			}
-		};
-		return savedFiles;
+		});
+		return results;
 	}
 
-	public void delete(Path path) throws FileDeleteException {
+	public void delete(String relativePath) throws FileDeleteException {
+		Path path = resolve(relativePath);
+		if (!path.startsWith(basePath)) {
+			throw new InvalidPathException(relativePath);
+		}
 		try {
 			Files.deleteIfExists(path);
 		} catch (IOException e) {
-			throw new FileDeleteException(path.getFileName().toString(), e);
+			throw new FileDeleteException(relativePath, e);
 		}
 	}
 
-	public void delete(String path) throws FileDeleteException {
-		delete(getPath(path));
-	}
-
-	public void deleteAllByFilename(Collection<String> paths) throws FileDeleteException {
-		for (String filename : paths) {
-			delete(filename);
+	public void deleteAll(Collection<String> relativePaths) throws FileDeleteException {
+		for (String relativePath : relativePaths) {
+			delete(relativePath);
 		}
 	}
 
-	public void deleteAllByPath(Collection<Path> paths) throws FileDeleteException {
-		for (Path path : paths) {
-			delete(path);
+	private Path resolve(String relativePath) {
+		Path path = null;
+		try {
+			path = basePath.resolve(relativePath).normalize();
+
+		} catch (java.nio.file.InvalidPathException e) {
+			throw new InvalidPathException(relativePath);
 		}
+		validatePath(path);
+		return path;
+	}
+
+	private String relativize(Path path) {
+		validatePath(path);
+		return basePath.relativize(path.toAbsolutePath().normalize()).toString();
+	}
+
+	private Path buildPath(String filename, String directory) {
+		if (filename == null || filename.isEmpty()) {
+			throw new EmptyFilenameException();
+		}
+		Path path = null;
+		if (directory == null || directory.isEmpty()) {
+			path = Path.of(filename);
+		} else {
+			path = Path.of(directory, filename);
+		}
+		try {
+			Path target = basePath.resolve(path).normalize();
+			validatePath(target);
+			return target;
+		} catch (java.nio.file.InvalidPathException e) {
+			throw new InvalidPathException(path.toString());
+		}
+	}
+
+	private void validatePath(Path path) {
+		if (!path.startsWith(basePath)) {
+			throw new InvalidPathException(path.toString());
+		}
+	}
+
+	private String extractExtension(Path path) {
+		String filename = path.getFileName().toString();
+		int lastDot = filename.lastIndexOf('.');
+		if (lastDot == -1) {
+			return "";
+		}
+		return filename.substring(lastDot);
+	}
+
+	// peek one byte from the stream to determine if its empty
+	// avaliable() might return 0 even if the stream is not empty
+	private boolean isStreamEmpty(BufferedInputStream stream) throws IOException {
+		if (stream == null) {
+			return true;
+		}
+		stream.mark(1);
+		int read = stream.read();
+		stream.reset();
+
+		return read == -1;
+	}
+
+	private BufferedInputStream getBufferedInputStream(InputStream stream) {
+		// wrap in a buffered stream if the stream is not already buffered
+		// the new instance of BufferedInputStream will point to the same underlying stream
+		// so we dont need to close the plain stream after creating a new buffered stream
+		return stream instanceof BufferedInputStream ? (BufferedInputStream) stream
+													 : new BufferedInputStream(stream);
 	}
 }
