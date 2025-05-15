@@ -29,7 +29,7 @@ import com.gray.bird.common.ResourcePaths;
 import com.gray.bird.common.utils.JsonApiResponseFactory;
 import com.gray.bird.common.utils.MetadataType;
 import com.gray.bird.common.utils.MetadataUtils;
-import com.gray.bird.media.dto.request.MediaMetadataRequest;
+import com.gray.bird.media.dto.request.MediaInputMetadataRequest;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.post.dto.request.PostContentRequest;
@@ -64,7 +64,7 @@ public class PostController {
 	public ResponseEntity<JsonApiResponse<PostResource>> createPost(
 		@RequestPart("content") @Valid PostContentRequest content,
 		@RequestPart(name = "media", required = false) List<MultipartFile> files,
-		@RequestPart(name = "metadata", required = false) Map<Integer, MediaMetadataRequest> metadata,
+		@RequestPart(name = "metadata", required = false) Map<Integer, MediaInputMetadataRequest> metadata,
 		@AuthenticationPrincipal UUID userId) {
 		PostRequest request = postCreationRequestMapper.toPostCreationRequest(content, files, metadata);
 		PostProjection postProjection = postService.createPost(request, userId);
@@ -124,7 +124,7 @@ public class PostController {
 	public ResponseEntity<JsonApiResponse<PostResource>> createReply(@PathVariable Long postId,
 		@RequestPart("content") @Valid PostContentRequest content,
 		@RequestPart(name = "media", required = false) List<MultipartFile> files,
-		@RequestPart(name = "metadata", required = false) Map<Integer, MediaMetadataRequest> metadata,
+		@RequestPart(name = "metadata", required = false) Map<Integer, MediaInputMetadataRequest> metadata,
 		@AuthenticationPrincipal UUID userId) {
 		PostRequest request = postCreationRequestMapper.toPostCreationRequest(content, files, metadata);
 		PostProjection reply = postService.createReply(request, postId, userId);

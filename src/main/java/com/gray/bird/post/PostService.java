@@ -42,11 +42,11 @@ public class PostService {
 			throw new InvalidPostException();
 		}
 		boolean hasMedia = hasMedia(postRequest);
-		if (hasMedia) {
-			mediaService.uploadImages(postRequest.media());
-		}
 		PostEntity post = createPostEntity(postRequest, userId, hasMedia);
 		PostEntity savedPost = savePost(post);
+		if (hasMedia) {
+			mediaService.uploadImages(userId, savedPost.getId(), postRequest.media());
+		}
 
 		postEventPublisher.publishPostCreatedEvent(savedPost.getUserId(), savedPost.getId());
 		return postMapper.toPostProjection(savedPost);
@@ -59,12 +59,11 @@ public class PostService {
 		}
 		PostEntity parent = getByPostId(parentPostId);
 		boolean hasMedia = hasMedia(postRequest);
-		if (hasMedia) {
-			mediaService.uploadImages(postRequest.media());
-		}
 		PostEntity post = createPostEntity(postRequest, parent, userId, hasMedia);
-
 		PostEntity savedPost = savePost(post);
+		if (hasMedia) {
+			mediaService.uploadImages(userId, savedPost.getId(), postRequest.media());
+		}
 
 		return postMapper.toPostProjection(savedPost);
 	}
@@ -89,7 +88,7 @@ public class PostService {
 	}
 
 	private boolean hasMedia(PostRequest postRequest) {
-		return postRequest.media() != null && !postRequest.media().files().isEmpty();
+		return postRequest.media() != null && !postRequest.media().content().isEmpty();
 	}
 
 	private boolean hasText(PostRequest postRequest) {
