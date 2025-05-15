@@ -6,16 +6,18 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import com.gray.bird.media.dto.MediaProjection;
+import com.gray.bird.media.dto.MediaDto;
 
 @Service
 @RequiredArgsConstructor
 public class MediaQueryService {
 	private final MediaRepository mediaRepository;
-	public List<MediaProjection> getMediaByPostId(Long postId) {
-		return mediaRepository.findByPostId(postId, MediaProjection.class);
+
+	public List<MediaDto> getMediaByPostId(Long postId) {
+		return mediaRepository.findByPostId(postId, MediaDto.class);
 	}
-	public List<MediaProjection> getAllMediaByPostId(Iterable<Long> postIds) {
-		return mediaRepository.findAllByPostIdIn(postIds, MediaProjection.class);
+
+	public List<MediaDto> getAllMediaByPostId(Iterable<Long> postIds) {
+		return mediaRepository.findAllByPostIdIn(postIds, MediaDto.class);
 	}
 }

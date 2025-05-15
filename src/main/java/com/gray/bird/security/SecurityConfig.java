@@ -32,6 +32,8 @@ public class SecurityConfig {
 					.permitAll()
 					.requestMatchers(HttpMethod.GET, "/api/users/**")
 					.permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/media/**")
+					.permitAll()
 					.anyRequest()
 					.authenticated())
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

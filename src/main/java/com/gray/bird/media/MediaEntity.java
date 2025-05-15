@@ -1,11 +1,11 @@
 package com.gray.bird.media;
 
-import org.springframework.http.MediaType;
-
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +22,9 @@ import com.gray.bird.common.entity.TimestampedEntity;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Entity
+@Builder
 @Table(name = "media", indexes = @Index(name = "idx_media_post", columnList = "post_id", unique = false))
 public class MediaEntity extends TimestampedEntity {
 	@Id
@@ -30,11 +32,14 @@ public class MediaEntity extends TimestampedEntity {
 	private Long id;
 	private Long postId;
 	private UUID userId;
-	private String url;
+	private int sortOrder;
+	private String relativePath;
+	private String filename;
+	private String originalFilename;
 	private String alt;
 	private int width;
 	private int height;
-	private long size;
+	private long fileSize;
 	private Integer duration;
-	private MediaType type;
+	private String mimeType;
 }

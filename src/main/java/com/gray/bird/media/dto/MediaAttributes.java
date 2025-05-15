@@ -1,7 +1,8 @@
 package com.gray.bird.media.dto;
 
-import org.springframework.http.MediaType;
+import lombok.Builder;
 
-public record MediaAttributes(
-	String url, String alt, int width, int height, long size, long duration, MediaType type) {
+@Builder
+public record MediaAttributes(String url, String originalFilename, int sortOrder, String alt, int width,
+	int height, long fileSize, Integer duration, String mimeType) {
 }
