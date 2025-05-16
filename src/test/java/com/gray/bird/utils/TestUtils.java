@@ -145,7 +145,7 @@ public class TestUtils {
 	}
 
 	public PostEntity createPost(UserEntity user) {
-		return createPost(user, ReplyAudience.EVERYONE, false, null);
+		return createPost(user, ReplyAudience.PUBLIC, false, null);
 	}
 
 	public List<PostEntity> createPosts(UserEntity user, int count) {
@@ -157,19 +157,19 @@ public class TestUtils {
 	}
 
 	public PostEntity createPost() {
-		return createPost(createUser(), ReplyAudience.EVERYONE, false, null);
+		return createPost(createUser(), ReplyAudience.PUBLIC, false, null);
 	}
 
 	public PostEntity createPost(UUID userId) {
-		PostEntity post = createPost(createUser(), ReplyAudience.EVERYONE, false, null);
+		PostEntity post = createPost(createUser(), ReplyAudience.PUBLIC, false, null);
 		post.setUserId(userId);
 		return post;
 	}
 
 	public PostEntity createReply() {
-		PostEntity parent = createPost(createUser(), ReplyAudience.EVERYONE, false, null);
+		PostEntity parent = createPost(createUser(), ReplyAudience.PUBLIC, false, null);
 
-		PostEntity reply = createPost(createUser(), ReplyAudience.EVERYONE, false, parent);
+		PostEntity reply = createPost(createUser(), ReplyAudience.PUBLIC, false, parent);
 		reply.setParentPostId(parent.getId());
 
 		return reply;

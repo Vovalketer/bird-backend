@@ -13,7 +13,7 @@ import com.gray.bird.post.dto.request.PostRequest;
 
 public class TestPostFactory {
 	public static PostContentRequest postContentRequest() {
-		return new PostContentRequest("testText", ReplyAudience.EVERYONE);
+		return new PostContentRequest("testText", ReplyAudience.PUBLIC);
 	}
 
 	public static PostRequest postCreationRequestWithoutMedia() {
@@ -22,12 +22,12 @@ public class TestPostFactory {
 
 	public static PostProjection postProjection(Long postId, UUID userId) {
 		return new PostProjection(
-			postId, userId, "testText", false, false, ReplyAudience.EVERYONE, null, LocalDateTime.now());
+			postId, userId, "testText", false, false, ReplyAudience.PUBLIC, null, LocalDateTime.now());
 	}
 
 	public static PostResource postResource(Long postId, UUID userId) {
 		return new PostResource(postId,
-			new PostAttributes("testText", ReplyAudience.EVERYONE, LocalDateTime.now()),
+			new PostAttributes("testText", ReplyAudience.PUBLIC, LocalDateTime.now()),
 			new PostRelationships(userId, null));
 	}
 }

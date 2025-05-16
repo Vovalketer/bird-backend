@@ -104,7 +104,7 @@ public class PostControllerIT {
 			@Transactional
 			@Rollback
 			void shouldCreatePostWithValidDataAndReturnIt() throws JsonProcessingException, Exception {
-				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.PUBLIC);
 				MockMultipartFile content = new MockMultipartFile("content",
 					"",
 					MediaType.APPLICATION_JSON.toString(),
@@ -128,7 +128,7 @@ public class PostControllerIT {
 
 			@Test
 			void shouldReturnBadRequestWithInvalidData() throws JsonProcessingException, Exception {
-				PostContentRequest req = new PostContentRequest(null, ReplyAudience.EVERYONE);
+				PostContentRequest req = new PostContentRequest(null, ReplyAudience.PUBLIC);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT)
@@ -171,7 +171,7 @@ public class PostControllerIT {
 			@Rollback
 			void shouldCreateReplyWithValidDataAndReturnIt() throws Exception {
 				Long postId = 1L;
-				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.PUBLIC);
 				MockMultipartFile content = new MockMultipartFile("content",
 					"",
 					MediaType.APPLICATION_JSON.toString(),
@@ -195,7 +195,7 @@ public class PostControllerIT {
 			@Test
 			void shouldReturnBadRequestWithInvalidData() throws Exception {
 				Long postId = 1L;
-				PostContentRequest req = new PostContentRequest(null, ReplyAudience.EVERYONE);
+				PostContentRequest req = new PostContentRequest(null, ReplyAudience.PUBLIC);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT + "/{postId}/replies", postId)
@@ -239,7 +239,7 @@ public class PostControllerIT {
 		class CreatePost {
 			@Test
 			void shouldReturnUnauthorizedWhenNotAuthenticated() throws JsonProcessingException, Exception {
-				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.PUBLIC);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT)
@@ -273,7 +273,7 @@ public class PostControllerIT {
 			@Test
 			void shouldReturnUnauthorizedWhenNotAuthenticated() throws JsonProcessingException, Exception {
 				Long postId = 1L;
-				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.EVERYONE);
+				PostContentRequest req = new PostContentRequest("testText", ReplyAudience.PUBLIC);
 
 				mockMvc
 					.perform(MockMvcRequestBuilders.post(POSTS_ENDPOINT + "/{postId}/replies", postId)

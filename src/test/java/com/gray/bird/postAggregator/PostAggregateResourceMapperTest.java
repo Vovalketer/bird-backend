@@ -28,7 +28,7 @@ public class PostAggregateResourceMapperTest {
 		long postId = 101L;
 		PostAggregate postAggregate = new PostAggregate(
 			new PostProjection(
-				postId, userId, "text", false, false, ReplyAudience.EVERYONE, 102L, LocalDateTime.now()),
+				postId, userId, "text", false, false, ReplyAudience.PUBLIC, 102L, LocalDateTime.now()),
 			null,
 			new PostEngagement(postId,
 				new PostMetrics(100L, 100L, 100L),

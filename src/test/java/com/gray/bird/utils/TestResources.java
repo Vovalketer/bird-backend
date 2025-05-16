@@ -16,7 +16,7 @@ import com.gray.bird.user.dto.UserResource;
 public class TestResources {
 	public PostResource createPostResource(Long postId, UUID userId, Long parentPostId) {
 		PostAttributes attributes = new PostAttributes(UUID.randomUUID().toString(),
-			ReplyAudience.EVERYONE,
+			ReplyAudience.PUBLIC,
 			LocalDateTime.now().minusDays(randomInt(1000)));
 		PostRelationships reationships = new PostRelationships(userId, parentPostId);
 		return new PostResource(postId, attributes, reationships);
