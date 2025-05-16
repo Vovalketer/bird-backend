@@ -20,6 +20,6 @@ public class PostResourceMapper implements ResourceMapper<PostProjection, PostRe
 	}
 
 	private PostAttributes getPostAttributes(PostProjection data) {
-		return new PostAttributes(data.text(), data.replyType(), data.createdAt());
+		return new PostAttributes(data.text(), data.replyAudience(), data.createdAt());
 	}
 }

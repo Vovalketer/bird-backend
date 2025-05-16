@@ -38,7 +38,7 @@ public class PostEntity extends TimestampedEntity {
 	@Column(nullable = false)
 	private UUID userId;
 	private String text;
-	private ReplyType replyType;
+	private ReplyAudience replyAudience;
 	private boolean deleted;
 	// improves latency since we wouldnt need to query the media service if the post has no media
 	private boolean hasMedia;

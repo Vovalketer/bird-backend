@@ -71,7 +71,7 @@ public class PostService {
 	private PostEntity createPostEntity(PostRequest post, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
 			.text(post.content().text())
-			.replyType(post.content().replyType())
+			.replyAudience(post.content().replyAudience())
 			.userId(userId)
 			.hasMedia(hasMedia)
 			.build();
@@ -80,7 +80,7 @@ public class PostService {
 	private PostEntity createPostEntity(PostRequest post, PostEntity parent, UUID userId, boolean hasMedia) {
 		return PostEntity.builder()
 			.text(post.content().text())
-			.replyType(post.content().replyType())
+			.replyAudience(post.content().replyAudience())
 			.userId(userId)
 			.parentPost(parent)
 			.hasMedia(hasMedia)

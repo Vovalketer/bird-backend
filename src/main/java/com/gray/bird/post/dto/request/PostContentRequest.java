@@ -2,7 +2,7 @@ package com.gray.bird.post.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 
-import com.gray.bird.post.ReplyType;
+import com.gray.bird.post.ReplyAudience;
 
-public record PostContentRequest(String text, @NotNull ReplyType replyType) {
+public record PostContentRequest(String text, @NotNull ReplyAudience replyAudience) {
 }

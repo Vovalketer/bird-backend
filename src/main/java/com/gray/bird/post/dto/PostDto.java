@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.gray.bird.media.dto.MediaDto;
-import com.gray.bird.post.ReplyType;
+import com.gray.bird.post.ReplyAudience;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @Data
@@ -18,7 +18,7 @@ public class PostDto {
 	private Long id;
 	private UUID userId;
 	private String text;
-	private ReplyType replyType;
+	private ReplyAudience replyAudience;
 	private boolean deleted;
 	private List<MediaDto> media;
 	private Long parentPostId;

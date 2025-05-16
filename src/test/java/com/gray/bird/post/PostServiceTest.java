@@ -37,13 +37,13 @@ public class PostServiceTest {
 	@Test
 	void createValidPostWithoutMedia() {
 		PostEntity post = testUtils.createPost();
-		PostRequest req = new PostRequest(new PostContentRequest(post.getText(), post.getReplyType()));
+		PostRequest req = new PostRequest(new PostContentRequest(post.getText(), post.getReplyAudience()));
 		PostProjection projection = new PostProjection(post.getId(),
 			post.getUserId(),
 			post.getText(),
 			post.isDeleted(),
 			post.isHasMedia(),
-			post.getReplyType(),
+			post.getReplyAudience(),
 			null,
 			post.getCreatedAt());
 
@@ -57,7 +57,7 @@ public class PostServiceTest {
 		Assertions.assertThat(postResult.text()).isEqualTo(post.getText());
 		Assertions.assertThat(postResult.userId()).isEqualTo(post.getUserId());
 		Assertions.assertThat(postResult.deleted()).isEqualTo(post.isDeleted());
-		Assertions.assertThat(postResult.replyType()).isEqualTo(post.getReplyType());
+		Assertions.assertThat(postResult.replyAudience()).isEqualTo(post.getReplyAudience());
 		Assertions.assertThat(postResult.createdAt()).isEqualTo(post.getCreatedAt());
 		// ensure that the parent post is null, therefore it isnt a reply
 		Assertions.assertThat(post.getParentPost()).isNull();
@@ -73,13 +73,13 @@ public class PostServiceTest {
 	@Test
 	void createValidReplyWithoutMedia() {
 		PostEntity post = testUtils.createReply();
-		PostRequest req = new PostRequest(new PostContentRequest(post.getText(), post.getReplyType()));
+		PostRequest req = new PostRequest(new PostContentRequest(post.getText(), post.getReplyAudience()));
 		PostProjection projection = new PostProjection(post.getId(),
 			post.getUserId(),
 			post.getText(),
 			post.isDeleted(),
 			post.isHasMedia(),
-			post.getReplyType(),
+			post.getReplyAudience(),
 			post.getParentPostId(),
 			post.getCreatedAt());
 
@@ -94,7 +94,7 @@ public class PostServiceTest {
 		Assertions.assertThat(postResult.text()).isEqualTo(post.getText());
 		Assertions.assertThat(postResult.userId()).isEqualTo(post.getUserId());
 		Assertions.assertThat(postResult.deleted()).isEqualTo(post.isDeleted());
-		Assertions.assertThat(postResult.replyType()).isEqualTo(post.getReplyType());
+		Assertions.assertThat(postResult.replyAudience()).isEqualTo(post.getReplyAudience());
 		Assertions.assertThat(postResult.createdAt()).isEqualTo(post.getCreatedAt());
 
 		// ensure that the parent post is not null, therefore it is a reply

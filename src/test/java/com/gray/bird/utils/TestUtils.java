@@ -17,7 +17,7 @@ import com.gray.bird.media.MediaMapperImpl;
 import com.gray.bird.post.PostEntity;
 import com.gray.bird.post.PostMapper;
 import com.gray.bird.post.PostMapperImpl;
-import com.gray.bird.post.ReplyType;
+import com.gray.bird.post.ReplyAudience;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.postAggregator.PostAggregate;
 import com.gray.bird.postAggregator.dto.PostEngagement;
@@ -133,19 +133,19 @@ public class TestUtils {
 	}
 
 	public PostEntity createPost(
-		UserEntity user, ReplyType replyType, boolean deleted, PostEntity parentPost) {
+		UserEntity user, ReplyAudience replyType, boolean deleted, PostEntity parentPost) {
 		return PostEntity.builder()
 			.id(randomId())
 			.userId(user.getUuid())
 			.text(UUID.randomUUID().toString())
-			.replyType(replyType)
+			.replyAudience(replyType)
 			.deleted(deleted)
 			.parentPost(parentPost)
 			.build();
 	}
 
 	public PostEntity createPost(UserEntity user) {
-		return createPost(user, ReplyType.EVERYONE, false, null);
+		return createPost(user, ReplyAudience.EVERYONE, false, null);
 	}
 
 	public List<PostEntity> createPosts(UserEntity user, int count) {
@@ -157,19 +157,19 @@ public class TestUtils {
 	}
 
 	public PostEntity createPost() {
-		return createPost(createUser(), ReplyType.EVERYONE, false, null);
+		return createPost(createUser(), ReplyAudience.EVERYONE, false, null);
 	}
 
 	public PostEntity createPost(UUID userId) {
-		PostEntity post = createPost(createUser(), ReplyType.EVERYONE, false, null);
+		PostEntity post = createPost(createUser(), ReplyAudience.EVERYONE, false, null);
 		post.setUserId(userId);
 		return post;
 	}
 
 	public PostEntity createReply() {
-		PostEntity parent = createPost(createUser(), ReplyType.EVERYONE, false, null);
+		PostEntity parent = createPost(createUser(), ReplyAudience.EVERYONE, false, null);
 
-		PostEntity reply = createPost(createUser(), ReplyType.EVERYONE, false, parent);
+		PostEntity reply = createPost(createUser(), ReplyAudience.EVERYONE, false, parent);
 		reply.setParentPostId(parent.getId());
 
 		return reply;

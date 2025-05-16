@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.gray.bird.post.ReplyType;
+import com.gray.bird.post.ReplyAudience;
 import com.gray.bird.post.dto.PostAttributes;
 import com.gray.bird.post.dto.PostRelationships;
 import com.gray.bird.post.dto.PostResource;
@@ -15,8 +15,9 @@ import com.gray.bird.user.dto.UserResource;
 
 public class TestResources {
 	public PostResource createPostResource(Long postId, UUID userId, Long parentPostId) {
-		PostAttributes attributes = new PostAttributes(
-			UUID.randomUUID().toString(), ReplyType.EVERYONE, LocalDateTime.now().minusDays(randomInt(1000)));
+		PostAttributes attributes = new PostAttributes(UUID.randomUUID().toString(),
+			ReplyAudience.EVERYONE,
+			LocalDateTime.now().minusDays(randomInt(1000)));
 		PostRelationships reationships = new PostRelationships(userId, parentPostId);
 		return new PostResource(postId, attributes, reationships);
 	}

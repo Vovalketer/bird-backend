@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.gray.bird.post.ReplyType;
+import com.gray.bird.post.ReplyAudience;
 import com.gray.bird.post.dto.PostProjection;
 import com.gray.bird.post.dto.PostResource;
 import com.gray.bird.postAggregator.dto.PostEngagement;
@@ -28,7 +28,7 @@ public class PostAggregateResourceMapperTest {
 		long postId = 101L;
 		PostAggregate postAggregate = new PostAggregate(
 			new PostProjection(
-				postId, userId, "text", false, false, ReplyType.EVERYONE, 102L, LocalDateTime.now()),
+				postId, userId, "text", false, false, ReplyAudience.EVERYONE, 102L, LocalDateTime.now()),
 			null,
 			new PostEngagement(postId,
 				new PostMetrics(100L, 100L, 100L),
@@ -37,8 +37,8 @@ public class PostAggregateResourceMapperTest {
 
 		Assertions.assertThat(resource.getId()).isEqualTo(postAggregate.post().id());
 		Assertions.assertThat(resource.getAttributes().text()).isEqualTo(postAggregate.post().text());
-		Assertions.assertThat(resource.getAttributes().replyType())
-			.isEqualTo(postAggregate.post().replyType());
+		Assertions.assertThat(resource.getAttributes().replyAudience())
+			.isEqualTo(postAggregate.post().replyAudience());
 		Assertions.assertThat(resource.getAttributes().createdAt())
 			.isEqualTo(postAggregate.post().createdAt());
 		Assertions.assertThat(resource.getRelationships().getUser().getData().getId())

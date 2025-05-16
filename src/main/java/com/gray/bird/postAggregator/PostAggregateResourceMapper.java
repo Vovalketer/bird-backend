@@ -30,7 +30,7 @@ public class PostAggregateResourceMapper implements ResourceMapper<PostAggregate
 	// duplicated from PostResourceMapper but has to be this way to keep it decoupled
 	// or else the relationships would have to be mutable and this would have to have dependencies
 	private PostAttributes toAttributes(PostAggregate data) {
-		return new PostAttributes(data.post().text(), data.post().replyType(), data.post().createdAt());
+		return new PostAttributes(data.post().text(), data.post().replyAudience(), data.post().createdAt());
 	}
 
 	private PostRelationships toRelationship(PostAggregate data) {

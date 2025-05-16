@@ -30,7 +30,8 @@ public class PostResourceMapperTest {
 		Assertions.assertThat(resource.getAttributes()).isNotNull();
 		Assertions.assertThat(resource.getAttributes().text()).isEqualTo(postProjection.text());
 		Assertions.assertThat(resource.getAttributes().createdAt()).isEqualTo(postProjection.createdAt());
-		Assertions.assertThat(resource.getAttributes().replyType()).isEqualTo(postProjection.replyType());
+		Assertions.assertThat(resource.getAttributes().replyAudience())
+			.isEqualTo(postProjection.replyAudience());
 		// relationships
 		Assertions.assertThat(resource.getRelationships()).isNotNull();
 		Assertions.assertThat(resource.getRelationships().getUser()).isNotNull();
